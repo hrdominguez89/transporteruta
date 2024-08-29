@@ -3,10 +3,6 @@
 /public/build
 /public/hot
 /public/storage
-/public/vendor
-/public/vendor/composer/*
-/public/vendor/composer/autoload_psr4.php
-/public/vendor/composer/installed.json
 /storage/*.key
 /vendor
 vendor/composer/installed.json
