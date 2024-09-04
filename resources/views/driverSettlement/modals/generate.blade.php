@@ -21,7 +21,7 @@
                   <option value="{{ $driver->id }}">{{ $driver->name }}</option>
                 @endforeach
             </select>
-            <label for="dateFrom">Obetener datos desde:</label>
+            <label for="dateFrom">Obtener datos desde:</label>
             <input type="date" name="dateFrom" class="form-control mb-2" required>
             <label for="dateTo">Obtener datos hasta:</label>
             <input type="date" name="dateTo" class="form-control mb-2" required>

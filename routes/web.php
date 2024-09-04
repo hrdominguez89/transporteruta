@@ -12,6 +12,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\TaxController;
+use App\Http\Controllers\VehicleController;
 
 Auth::routes();
 
@@ -90,4 +91,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('impuestos', [TaxController::class, 'taxes'])->name('taxes');
     Route::post('guardar/impuesto', [TaxController::class, 'store'])->name('storeTax');
     Route::put('actualizar/impuesto/{id}', [TaxController::class, 'update'])->name('updateTax');
+
+    // Vehicle
+    Route::get('vehiculos', [VehicleController::class, 'vehicles'])->name('vehicles');
+    Route::post('guardar/vehiculo', [VehicleController::class, 'store'])->name('storeVehicle');
+    Route::put('actualizar/vehiculo/{id}', [VehicleController::class, 'update'])->name('updateVehicle');
 });

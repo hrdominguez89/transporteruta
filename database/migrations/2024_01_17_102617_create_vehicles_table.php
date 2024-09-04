@@ -13,16 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('drivers', function (Blueprint $table) {
+        Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('dni');
-            $table->string('address');
-            $table->string('city');
-            $table->string('phone');
-            $table->integer('percent');
-            $table->enum('type', ['PROPIO', 'TERCERO']);
-            $table->foreignId('vehicleId')->references('id')->on('vehicles')->onDelete('CASCADE');
             $table->timestamps();
         });
     }
@@ -34,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('drivers');
+        Schema::dropIfExists('vehicles');
     }
 };

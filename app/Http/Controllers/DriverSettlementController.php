@@ -43,7 +43,13 @@ class DriverSettlementController extends Controller
     public function generateDriverSettlementPdf($id)
     {
         $driverSettlement = DriverSettlement::find($id);
-        $pdf = Pdf::loadView('driverSettlement.pdf', ['driverSettlement'=>$driverSettlement]);
+        $totalAgency = 0;
+        foreach($driverSettlement->travelCertificates as $travelCertificate)
+        {
+            $totalAgency += $travelCertificate->driverPayment;
+        }
+        $totalAgencyFormat = number_format($number = $totalAgency, $decimals = 2);
+        $pdf = Pdf::loadView('driverSettlement.pdf', ['driverSettlement'=>$driverSettlement, 'totalAgency'=>$totalAgencyFormat]);
         $pdf->setPaper('A4', 'landscape');
         return $pdf->stream('Liquidacion-'.$driverSettlement->driver->name.'pdf');
     }

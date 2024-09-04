@@ -348,6 +348,11 @@ return [
             'icon' => 'fas fa-receipt',
         ],
         [
+            'text' => 'Vehiculos',
+            'url'  => 'vehiculos',
+            'icon' => 'fas fa-car',
+        ],
+        [
             'text' => 'Soporte Técnico',
             'url'  => 'https://wa.me/541135050849',
             'icon' => 'fab fa-whatsapp',

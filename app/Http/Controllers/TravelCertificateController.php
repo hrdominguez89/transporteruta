@@ -97,7 +97,7 @@ class TravelCertificateController extends Controller
         $travelCertificate = TravelCertificate::find($id);
         $travelCertificate->driverSettlementId = $request->driverSettlementId;
         $driverSettlement = DriverSettlement::find($request->driverSettlementId);
-        $driverSettlement->total += $travelCertificate->driverPayment;
+        $driverSettlement->total += ($travelCertificate->total - $travelCertificate->driverPayment);
         $travelCertificate->isPaidToDriver = 'SI';
         $travelCertificate->save();
         $driverSettlement->save();
@@ -108,7 +108,7 @@ class TravelCertificateController extends Controller
     {
         $travelCertificate = TravelCertificate::find($id);
         $driverSettlement = DriverSettlement::find($request->driverSettlementId);
-        $driverSettlement->total -= $travelCertificate->driverPayment;
+        $driverSettlement->total -= ($travelCertificate->total - $travelCertificate->driverPayment);
         $travelCertificate->driverSettlementId = 0;
         $travelCertificate->isPaidToDriver = 'NO';
         $travelCertificate->save();

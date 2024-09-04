@@ -56,7 +56,7 @@
                         <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ $travelCertificate->id }}</a>
                     </td>
                     <td>{{ $travelCertificate->client->name }}</td>
-                    <td>{{ $travelCertificate->driverPayment }}</td>
+                    <td>{{ $travelCertificate->total - $travelCertificate->driverPayment}}</td>
                     <td>
                         @if($driverSettlement->liquidated == 'NO')
                             <form action="{{ Route('removeFromDriverSettlement', $travelCertificate->id) }}" method="POST"    >
@@ -94,7 +94,7 @@
                             <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ $travelCertificate->id }}</a>
                         </td>
                         <td>{{ $travelCertificate->driver->name }}</td>
-                        <td>{{ $travelCertificate->driverPayment }}</td>
+                        <td>{{ $travelCertificate->total - $travelCertificate->driverPayment}}</td>
                         <td>
                             <form action="{{ Route('addToDriverSettlement', $travelCertificate->id) }}" method="POST"    >
                                 @csrf

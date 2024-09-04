@@ -20,13 +20,20 @@
             <input type="text" name="city" class="form-control mb-2" placeholder="Ingrese la ciudad..." required>
             <label for="phpne">Telefono:</label>
             <input type="text" name="phone" class="form-control mb-2" placeholder="Ingrese el telefono..." required>
-            <label for="phpne">Porcentaje:</label>
-            <input type="number" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de viajes..." required>
+            <label for="phpne">Porcentaje de la Agencia:</label>
+            <input type="number" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de la agencia..." required>
             <label for="type">Tipo:</label>
             <select name="type" class="form-control mb-2" required>
                 <option value="">---- Seleccione una opcion ----</option>
                 <option value="PROPIO">Propio</option>
                 <option value="TERCERO">Tercero</option>
+            </select>
+            <label for="vehicleId">Vehiculo:</label>
+            <select name="vehicleId" class="form-control mb-2">
+                <option value="">---- Seleccione una opcion ----</option>
+                @foreach($vehicles as $vehicle)
+                    <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
+                @endforeach
             </select>
       </div>
       <div class="modal-footer">

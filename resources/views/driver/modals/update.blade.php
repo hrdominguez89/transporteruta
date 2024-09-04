@@ -21,13 +21,20 @@
             <input type="text" name="city" class="form-control mb-2" placeholder="Ingrese la ciudad..." value="{{ $driver->city }}" required>
             <label for="phone">Telefono:</label>
             <input type="text" name="phone" class="form-control mb-2" placeholder="Ingrese el telefono..." value="{{ $driver->phone }}" required>
-            <label for="percent">Porcentaje:</label>
-            <input type="number" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de viaje..." value="{{ $driver->percent }}" required>            
+            <label for="percent">Porcentaje de la Agencia:</label>
+            <input type="number" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de la agencia..." value="{{ $driver->percent }}" required>            
             <label for="type">Tipo:</label>
             <select name="type" class="form-control mb-2" required>
                 <option  value="{{ $driver->type }}">{{ $driver->type }}</option>
                 <option value="PROPIO">Propio</option>
                 <option value="TERCERO">Tercero</option>
+            </select>
+            <label for="vehicleId">Vehiculo:</label>
+            <select name="vehicleId" class="form-control mb-2">
+                <option value="{{ $driver->vehicleId }}">{{ $driver->vehicle->name }}</option>
+                @foreach($vehicles as $vehicle)
+                    <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
+                @endforeach
             </select>
       </div>
       <div class="modal-footer">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Driver;
+use App\Models\Vehicle;
 use App\Http\Requests\StoreDriverRequest;
 use App\Http\Requests\UpdateDriverRequest;
 
@@ -11,7 +12,8 @@ class DriverController extends Controller
     public function drivers()
     {
         $drivers = Driver::all();
-        return view('driver.index', ['drivers'=>$drivers]);
+        $vehicles = Vehicle::all();
+        return view('driver.index', ['drivers'=>$drivers, 'vehicles'=>$vehicles]);
     }
 
    
@@ -25,6 +27,14 @@ class DriverController extends Controller
         $newDriver->phone = $request->phone;
         $newDriver->percent = $request->percent;
         $newDriver->type = $request->type;
+        if($request->vehicleId != null)
+        {
+            $newDriver->vehicleId = $request->vehicleId;
+        }
+        else
+        {
+            $newDriver->vehicleId = 1;
+        }
         $newDriver->save();
         return redirect(route('showDriver', $newDriver->id));
     }
@@ -32,7 +42,8 @@ class DriverController extends Controller
     public function show($id)
     {
         $driver = Driver::find($id);
-        return view('driver.show', ['driver'=>$driver]);
+        $vehicles = Vehicle::all();
+        return view('driver.show', ['driver'=>$driver, 'vehicles'=>$vehicles]);
     }
 
     public function update(UpdateDriverRequest $request, $id)

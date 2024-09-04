@@ -15,6 +15,7 @@
 <body>
     <div class="container text-center">
         <div class="col-12">
+            <p><strong>Fecha:</strong> {{ $travelCertificate->date }}</p>
             <h5>CONSTANCIA DE VIAJE N°{{ $travelCertificate->number }}</h5>
         </div>
             <div class="row ">
@@ -23,9 +24,11 @@
 
 
         <div class="col-12 table-bordered text-left">
-            <p><strong>Fecha:</strong> {{ $travelCertificate->date }}</p>
             <p><strong>Cliente:</strong> {{ $travelCertificate->client->name }}</p>
             <p><strong>Chofer:</strong> {{ $travelCertificate->driver->name }}</p>
+            <p><strong>Vehiculo:</strong> {{ $travelCertificate->driver->vehicle->name }}</p>
+            <p><strong>Hora de Salida:</strong></p>
+            <p><strong>Hora de Llegada:</strong></p>
         </div>
         <div class="col-12 table-bordered text-left">
             <p><strong>CONCEPTOS:</strong></p>

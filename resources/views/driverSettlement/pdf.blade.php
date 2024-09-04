@@ -15,6 +15,7 @@
                 <img class="col-7" src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
             </div>
         <div class="col-12 text-left">
+            <p><strong>Periodo:</strong> {{ $driverSettlement->dateFrom }} / {{ $driverSettlement->dateTo }}</p>
             <p><strong>Fecha:</strong> {{ $driverSettlement->date }}</p>
             <p><strong>Chofer:</strong> {{ $driverSettlement->driver->name }}</p>
         </div>
@@ -26,6 +27,7 @@
                         <td>Fecha</td>
                         <td>Numero</td>
                         <td>Cliente</td>
+                        <td>Subtotal</td>
                         <td>IVA</td>
                         <td>Peajes</td>
                         <td>Total</td>
@@ -38,9 +40,10 @@
                             <td>{{ $travelCertificate->date }}</td>
                             <td>{{ $travelCertificate->number }}</td>
                             <td>{{ $travelCertificate->client->name }}</td>
+                            <td>{{ $travelCertificate->total }}</td>
                             <td>{{ $travelCertificate->iva }}</td>
                             <td>@php $tolls = TravelItem::where('type', 'PEAJE')->where('travelCertificateId', $travelCertificate->id); $totalTolls = $tolls->sum('price'); echo $totalTolls;@endphp</td>
-                            <td>{{ $travelCertificate->total }}</td>
+                            <td>{{ $travelCertificate->total + $travelCertificate->iva }}</td>
                         </tr>
                     @endforeach      
                </tbody>
@@ -48,6 +51,7 @@
         </div>
         <div class="col-12 text-left">
             <p><strong>A FAVOR DEL CHOFER:</strong> ${{ $driverSettlement->total }}</p>
+            <p><strong>A FAVOR DE LA AGENCIA: </strong> ${{ $totalAgency }}</p>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>

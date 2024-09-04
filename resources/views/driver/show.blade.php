@@ -21,6 +21,7 @@
                 <th>Ciudad</th>
                 <th>Telefono</th>
                 <th>Tipo</th>
+                <th>Vehiculo</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +31,7 @@
                 <td>{{ $driver->city }}</td>
                 <td>{{ $driver->phone }}</td>
                 <td>{{ $driver->type }}</td>
+                <td>{{ $driver->vehicle->name }}</td>
             </tr>
         </tbody>
     </table>
@@ -40,7 +42,7 @@
             <tr>
                 <th>Numero</th>
                 <th>Fecha</th>
-                <th>Tarifa del Chofer</th>
+                <th>Pago a la Agencia</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -66,7 +68,7 @@
             <tr>
                 <th>Numero</th>
                 <th>Fecha</th>
-                <th>Tarifa del Chofer</th>
+                <th>Pago a la Agencia</th>
                 <th>Acciones</th>
             </tr>
         </thead>
