@@ -13,7 +13,7 @@
             <p>Saldo Restante: <strong>{{ $invoice->balance }}</strong></p>
             <input type="hidden" name="receiptId" value="{{ $receipt->id }}">
             <label for="balanceToPay">Saldo a Pagar:</label>
-            <input type="number" name="balanceToPay" class="form-control mb-2" required>
+            <input type="number" step="0.01" name="balanceToPay" class="form-control mb-2" required>
             <label for="paymentMethodId">Medio de Pago:</label>
             <select name="paymentMethodId" class="form-control mb-2" required>
                 <option value="">---- Seleccione una opcion ----</option>
@@ -29,7 +29,7 @@
                 @endforeach
             </select>
             <label for="taxAmount">Monto de Impuesto:</label>
-            <input type="number" name="taxAmount" class="form-control mb-2" required>
+            <input type="number" step="0.01" name="taxAmount" class="form-control mb-2" required>
 
     </div>
       <div class="modal-footer">

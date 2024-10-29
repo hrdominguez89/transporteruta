@@ -11,12 +11,12 @@
         <form action="{{ Route('deleteTravelItem', [$travelItem->id, $travelCertificate->id]) }}" class="form-group" method="POST">
             @csrf
             @method('DELETE')
-            <p>Se eliminara el item de viaje seleccionado<br>
+            <p>Se eliminara el item de viaje seleccionado.<br>
             <strong class="text-warning">¡ESTA ACCION ES IRREVERSIBLE!</strong></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-warning">Eliminar</button>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
         </form>
       </div>
     </div>

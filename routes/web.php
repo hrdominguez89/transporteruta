@@ -13,8 +13,9 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\UserController;
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::group(['middleware' => 'auth'], function () {
 
@@ -96,4 +97,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('vehiculos', [VehicleController::class, 'vehicles'])->name('vehicles');
     Route::post('guardar/vehiculo', [VehicleController::class, 'store'])->name('storeVehicle');
     Route::put('actualizar/vehiculo/{id}', [VehicleController::class, 'update'])->name('updateVehicle');
+
+    // User
+    Route::get('usuarios', [UserController::class, 'users'])->name('users');
+    Route::post('guardar/usuario', [UserController::class, 'store'])->name('storeUser');
+    Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
+    Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
 });
