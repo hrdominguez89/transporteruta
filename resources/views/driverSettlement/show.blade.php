@@ -10,7 +10,7 @@
             <button class="btn btn-primary col-3" data-toggle="modal" data-target="#liquidatedModal{{ $driverSettlement->id }}">Liquidar</button>
         @else
         <button class="btn btn-danger mr-2" data-toggle="modal" data-target="#cancelModal{{ $driverSettlement->id }}">Anular Liquidacion</button>
-        <a href="{{ Route('driverSettlementPdf', $driverSettlement->id) }}" class="btn btn-info">Emitir Comprobante</a>
+        <a href="{{ Route('driverSettlementPdf', $driverSettlement->id) }}" target="_blank" class="btn btn-info">Emitir Comprobante</a>
         @endif
     </div>
     @include('driverSettlement.modals.liquidated')

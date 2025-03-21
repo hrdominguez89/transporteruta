@@ -7,6 +7,7 @@ use App\Models\Driver;
 use App\Models\PaymentMethod;
 use App\Http\Requests\StoreDriverSettlementRequest;
 use App\Http\Requests\UpdateDriverSettlementRequest;
+use App\Models\TravelItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DriverSettlementController extends Controller
@@ -16,7 +17,7 @@ class DriverSettlementController extends Controller
         $driverSettlements = DriverSettlement::all();
         $drivers = Driver::all();
         $paymentMethods = PaymentMethod::all();
-        return view('driverSettlement.index', ['driverSettlements'=>$driverSettlements, 'drivers'=>$drivers, 'paymentMethods'=>$paymentMethods]);
+        return view('driverSettlement.index', ['driverSettlements' => $driverSettlements, 'drivers' => $drivers, 'paymentMethods' => $paymentMethods]);
     }
 
     public function generate(StoreDriverSettlementRequest $request)
@@ -37,22 +38,42 @@ class DriverSettlementController extends Controller
     {
         $driverSettlement = DriverSettlement::find($id);
         $paymentMethods = PaymentMethod::all();
-       return view('driverSettlement.show', ['driverSettlement'=>$driverSettlement, 'paymentMethods'=>$paymentMethods]);
+        return view('driverSettlement.show', ['driverSettlement' => $driverSettlement, 'paymentMethods' => $paymentMethods]);
     }
 
     public function generateDriverSettlementPdf($id)
     {
-        $driverSettlement = DriverSettlement::find($id);
-        $totalAgency = 0;
-        foreach($driverSettlement->travelCertificates as $travelCertificate)
-        {
-            $totalAgency += $travelCertificate->driverPayment;
+        $data['driverSettlement'] = DriverSettlement::find($id);
+
+        // Ordenamos los travelCertificates por date y luego por number
+        $data['driverSettlement']->travelCertificates = $data['driverSettlement']->travelCertificates
+            ->sortBy([
+                ['date', 'asc'],   // Ordenar por fecha (ascendente)
+                ['number', 'asc']  // Ordenar por número (ascendente)
+            ]);
+
+        $data['totalAgency'] = 0;
+
+        $data['totalTolls'] = 0;
+
+        // Calculamos el total de agency y sumamos los peajes
+        foreach ($data['driverSettlement']->travelCertificates as $travelCertificate) {
+            $data['totalAgency'] += $travelCertificate->driverPayment;
+
+            // Agregar el total de peajes a cada travelCertificate
+            $travelCertificate->totalTolls = TravelItem::where('type', 'PEAJE')
+                ->where('travelCertificateId', $travelCertificate->id)
+                ->sum('price');
+                $data['totalTolls'] += $travelCertificate->totalTolls;
         }
-        $totalAgencyFormat = number_format($number = $totalAgency, $decimals = 2);
-        $pdf = Pdf::loadView('driverSettlement.pdf', ['driverSettlement'=>$driverSettlement, 'totalAgency'=>$totalAgencyFormat]);
+
+        $pdf = Pdf::loadView('driverSettlement.pdf', $data);
+
         $pdf->setPaper('A4', 'landscape');
-        return $pdf->stream('Liquidacion-'.$driverSettlement->driver->name.'pdf');
+
+        return $pdf->stream('Liquidacion-' . $data['driverSettlement']->driver->name . '.pdf');
     }
+
 
     public function liquidated(UpdateDriverSettlementRequest $request, $id)
     {
