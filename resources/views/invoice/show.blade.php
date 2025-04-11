@@ -4,18 +4,34 @@
 
 @section('content_header')
     <div class="row">
-        <a href="{{ Route('invoices') }}" class="btn btn-secondary">Volver</a>
-        <h1 class="col-7">Factura N°<strong>{{ $invoice->number }}</strong></h1>
-        @if($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
-            <button class="btn btn-danger col-2 mr-2" data-toggle="modal" data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
-            <a href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-info col-2">Generar PDF</a>
+
+        <div class="col-12">
+            <a href="{{ Route('invoices') }}" class="btn btn-secondary">Volver</a>
+        </div>
+        <div class="col-12 mt-3">
+            <h1>Factura N° <strong>{{ number_format($invoice->number, 0, ',', '.') }}</strong></h1>
+        </div>
+
+        @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
+            <div class="col-12 text-right mb-2">
+                <button class="btn btn-danger col-2 mr-2" data-toggle="modal"
+                    data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
+                <a href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-info col-2">Generar PDF</a>
+            </div>
         @elseif($invoice->invoiced == 'NO')
-            <button class="btn btn-primary col-4" data-toggle="modal" data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
+            <div class="col-12 text-right mb-2">
+                <button class="btn btn-primary col-4" data-toggle="modal"
+                    data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
+            </div>
         @endif
-        @if($invoice->paid == 'SI') 
-        <a href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-info col-4">Generar PDF</a>
-        <br>
-        <h5 class="text-danger">La factura se marco como pagada y se desconto el saldo de la cuenta corriente</h5>
+        @if ($invoice->paid == 'SI')
+            <div class="col-12 text-right mb-2">
+
+                <a href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-info col-4">Generar PDF</a>
+            </div>
+            <div class="col-12 text-left mb-2">
+                <h5 class="text-danger">La factura se marco como pagada y se desconto el saldo de la cuenta corriente</h5>
+            </div>
         @endif
     </div>
     @include('invoice.modals.invoiced')
@@ -23,7 +39,7 @@
 @stop
 
 @section('content')
-<table class="table table-bordered text-center">
+    <table class="table table-bordered text-center">
         <thead class="bg-danger">
             <tr>
                 <th>Fecha</th>
@@ -37,21 +53,21 @@
         </thead>
         <tbody>
             <tr>
-                <td>{{ $invoice->date }}</td>
+                <td>{{ \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') }}</td>
                 <td>
                     <a href="{{ Route('showClient', $invoice->client->id) }}">{{ $invoice->client->name }}</a>
                 </td>
-                <td>{{ $invoice->total }}</td>
-                <td>{{ $invoice->iva }}</td>
-                <td>{{ $invoice->balance }}</td>
+                <td>$&nbsp;{{ number_format($invoice->total, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($invoice->iva, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
                 <td>{{ $invoice->invoiced }}</td>
-                <td>{{ ($invoice->total + $invoice->iva) }}</td>
+                <td>$&nbsp;{{ number_format($invoice->total + $invoice->iva, 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
     <br>
     <h4>Notas de Credito</h4>
-    <table class="table table-bordered text-center data-table">
+    <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
                 <th>Numero</th>
@@ -60,39 +76,47 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($invoice->credits as $credit)
+            @foreach ($invoice->credits as $credit)
                 <tr>
                     <td>
                         <a href="{{ Route('showCredit', $credit->id) }}">{{ $credit->number }}</a>
                     </td>
-                    <td>{{ $credit->date }}</td>
-                    <td>{{ $credit->total }}</td>
+                    <td data-order="{{ \Carbon\Carbon::parse($credit->date)->timestamp }}">
+                        {{ \Carbon\Carbon::parse($credit->date)->format('d/m/Y') }}</td>
+                    <td data-order="{{ $credit->total }}">$&nbsp;{{ number_format($credit->total, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
     <br>
     <h4>Constancias de Viaje Agregadas</h4>
-    <table class="table table-bordered text-center data-table">
+    <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
-                <th>Numero</th>
+                <th>Nro. Nuevo</th>
+                <th>Nro. Antiguo</th>
                 <th>Chofer</th>
                 <th>Precio (Sin IVA)</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($invoice->travelCertificates as $travelCertificate)
+            @foreach ($invoice->travelCertificates as $travelCertificate)
                 <tr>
-                    <td>
-                        <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ $travelCertificate->number }}</a>
+                    <td data-order="{{ $travelCertificate->id }}">
+                        <a
+                            href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}</a>
+                    </td>
+                    <td data-order="{{ $travelCertificate->number }}">
+                        <a
+                            href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->number, 0, ',', '.') }}</a>
                     </td>
                     <td>{{ $travelCertificate->driver->name }}</td>
-                    <td>{{ $travelCertificate->total }}</td>
+                    <td data-order="{{ $travelCertificate->total }}">
+                        $&nbsp;{{ number_format($travelCertificate->total, 2, ',', '.') }}</td>
                     <td>
-                        @if($invoice->invoiced == 'NO')
-                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST"    >
+                        @if ($invoice->invoiced == 'NO')
+                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
@@ -107,38 +131,58 @@
         </tbody>
     </table>
     <br>
-    @if($invoice->invoiced == 'NO')
-    <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
-    <table class="table table-bordered text-center data-table">
-        <thead class="bg-danger">
-            <tr>
-                <th>Numero</th>
-                <th>Chofer</th>
-                <th>Precio (Sin IVA)</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($invoice->client->travelCertificates as $travelCertificate)
-                @if($travelCertificate->invoiceId != $invoice->id and $travelCertificate->invoiced == 'NO')
-                    <tr>
-                        <td>
-                            <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ $travelCertificate->number }}</a>
-                        </td>
-                        <td>{{ $travelCertificate->driver->name }}</td>
-                        <td>{{ $travelCertificate->total }}</td>
-                        <td>
-                            <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST"    >
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                <button type="submit" class="btn btn-success">Agregar a la Factura</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endif
-            @endforeach
-        </tbody>
-    </table>
+    @if ($invoice->invoiced == 'NO')
+        <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
+        <table class="table table-sm table-bordered text-center data-table">
+            <thead class="bg-danger">
+                <tr>
+                    <th>Nro. Nuevo</th>
+                    <th>Nro. Antiguo</th>
+                    <th>Chofer</th>
+                    <th>Precio (Sin IVA)</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($invoice->client->travelCertificates as $travelCertificate)
+                    @if ($travelCertificate->invoiceId != $invoice->id and $travelCertificate->invoiced == 'NO')
+                        <tr>
+                            <td data-order="{{ $travelCertificate->id }}">
+                                <a
+                                    href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}</a>
+                            </td>
+                            <td data-order="{{ $travelCertificate->number }}">
+                                <a
+                                    href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->number, 0, ',', '.') }}</a>
+                            </td>
+                            <td>{{ $travelCertificate->driver->name }}</td>
+                            <td data-order="{{ $travelCertificate->total }}">
+                                $&nbsp;{{ number_format($travelCertificate->total, 2, ',', '.') }}</td>
+                            <td>
+                                <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
+                                    <button type="submit" class="btn btn-success">Agregar a la Factura</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endif
+                @endforeach
+            </tbody>
+        </table>
     @endif
+@stop
+@section('js')
+    <script>
+        $(document).ready(function() {
+            $('.data-table').DataTable();
+        });
+        var table = new DataTable('.data-table', {
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+            }
+        });
+        $('.select2').select2();
+    </script>
 @stop

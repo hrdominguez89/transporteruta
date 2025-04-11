@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'AdminLTE 3',
+    'title' => 'Transporte Ruta S.R.L.',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -298,10 +298,10 @@ return [
         // Sidebar items:
         [
             'text' => 'Panel de Control',
-            'url'  => '',
+            'url'  => '/',
             'icon' => 'fas fa-tachometer-alt',
         ],
-        
+
         [
             'text' => 'Choferes',
             'url'  => 'choferes',
@@ -402,12 +402,12 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
+                    'location' => '//cdn.datatables.net/1.13.7/js/jquery.dataTables.js',
                 ],
                 [
                     'type' => 'js',
@@ -422,7 +422,7 @@ return [
             ],
         ],
         'Select2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -468,6 +468,16 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                ],
+            ],
+        ],
+        'Tooltips' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js',
                 ],
             ],
         ],

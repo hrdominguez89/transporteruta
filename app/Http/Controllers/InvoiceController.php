@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Receipt;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use App\Models\TravelItem;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -15,8 +16,8 @@ class InvoiceController extends Controller
     public function invoices()
     {
         $invoices = Invoice::all();
-        $clients = Client::all();
-        return view('invoice.index', ['clients'=>$clients, 'invoices'=>$invoices]);
+        $clients = Client::orderBy('name', 'asc')->get();
+        return view('invoice.index', ['clients' => $clients, 'invoices' => $invoices]);
     }
 
     public function generate(StoreInvoiceRequest $request)
@@ -24,6 +25,7 @@ class InvoiceController extends Controller
         $newInvoice = new Invoice;
         $newInvoice->number = $request->number;
         $newInvoice->date = $request->date;
+        $newInvoice->pointOfSale = $request->pointOfSale ?? 3;
         $newInvoice->total = 0;
         $newInvoice->iva = 0;
         $newInvoice->totalWithIva = 0;
@@ -37,14 +39,50 @@ class InvoiceController extends Controller
     public function show($id)
     {
         $invoice = Invoice::find($id);
-        return view('invoice.show', ['invoice'=>$invoice]);
+        return view('invoice.show', ['invoice' => $invoice]);
     }
 
     public function generateInvoicePdf($id)
     {
-        $invoice = Invoice::find($id);
-        $pdf = Pdf::loadView('invoice.pdf', ['invoice'=>$invoice]);
-        return $pdf->stream('Factura-N°-'.$invoice->number.'pdf');
+
+        $data['invoice'] = Invoice::find($id);
+
+        $data['invoice']->travelCertificates = $data['invoice']->travelCertificates
+            ->sortBy([
+                ['date', 'asc'],   // Ordenar por fecha (ascendente)
+                ['number', 'asc']  // Ordenar por número (ascendente)
+            ]);
+
+        $data['totalTolls'] = 0;
+        $data['totalImporteNeto'] = 0;
+
+        // Calculamos el total de agency y sumamos los peajes
+        foreach ($data['invoice']->travelCertificates as $travelCertificate) {
+            // Agregar el total de peajes a cada travelCertificate
+            $travelCertificate->totalTolls = TravelItem::where('type', 'PEAJE')
+            ->where('travelCertificateId', $travelCertificate->id)
+            ->sum('price');
+
+            $data['totalImporteNeto'] += $travelCertificate->total - $travelCertificate->totalTolls;
+            
+            $data['totalTolls'] += $travelCertificate->totalTolls;
+        }
+
+        $pdf = Pdf::loadView('invoice.pdf', $data);
+        $pdf->setPaper('A4', 'portrait');
+
+        // Definir márgenes personalizados
+        $options = $pdf->getDomPDF()->getOptions();
+        $options->set('defaultPaperSize', 'a4');
+        $options->set('defaultPaperOrientation', 'portrait');
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        $pdf->getDomPDF()->setOptions($options);
+
+
+        return $pdf->stream('Factura-N°-' . $data['invoice']->number . 'pdf');
     }
 
     public function invoiced($id)
@@ -78,13 +116,12 @@ class InvoiceController extends Controller
         $balanceToPay = $request->balanceToPay;
         $taxAmount = $request->taxAmount;
         $invoice = Invoice::find($id);
-        if ($balanceToPay == $invoice->balance)
-        {
+        if ($balanceToPay == $invoice->balance) {
             $invoice->paid = 'SI';
         }
         $receiptId = $request->receiptId;
         $receipt = Receipt::find($receiptId);
-        $invoice->receipts()->attach($receiptId, ['paymentMethodId'=>$request->paymentMethodId, 'taxId'=>$request->taxId, 'total'=>$balanceToPay, 'taxAmount'=>$taxAmount]);
+        $invoice->receipts()->attach($receiptId, ['paymentMethodId' => $request->paymentMethodId, 'taxId' => $request->taxId, 'total' => $balanceToPay, 'taxAmount' => $taxAmount]);
         $invoice->balance -= $balanceToPay;
         $receipt->total += $balanceToPay;
         $receipt->taxTotal += $taxAmount;
@@ -102,7 +139,7 @@ class InvoiceController extends Controller
             ->where('invoice_id', $id)
             ->where('receipt_id', $receiptId)
             ->first();
-        
+
         if ($pivot) {
             $taxAmount = $pivot->taxAmount;
             $total = $pivot->total;

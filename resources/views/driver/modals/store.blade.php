@@ -10,18 +10,18 @@
       <div class="modal-body">
         <form action="{{ Route('storeDriver') }}" class="form-group" method="POST">
             @csrf
-            <label for="name">Nombre:</label>
+            <label for="name">Nombre:<span class="text-danger"> *</span></label>
             <input type="text" name="name" class="form-control mb-2" placeholder="Ingrese el nombre..." required>
-            <label for="dni">DNI/CUIT:</label>
+            <label for="dni">DNI/CUIT:<span class="text-danger"> *</span></label>
             <input type="text" name="dni" class="form-control mb-2" placeholder="Ingrese el DNI/CUIT..." required>
-            <label for="address">Direccion:</label>
+            <label for="address">Direccion:<span class="text-danger"> *</span></label>
             <input type="text" name="address" class="form-control mb-2" placeholder="Ingrese la direccion..." required>
-            <label for="city">Ciudad:</label>
+            <label for="city">Ciudad:<span class="text-danger"> *</span></label>
             <input type="text" name="city" class="form-control mb-2" placeholder="Ingrese la ciudad..." required>
-            <label for="phpne">Telefono:</label>
+            <label for="phpne">Telefono:<span class="text-danger"> *</span></label>
             <input type="text" name="phone" class="form-control mb-2" placeholder="Ingrese el telefono..." required>
-            <label for="phpne">Porcentaje de la Agencia:</label>
-            <input type="number" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de la agencia..." required>
+            <label for="phpne">Porcentaje de la Agencia:<span class="text-danger"> *</span></label>
+            <input type="number" step="0.01" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de la agencia..." required>
             <label for="type">Tipo:</label>
             <select name="type" class="form-control mb-2" required>
                 <option value="">---- Seleccione una opcion ----</option>

@@ -67,6 +67,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('imprimir/liquidacion/{id}', [DriverSettlementController::class, 'generateDriverSettlementPdf'])->name('driverSettlementPdf');
     Route::get('liquidar/{id}', [DriverSettlementController::class, 'liquidated'])->name('liquidatedDriverSettlement');
     Route::get('anular/liquidacion/{id}', [DriverSettlementController::class, 'cancel'])->name('cancelDriverSettlement');
+    Route::get('eliminar/liquidacion/{id}', [DriverSettlementController::class, 'delete'])->name('deleteDriverSettlement');
 
     // Receipt
     Route::get('recibos', [ReceiptController::class, 'receipts'])->name('receipts');

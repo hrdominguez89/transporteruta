@@ -4,110 +4,358 @@
 
 @section('content_header')
     <div class="row">
-        <a href="{{ Route('driverSettlements') }}" class="btn btn-secondary mr-2">Volver</a>
-        <h1 class="col-8">Liquidacion N°<strong>{{ $driverSettlement->number }}</strong></h1>
-        @if($driverSettlement->liquidated == 'NO')
-            <button class="btn btn-primary col-3" data-toggle="modal" data-target="#liquidatedModal{{ $driverSettlement->id }}">Liquidar</button>
-        @else
-        <button class="btn btn-danger mr-2" data-toggle="modal" data-target="#cancelModal{{ $driverSettlement->id }}">Anular Liquidacion</button>
-        <a href="{{ Route('driverSettlementPdf', $driverSettlement->id) }}" target="_blank" class="btn btn-info">Emitir Comprobante</a>
-        @endif
-    </div>
-    @include('driverSettlement.modals.liquidated')
-    @include('driverSettlement.modals.cancel')
-@stop
+        <div class="col-12">
+            <a href="{{ Route('driverSettlements') }}" class="btn btn-secondary mr-2">Volver</a>
+        </div>
+        <div class="col-12 mt-3">
+            <h1>Liquidación N° <strong><span data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Numeración sistema nuevo">{{ number_format($driverSettlement->id, 0, ',', '.') }}</span> /
+                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Numeración sistema antiguo">{{ $driverSettlement->number ? number_format($driverSettlement->number, 0, ',', '.') : ' - ' }}</span></strong>
+            </h1>
+        </div>
+        <div class="col-12 text-right mb-2">
+            @if ($driverSettlement->liquidated == 'NO')
+                <button class="btn btn-primary col-3" data-toggle="modal"
+                    data-target="#liquidatedModal{{ $driverSettlement->id }}">Liquidar</button>
+            @else
+                <button class="btn btn-danger mr-2" data-toggle="modal"
+                    data-target="#cancelModal{{ $driverSettlement->id }}">Anular
+                    Liquidación</button>
+                <a href="{{ Route('driverSettlementPdf', $driverSettlement->id) }}" target="_blank"
+                    class="btn btn-info">Emitir
+                    Comprobante</a>
+            @endif
+        </div>
+        @include('driverSettlement.modals.liquidated')
+        @include('driverSettlement.modals.cancel')
+    @stop
 
-@section('content')
-<table class="table table-bordered text-center">
-        <thead class="bg-danger">
-            <tr>
-                <th>Fecha</th>
-                <th>Chofer</th>
-                <th>Total</th>
-                <th>Liquidado</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ $driverSettlement->date }}</td>
-                <td>
-                    <a href="{{ Route('showDriver', $driverSettlement->driver->id) }}">{{ $driverSettlement->driver->name }}</a>
-                </td>
-                <td>{{ $driverSettlement->total }}</td>
-                <td>{{ $driverSettlement->liquidated }}</td>
-            </tr>
-        </tbody>
-    </table>
-    <br>
-    <h4>Constancias de Viaje Agregadas</h4>
-    <table class="table table-bordered text-center data-table">
-        <thead class="bg-danger">
-            <tr>
-                <th>Numero</th>
-                <th>Cliente</th>
-                <th>Tarifa Chofer</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($driverSettlement->travelCertificates as $travelCertificate)
+    @section('content')
+        <table class="table table-bordered text-center">
+            <thead class="bg-danger">
                 <tr>
-                    <td>
-                        <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ $travelCertificate->id }}</a>
-                    </td>
-                    <td>{{ $travelCertificate->client->name }}</td>
-                    <td>{{ $travelCertificate->total - $travelCertificate->driverPayment}}</td>
-                    <td>
-                        @if($driverSettlement->liquidated == 'NO')
-                            <form action="{{ Route('removeFromDriverSettlement', $travelCertificate->id) }}" method="POST"    >
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="driverSettlementId" value="{{ $driverSettlement->id }}">
-                                <button type="submit" class="btn btn-warning">Quitar de la Liquidacion</button>
-                            </form>
-                        @else
-                            <strong class="text-danger">¡No se pueden realizar cambios!</strong>
-                        @endif
-                    </td>
+                    <th>Fecha</th>
+                    <th>Período</th>
+                    <th>Chofer</th>
+                    <th>Total</th>
+                    <th>Liquidado</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-    <br>
-    @if($driverSettlement->liquidated == 'NO')
-    <h4>Constancias de Viaje del Chofer sin Liquidar</h4>
-    <table class="table table-bordered text-center data-table">
-        <thead class="bg-danger">
-            <tr>
-                <th>Numero</th>
-                <th>Cliente</th>
-                <th>Tarifa del Chofer</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($driverSettlement->driver->travelCertificates as $travelCertificate)
-            @if($travelCertificate->date >= $driverSettlement->dateFrom and $travelCertificate->date <= $driverSettlement->dateTo)
-                @if($travelCertificate->driverSettlementId != $driverSettlement->id and $travelCertificate->isPaidToDriver == 'NO')
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ \Carbon\Carbon::parse($driverSettlement->date)->format('d/m/Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($driverSettlement->dateFrom)->format('d/m/Y') }} -
+                        {{ \Carbon\Carbon::parse($driverSettlement->dateTo)->format('d/m/Y') }}</td>
+                    <td>
+                        <a target="_blank"
+                            href="{{ Route('showDriver', $driverSettlement->driver->id) }}">{{ $driverSettlement->driver->name }}</a>
+                    </td>
+                    <td>$&nbsp;{{ number_format($driverSettlement->total, 2, ',', '.') }}</td>
+                    <td>{{ $driverSettlement->liquidated }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <h4>Constancias de Viaje Agregadas</h4>
+        <table class="table table-sm table-bordered text-center data-table">
+            <thead class="bg-danger">
+                <tr>
+                    <th class="text-center" style="font-size:14px">Fecha</th>
+                    <th class="text-center" style="font-size:14px">Nro<br>Nuevo</th>
+                    <th class="text-center" style="font-size:14px">Nro<br>Antiguo</th>
+                    <th class="text-center" style="font-size:14px">Cliente</th>
+                    <th class="text-center" style="font-size:14px">Importe<br>Neto</th>
+                    <th class="text-center" style="font-size:14px">I.V.A.</th>
+                    <th class="text-center" style="font-size:14px">Subtotal</th>
+                    <th class="text-center" style="font-size:14px">Peajes</th>
+                    <th class="text-center" style="font-size:14px">Total</th>
+                    <th class="text-center" style="font-size:14px">% ó $<br>acordado</th>
+                    <th class="text-center" style="font-size:14px">A favor<br>del chofer</th>
+                    <th class="text-center" style="font-size:14px">% I.V.A.<br>Chofer</th>
+                    <th class="text-center" style="font-size:14px">A favor de<br>la empresa</th>
+                    <th class="text-center" style="font-size:14px">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($driverSettlement->travelCertificates as $travelCertificate)
                     <tr>
-                        <td>
-                            <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ $travelCertificate->id }}</a>
+                        <td style="font-size:14px;" class="text-center"
+                            data-order="{{ \Carbon\Carbon::parse($travelCertificate->date)->timestamp }}">
+                            {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                        <td data-order="{{ $travelCertificate->id }}" style="font-size:14px;" class="text-center">
+                            <a target="_blank" title="Numeración Nueva"
+                                href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}
+                            </a>
                         </td>
-                        <td>{{ $travelCertificate->driver->name }}</td>
-                        <td>{{ $travelCertificate->total - $travelCertificate->driverPayment}}</td>
+                        <td data-order="{{ $travelCertificate->number }}" style="font-size:14px;" class="text-center">
+                            <a target="_blank" title="Numeración Antigua"
+                                href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
+                                {{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.') : ' - ' }}</a>
+                        </td>
+                        <td style="font-size:14px;" class="text-left">{{ $travelCertificate->client->name }}</td>
+                        {{-- IMPORTE NETO --}}
+                        <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls }}"
+                            style="font-size:14px;" class="text-right">
+                            $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
+                        </td>
+                        {{-- IVA --}}
+                        <td data-order="{{ $travelCertificate->iva }}" style="font-size:14px;" class="text-right">
+                            $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
+                        </td>
+                        {{-- SUBTOTAL (IMPORTE NETO + IVA) --}}
+                        <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva }}"
+                            style="font-size:14px;" class="text-right">
+                            $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva, 2, ',', '.') }}
+                        </td>
+                        {{-- PEAJES --}}
+                        <td data-order="{{ $travelCertificate->totalTolls }}" style="font-size:14px;" class="text-right">
+                            $&nbsp;{{ number_format($travelCertificate->totalTolls, 2, ',', '.') }}</td>
+                        {{-- NETO + IVA + PEAJE = TOTAL --}}
+                        <td data-order="{{ $travelCertificate->total + $travelCertificate->iva }}" style="font-size:14px;"
+                            class="text-right">
+                            $&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}
+                        </td>
+                        {{-- % ó $ acordado --}}
+                        {{-- % ó $ acordado --}}
+                        @if ($travelCertificate->commission_type == 'porcentaje')
+                            <td data-order="{{ $travelCertificate->percent }}" style="font-size:14px;" class="text-right">
+                                {{ $travelCertificate->percent }}&nbsp;%
+                            </td>
+                            {{-- A FAVOR DEL CHOFER (IMPORTE NETO MENOS EL % QUE SE QUEDA LA EMPRESA DE COMISION) --}}
+                            <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls - (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent }}"
+                                style="font-size:14px;" class="text-right">
+                                $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls - (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent, 2, ',', '.') }}
+                            </td>
+                            {{-- % IVA DE chofer --}}
+                            <td data-order="{{ (($travelCertificate->total -
+                                $travelCertificate->totalTolls -
+                                (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent) /
+                                100) *
+                                21 }}"
+                                style="font-size:14px;" class="text-right">
+                                $&nbsp;{{ number_format(
+                                    (($travelCertificate->total -
+                                        $travelCertificate->totalTolls -
+                                        (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent) /
+                                        100) *
+                                        21,
+                                    2,
+                                    ',',
+                                    '.',
+                                ) }}
+                            </td>
+                            {{-- A favor de la empresa --}}
+                            <td data-order="{{ (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent }}"
+                                style="font-size:14px;" class="text-right">
+                                $&nbsp;{{ number_format((($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent, 2, ',', '.') }}
+                            </td>
+                        @else
+                            <td data-order="{{ $travelCertificate->fixed_amount }}" style="font-size:14px;"
+                                class="text-right">
+                                $&nbsp;{{ number_format($travelCertificate->fixed_amount, 2, ',', '.') }}
+                            </td>
+                            {{-- A FAVOR DEL CHOFER (IMPORTE NETO MENOS EL % QUE SE QUEDA LA EMPRESA DE COMISION) --}}
+                            <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount }}"
+                                style="font-size:14px;" class="text-right">
+                                $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount, 2, ',', '.') }}
+                            </td>
+                            {{-- % IVA DE chofer --}}
+                            <td data-order="{{ (($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount) / 100) * 21 }}"
+                                style="font-size:14px;" class="text-right">
+                                $&nbsp;{{ number_format(
+                                    (($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount) / 100) * 21,
+                                    2,
+                                    ',',
+                                    '.',
+                                ) }}
+                            </td>
+                            {{-- A favor de la empresa --}}
+                            <td data-order="{{ $travelCertificate->fixed_amount }}" style="font-size:14px;"
+                                class="text-right">
+                                $&nbsp;{{ number_format($travelCertificate->fixed_amount, 2, ',', '.') }}
+                            </td>
+                        @endif
                         <td>
-                            <form action="{{ Route('addToDriverSettlement', $travelCertificate->id) }}" method="POST"    >
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="driverSettlementId" value="{{ $driverSettlement->id }}">
-                                <button type="submit" class="btn btn-success">Agregar a la Liquidacion</button>
-                            </form>
+                            @if ($driverSettlement->liquidated == 'NO')
+                                <form action="{{ Route('removeFromDriverSettlement', $travelCertificate->id) }}"
+                                    method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="driverSettlementId" value="{{ $driverSettlement->id }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">Quitar de la
+                                        Liquidación</button>
+                                </form>
+                            @else
+                                <strong class="text-danger">¡No se pueden realizar cambios!</strong>
+                            @endif
                         </td>
                     </tr>
-                @endif
-                @endif
-            @endforeach
-        </tbody>
-    </table>
-    @endif
-@stop
+                @endforeach
+            </tbody>
+        </table>
+        <br>
+        @if ($driverSettlement->liquidated == 'NO')
+            <h4>Constancias de Viaje del Chofer sin Liquidar</h4>
+            <table class="table table-sm table-bordered text-center data-table">
+                <thead class="bg-danger">
+                    <tr>
+                        <th class="text-center" style="font-size:14px">Fecha</th>
+                        <th class="text-center" style="font-size:14px">Nro<br><br>Nuevo</th>
+                        <th class="text-center" style="font-size:14px">Nro<br><br>Antiguo</th>
+                        <th class="text-center" style="font-size:14px">Cliente</th>
+                        <th class="text-center" style="font-size:14px">Importe<br>Neto</th>
+                        <th class="text-center" style="font-size:14px">I.V.A.</th>
+                        <th class="text-center" style="font-size:14px">Subtotal</th>
+                        <th class="text-center" style="font-size:14px">Peajes</th>
+                        <th class="text-center" style="font-size:14px">Total</th>
+                        <th class="text-center" style="font-size:14px">% ó $<br>acordado</th>
+                        <th class="text-center" style="font-size:14px">A favor<br>del chofer</th>
+                        <th class="text-center" style="font-size:14px">% I.V.A.<br>Chofer</th>
+                        <th class="text-center" style="font-size:14px">A favor de<br>la empresa</th>
+                        <th class="text-center" style="font-size:14px">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($driverSettlement->driver->travelCertificates as $travelCertificate)
+                        @if ($travelCertificate->date >= $driverSettlement->dateFrom and $travelCertificate->date <= $driverSettlement->dateTo)
+                            @if ($travelCertificate->driverSettlementId != $driverSettlement->id and $travelCertificate->isPaidToDriver == 'NO')
+                                <tr>
+                                    <td style="font-size:14px;" class="text-center"
+                                        data-order="{{ \Carbon\Carbon::parse($travelCertificate->date)->timestamp }}">
+                                        {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                                    <td data-order="{{ $travelCertificate->id }}" style="font-size:14px;"
+                                        class="text-center">
+                                        <a target="_blank" title="Numeración Nueva"
+                                            href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}
+                                        </a>
+                                    </td>
+                                    <td data-order="{{ $travelCertificate->number }}" style="font-size:14px;"
+                                        class="text-center">
+                                        <a target="_blank" title="Numeración Antigua"
+                                            href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
+                                            {{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.') : ' - ' }}</a>
+                                    </td>
+                                    <td style="font-size:14px;" class="text-left">{{ $travelCertificate->client->name }}
+                                    </td>
+                                    {{-- IMPORTE NETO --}}
+                                    <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls }}"
+                                        style="font-size:14px;" class="text-right">
+                                        $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
+                                    </td>
+                                    {{-- IVA --}}
+                                    <td data-order="{{ $travelCertificate->iva }}" style="font-size:14px;"
+                                        class="text-right">
+                                        $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
+                                    </td>
+                                    {{-- SUBTOTAL (IMPORTE NETO + IVA) --}}
+                                    <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva }}"
+                                        style="font-size:14px;" class="text-right">
+                                        $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva, 2, ',', '.') }}
+                                    </td>
+                                    {{-- PEAJES --}}
+                                    <td data-order="{{ $travelCertificate->totalTolls }}" style="font-size:14px;"
+                                        class="text-right">
+                                        $&nbsp;{{ number_format($travelCertificate->totalTolls, 2, ',', '.') }}</td>
+                                    {{-- NETO + IVA + PEAJE = TOTAL --}}
+                                    <td data-order="{{ $travelCertificate->total + $travelCertificate->iva }}"
+                                        style="font-size:14px;" class="text-right">
+                                        $&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}
+                                    </td>
+                                    {{-- % ó $ acordado --}}
+                                    @if ($travelCertificate->commission_type == 'porcentaje')
+                                        <td data-order="{{ $travelCertificate->percent }}" style="font-size:14px;"
+                                            class="text-right">
+                                            {{ $travelCertificate->percent }}&nbsp;%
+                                        </td>
+                                        {{-- A FAVOR DEL CHOFER (IMPORTE NETO MENOS EL % QUE SE QUEDA LA EMPRESA DE COMISION) --}}
+                                        <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls - (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent }}"
+                                            style="font-size:14px;" class="text-right">
+                                            $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls - (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent, 2, ',', '.') }}
+                                        </td>
+                                        {{-- % IVA DE chofer --}}
+                                        <td data-order="{{ (($travelCertificate->total -
+                                            $travelCertificate->totalTolls -
+                                            (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent) /
+                                            100) *
+                                            21 }}"
+                                            style="font-size:14px;" class="text-right">
+                                            $&nbsp;{{ number_format(
+                                                (($travelCertificate->total -
+                                                    $travelCertificate->totalTolls -
+                                                    (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent) /
+                                                    100) *
+                                                    21,
+                                                2,
+                                                ',',
+                                                '.',
+                                            ) }}
+                                        </td>
+                                        {{-- A favor de la empresa --}}
+                                        <td data-order="{{ (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent }}"
+                                            style="font-size:14px;" class="text-right">
+                                            $&nbsp;{{ number_format((($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent, 2, ',', '.') }}
+                                        </td>
+                                    @else
+                                        <td data-order="{{ $travelCertificate->fixed_amount }}" style="font-size:14px;"
+                                            class="text-right">
+                                            $&nbsp;{{ number_format($travelCertificate->fixed_amount, 2, ',', '.') }}
+                                        </td>
+                                        {{-- A FAVOR DEL CHOFER (IMPORTE NETO MENOS EL % QUE SE QUEDA LA EMPRESA DE COMISION) --}}
+                                        <td data-order="{{ $travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount }}"
+                                            style="font-size:14px;" class="text-right">
+                                            $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount, 2, ',', '.') }}
+                                        </td>
+                                        {{-- % IVA DE chofer --}}
+                                        <td data-order="{{ (($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount) / 100) * 21 }}"
+                                            style="font-size:14px;" class="text-right">
+                                            $&nbsp;{{ number_format(
+                                                (($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount) / 100) * 21,
+                                                2,
+                                                ',',
+                                                '.',
+                                            ) }}
+                                        </td>
+                                        {{-- A favor de la empresa --}}
+                                        <td data-order="{{ $travelCertificate->fixed_amount }}" style="font-size:14px;"
+                                            class="text-right">
+                                            $&nbsp;{{ number_format($travelCertificate->fixed_amount, 2, ',', '.') }}
+                                        </td>
+                                    @endif
+
+                                    <td>
+                                        <form action="{{ Route('addToDriverSettlement', $travelCertificate->id) }}"
+                                            method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="driverSettlementId"
+                                                value="{{ $driverSettlement->id }}">
+                                            <button type="submit" class="btn btn-sm btn-success">Agregar a la
+                                                Liquidación</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endif
+                        @endif
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    @stop
+    @section('js')
+        <script>
+            $(document).ready(function() {
+                $('.data-table').DataTable();
+            });
+            var table = new DataTable('.data-table', {
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+                }
+            });
+            $('.select2').select2();
+            $(document).ready(function() {
+                // Activar tooltips
+                $('[data-bs-toggle="tooltip"]').tooltip();
+            });
+        </script>
+    @stop

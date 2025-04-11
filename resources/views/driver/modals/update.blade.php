@@ -11,25 +11,25 @@
         <form action="{{ Route('updateDriver', $driver->id) }}" class="form-group" method="POST">
             @csrf
             @method('PUT')
-            <label for="name">Nombre:</label>
+            <label for="name">Nombre:<span class="text-danger"> *</span></label>
             <input type="text" name="name" class="form-control mb-2" placeholder="Ingrese el nombre..." value="{{ $driver->name }}" required>
-            <label for="dni">DNI/CUIT:</label>
+            <label for="dni">DNI/CUIT:<span class="text-danger"> *</span></label>
             <input type="text" name="dni" class="form-control mb-2" placeholder="Ingrese el DNI/CUIT..." value="{{ $driver->dni }}" required>
-            <label for="address">Direccion:</label>
+            <label for="address">Direccion:<span class="text-danger"> *</span></label>
             <input type="text" name="address" class="form-control mb-2" placeholder="Ingrese la direccion..." value="{{ $driver->address }}" required>
-            <label for="city">Ciudad:</label>
+            <label for="city">Ciudad:<span class="text-danger"> *</span></label>
             <input type="text" name="city" class="form-control mb-2" placeholder="Ingrese la ciudad..." value="{{ $driver->city }}" required>
-            <label for="phone">Telefono:</label>
+            <label for="phone">Telefono:<span class="text-danger"> *</span></label>
             <input type="text" name="phone" class="form-control mb-2" placeholder="Ingrese el telefono..." value="{{ $driver->phone }}" required>
-            <label for="percent">Porcentaje de la Agencia:</label>
-            <input type="number" name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje de la agencia..." value="{{ $driver->percent }}" required>            
-            <label for="type">Tipo:</label>
+            <label for="percent">Porcentaje de la Agencia:<span class="text-danger"> *</span></label>
+            <input type="number" name="percent" class="form-control mb-2" step="0.01"  placeholder="Ingrese el porcentaje de la agencia..." value="{{ $driver->percent }}" required>            
+            <label for="type">Tipo:<span class="text-danger"> *</span></label>
             <select name="type" class="form-control mb-2" required>
                 <option  value="{{ $driver->type }}">{{ $driver->type }}</option>
                 <option value="PROPIO">Propio</option>
                 <option value="TERCERO">Tercero</option>
             </select>
-            <label for="vehicleId">Vehiculo:</label>
+            <label for="vehicleId">Vehiculo:<span class="text-danger"> *</span></label>
             <select name="vehicleId" class="form-control mb-2">
                 <option value="{{ $driver->vehicleId }}">{{ $driver->vehicle->name }}</option>
                 @foreach($vehicles as $vehicle)

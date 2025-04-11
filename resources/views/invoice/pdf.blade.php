@@ -1,67 +1,292 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <meta charset="utf-8" />
     <title>Facturas</title>
+
+    <style>
+        .text-top {
+            vertical-align: top;
+        }
+
+        .invoice-box {
+            padding: 10px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-family: Arial, sans-serif;
+            color: #555;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            text-align: left;
+        }
+
+        .invoice-box table title td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+
+        .information-empresa table th {
+            font-size: 10px;
+        }
+
+        .information-cliente table th,
+        .information-cliente table td {
+            font-size: 12px;
+            line-height: 12px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .conceptos td {
+            font-size: 10px
+        }
+
+        .conceptos tbody tr:nth-child(even) {
+            background-color: #e9ecef;
+            /* Gris un poco más oscuro */
+        }
+
+        .totales tr:nth-child(even) {
+            background-color: #FFFFFF;
+            /* Gris un poco más oscuro */
+        }
+
+        .conceptos thead {
+            background-color: #dc3546;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
 </head>
-<style>
-    .container {
-        border: 1px solid black;
-        padding: 65px;
-    }
-</style>
+
 <body>
-    <div class="container text-center">
-        <div class="col-12">
-            <h5>FACTURA N°{{ $invoice->number }}</h5>
-        </div>
-        <div class="row ">
-            <img class="col-7" src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
-        </div>
+    <div class="invoice-box">
+        {{-- CABECERA --}}
 
+        <table>
+            <tr>
+                <td class="title" style="width: 50%;">
+                    <table>
+                        <tr>
+                            <td>
+                                <img style="width: 100%;"
+                                    src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
+                            </td>
+                        </tr>
+                        <tr class="information-empresa">
+                            <td colspan="2">
+                                <table>
+                                    <tr>
+                                        <th class="text-center" style="padding:0;margin:0;line-height:14px;">
+                                            TRANSPORTES RUTA S.R.L.
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center" style="padding:0;margin:0;line-height:14px;">
+                                            30-70908352-6
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center" style="padding:0;margin:0;line-height:14px;">
+                                            Fray Justo Sta. María de Oro 1020
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center" style="padding:0;margin:0;line-height:14px;">
+                                            San Fernando - Buenos Aires
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center" style="padding:0;margin:0;line-height:14px;">
+                                            I.V.A. Responsable Inscripto
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center" style="padding:0;margin:0;line-height:14px;">
+                                            Inicio de actividades: 01/11/2004
+                                        </th>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                </td>
 
-        <div class="col-12 table-bordered text-left">
-            <p><strong>Fecha:</strong> {{ $invoice->date }}</p>
-            <p><strong>Cliente:</strong> {{ $invoice->client->name }}</p>
-            <p><strong>DNI/CUIT:</strong> {{ $invoice->client->dni }}</p>
-            <p><strong>Domicilio:</strong> {{ $invoice->client->address }}</p>
-            <p><strong>IVA Tipo:</strong> {{ $invoice->client->ivaType }}</p>
-        </div>
-        <div class="col-12 table-bordered text-left">
-            <p><strong>CONCEPTOS:</strong></p>
-            <table border="1" cellspacing="0" style="border-collapse: collapse;">
-                <thead>
+                <td style="width: 50%;" class="text-top">
+                    <table style="width: 100%;">
+                        <tr>
+                            <th class="text-right" style="width: 90%;font-size:18px">
+                                Resumen de factura Nro:
+                            </th>
+                            <td style="width: 10%;font-size:18px;text-align:left">
+                                {{ number_format($invoice->number, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-right" style="width: 90%;">
+                                Punto de venta:
+                            </th>
+                            <td style="width:10%;">
+                                {{ str_pad($invoice->pointOfSale, 5, '0', STR_PAD_LEFT) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-right" style="width: 90%;">
+                                Fecha:
+                            </th>
+                            <td style="width:10%;">
+                                {{ \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <hr>
+        {{-- DATA CLIENTE --}}
+        <table>
+            <tr class="information-cliente">
+                <table>
                     <tr>
-                        <th style="padding: 2px;">Constancia N°</th>
-                        <th style="padding: 2px;">Total</th>
+                        <th style="text-align:left">
+                            Apellido y Nombre / Razón Social:
+                        </th>
+                        <td style="text-align:left">
+                            {{ $invoice->client->name }}
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($invoice->travelCertificates as $travelCertificate)
                     <tr>
-                        <td style="padding: 2px;">{{ $travelCertificate->number }}</td>
-                        <td style="padding: 2px;">${{ $travelCertificate->total + $travelCertificate->iva }}</td>
+
+                        <th style="text-align:left">
+                            DNI/CUIT:
+                        </th>
+                        <td style="text-align:left">
+                            {{ $invoice->client->dni }}
+                        </td>
                     </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <br>
-            <div class="col-12 table-bordered text-left">
-                <p><strong>TOTAL:</strong> ${{ $invoice->total }}</p>
-                <p><strong>IVA:</strong> ${{ $invoice->iva }}</p>
-                <p><strong>TOTAL CON IVA:</strong> ${{ $invoice->totalWithIva }}</p>
-            </div>
-            <div class="col-12 table-bordered text-center">
-                <br>
-                <br>
-                <hr class="col-6">
-                <p>FIRMA</p>
-            </div>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+                    <tr>
+                        <th style="text-align:left">
+                            Domicilio:
+                        </th>
+                        <td style="text-align:left">
+                            {{ $invoice->client->address }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align:left">
+                            Condición frente al IVA:
+                        </th>
+                        <td style="text-align:left">
+                            {{ $invoice->client->ivaType }}
+                        </td>
+                    </tr>
+                </table>
+            </tr>
+        </table>
+        <hr>
+        <table class="conceptos">
+            <thead>
+                <tr class="heading" style="font-size:10px;">
+                    <td style="text-align:center;width:10%">Nro<br>Nuevo/Antiguo</td>
+                    <td style="text-align:center;width:10%">Fecha</td>
+                    <td style="text-align:center;width:50%">Servicio</td>
+                    <td style="text-align:center;width:30%">Importe Neto</td>
+                    <td style="text-align:center;width:30%">I.V.A.</td>
+                    <td style="text-align:center;width:30%">Peajes</td>
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach ($invoice->travelCertificates as $travelCertificate)
+                    <tr style="font-size:14px;">
+                        <td style="padding: 2px 8px;text-align:center">
+                            {{ number_format($travelCertificate->id, 0, ',', '.') }} / {{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.'): ' - ' }}</td>
+                        <td style="padding: 2px 8px;text-align:center">
+                            {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                        <td style="padding: 2px 8px;text-align:left">{{ $travelCertificate->destiny }}</td>
+                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
+                        </td>
+                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format((($travelCertificate->total - $travelCertificate->totalTolls) / 100) * 21, 2, ',', '.') }}
+                        </td>
+                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->totalTolls, 2, ',', '.') }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        <hr>
+        <table>
+            <tr style="background-color:#FFFFFF">
+                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
+                    Subtotal
+                </th>
+                <th style="padding: 2px 8px;text-align:right">
+                    $&nbsp;{{ number_format($totalImporteNeto, 2, ',', '.') }}
+                </th>
+            </tr>
+            <tr style="background-color:#FFFFFF">
+                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
+                    I.V.A.
+                </th>
+                <th style="padding: 2px 8px;text-align:right">
+                    $&nbsp;{{ number_format(($totalImporteNeto / 100) * 21, 2, ',', '.') }}
+                </th>
+            </tr>
+            <tr style="background-color:#FFFFFF">
+                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
+                    Peajes
+                </th>
+                <th style="padding: 2px 8px;text-align:right">
+                    $&nbsp;{{ number_format($totalTolls, 2, ',', '.') }}
+                </th>
+            </tr>
+            <tr style="background-color:#FFFFFF">
+                <th style="width:90%;text-align:center">
+                    ___________________________________<br>
+                    FIRMA
+                </th>
+                <th style="width:10%;padding: 2px 8px;text-align:right">
+                    Total
+                </th>
+                <th style="padding: 2px 8px;text-align:right">
+                    $&nbsp;{{ number_format($totalImporteNeto + ($totalImporteNeto / 100) * 21 + $totalTolls, 2, ',', '.') }}
+                </th>
+            </tr>
+        </table>
+    </div>
+    <script type="text/php">
+            if (isset($pdf)) {
+                $x_pagina = 500;  // Posición en X para el número de página
+                $y_pagina = 810;  // Posición en Y para el número de página
+                
+        
+                $x_factura = 50;  // Posición en X para la info extra
+                $y_factura = 810; // Posición en Y para la info extra
+        
+                $size = 10;
+                $color = array(0,0,0); // Color negro
+        
+                // Texto de la numeración de páginas
+                $pdf->page_text($x_pagina, $y_pagina, "Página {PAGE_NUM} de {PAGE_COUNT}", null, $size, $color);
+        
+                // Texto con número de liquidación y cliente
+                $pdf->page_text($x_factura, $y_factura, "Factura N° {{ number_format($invoice->number,0,',','.') }} - Cliente: {{ $invoice->client->name }}", null, $size, $color);
+            }
+        </script>
 </body>
 
 </html>

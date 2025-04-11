@@ -28,4 +28,9 @@ class Driver extends Model
     {
         return $this->belongsTo(Vehicle::class, 'vehicleId');
     }
+
+    public function setPercentAttribute($value)
+    {
+        $this->attributes['percent'] = number_format((float) $value, 2, '.', '');
+    }
 }

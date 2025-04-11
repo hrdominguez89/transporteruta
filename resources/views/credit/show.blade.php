@@ -17,7 +17,7 @@
 @stop
 
 @section('content')
-    <table class="table table-bordered text-center data-table">
+    <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
                 <th>Numero</th>
@@ -45,4 +45,17 @@
                 </tr>
         </tbody>
     </table>
+@stop
+@section('js')
+    <script>
+        $(document).ready(function() {
+            $('.data-table').DataTable();
+        });
+        var table = new DataTable('.data-table', {
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+            }
+        });
+        $('.select2').select2();
+    </script>
 @stop
