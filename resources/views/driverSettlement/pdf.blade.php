@@ -198,7 +198,7 @@
                             $totalIVA += $travelCertificate->iva;
                             $totalTotal += $travelCertificate->total + $travelCertificate->iva;
 
-                            if ($travelCertificate->commission_type == 'porcentaje') {
+                            if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado'])) {
                                 $totalAFavorDelChofer +=
                                     $travelCertificate->total -
                                     $travelCertificate->totalTolls -
@@ -262,12 +262,16 @@
                             </td>
                             {{-- % o monto acordado --}}
                             <td class="text-right">
-                                {{ $travelCertificate->commission_type == 'porcentaje' ? $travelCertificate->percent . ' %' : '$ ' . number_format($travelCertificate->fixed_amount, 2, ',', '.') }}
+                                {{ 
+                                    in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado']) 
+                                        ? $travelCertificate->percent . ' %' 
+                                        : '$ ' . number_format($travelCertificate->fixed_amount, 2, ',', '.') 
+                                }}
                             </td>
                             {{-- A FAVOR DEL CHOFER (IMPORTE NETO MENOS EL % QUE SE QUEDA LA EMPRESA DE COMISION) --}}
                             <td class="text-right">
                                 $&nbsp;
-                                @if ($travelCertificate->commission_type == 'porcentaje')
+                                @if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado']))
                                     {{ number_format($travelCertificate->total - $travelCertificate->totalTolls - (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent, 2, ',', '.') }}
                                 @else
                                     {{ number_format($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->fixed_amount, 2, ',', '.') }}
@@ -276,7 +280,7 @@
                             {{-- % IVA DE chofer --}}
                             <td class="text-right">
                                 $&nbsp;
-                                @if ($travelCertificate->commission_type == 'porcentaje')
+                                @if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado']))
                                     {{ number_format(
                                         (($travelCertificate->total -
                                             $travelCertificate->totalTolls -
@@ -299,7 +303,7 @@
                             {{-- A favor de la empresa --}}
                             <td class="text-right">
                                 $&nbsp;
-                                @if ($travelCertificate->commission_type == 'porcentaje')
+                                @if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado']))
                                     {{ number_format((($travelCertificate->total - $travelCertificate->totalTolls) / 100) * $travelCertificate->percent, 2, ',', '.') }}
                                 @else
                                     {{ number_format($travelCertificate->fixed_amount, 2, ',', '.') }}
@@ -312,7 +316,7 @@
                     {{-- Fila de totales --}}
                     <tr>
 
-                        <td colspan="3" class="text-right"><strong>Totales:</strong></td>
+                        <td colspan="4" class="text-right"><strong>Totales:</strong></td>
                         {{-- totales importe neto --}}
                         <td class="text-right"><strong>$&nbsp;{{ number_format($totalImporte, 2, ',', '.') }}</strong>
                         </td>

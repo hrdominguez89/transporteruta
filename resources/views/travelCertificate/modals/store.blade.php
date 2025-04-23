@@ -38,7 +38,7 @@
                     <!-- Tipo de comisión -->
                     <label for="commission_type">Tipo de Comisión:<span class="text-danger"> *</span></label>
                     <select name="commission_type" id="commission_type" class="form-control mb-2" required>
-                        <option value="chofer">Porcentaje del chofer</option>
+                        <option value="porcentaje pactado">Porcentaje pactado con del chofer</option>
                         <option value="porcentaje">Otro porcentaje</option>
                         <option value="monto fijo">Otro Monto Fijo</option>
                     </select>
@@ -46,12 +46,12 @@
                     <!-- Porcentaje o Monto Fijo -->
                     <div id="percent_div" style="display: none;">
                         <label for="percent">Porcentaje %:<span class="text-danger"> *</span></label>
-                        <input type="number" id="percent" step="0.01" name="percent" class="form-control mb-2">
+                        <input type="number" id="percent" step="0.01" name="percent" placeholder="Ej: 30,25" class="form-control mb-2">
                     </div>
-
+        
                     <div id="fixed_amount_div" style="display: none;">
                         <label for="fixed_amount">Monto Fijo en $:<span class="text-danger"> *</span></label>
-                        <input type="number" step="0.01" id="fixed_amount" name="fixed_amount" class="form-control mb-2">
+                        <input type="number" step="0.01" id="fixed_amount" name="fixed_amount" placeholder="Ej: 15000" class="form-control mb-2">
                     </div>
 
             </div>

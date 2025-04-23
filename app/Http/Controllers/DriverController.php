@@ -13,10 +13,10 @@ class DriverController extends Controller
     {
         $drivers = Driver::all();
         $vehicles = Vehicle::all();
-        return view('driver.index', ['drivers'=>$drivers, 'vehicles'=>$vehicles]);
+        return view('driver.index', ['drivers' => $drivers, 'vehicles' => $vehicles]);
     }
 
-   
+
     public function store(StoreDriverRequest $request)
     {
         $newDriver = new Driver;
@@ -25,14 +25,15 @@ class DriverController extends Controller
         $newDriver->address = $request->address;
         $newDriver->city = $request->city;
         $newDriver->phone = $request->phone;
-        $newDriver->percent = $request->percent;
         $newDriver->type = $request->type;
-        if($request->vehicleId != null)
-        {
-            $newDriver->vehicleId = $request->vehicleId;
+        if ($request->type == 'TERCERO') {
+            $newDriver->percent = $request->percent;
+        } else {
+            $newDriver->percent = 100;
         }
-        else
-        {
+        if ($request->vehicleId != null) {
+            $newDriver->vehicleId = $request->vehicleId;
+        } else {
             $newDriver->vehicleId = 1;
         }
         $newDriver->save();
@@ -43,7 +44,7 @@ class DriverController extends Controller
     {
         $driver = Driver::find($id);
         $vehicles = Vehicle::all();
-        return view('driver.show', ['driver'=>$driver, 'vehicles'=>$vehicles]);
+        return view('driver.show', ['driver' => $driver, 'vehicles' => $vehicles]);
     }
 
     public function update(UpdateDriverRequest $request, $id)
@@ -54,8 +55,12 @@ class DriverController extends Controller
         $driver->address = $request->address;
         $driver->city = $request->city;
         $driver->phone = $request->phone;
-        $driver->percent = $request->percent;
         $driver->type = $request->type;
+        if ($request->type == 'TERCERO') {
+            $driver->percent = $request->percent;
+        } else {
+            $driver->percent = 100;
+        }
         $driver->save();
         return redirect(route('showDriver', $driver->id));
     }

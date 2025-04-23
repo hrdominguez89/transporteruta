@@ -118,7 +118,7 @@
                         </td>
                         {{-- % ó $ acordado --}}
                         {{-- % ó $ acordado --}}
-                        @if ($travelCertificate->commission_type == 'porcentaje')
+                        @if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado']))
                             <td data-order="{{ $travelCertificate->percent }}" style="font-size:14px;" class="text-right">
                                 {{ $travelCertificate->percent }}&nbsp;%
                             </td>
@@ -263,7 +263,7 @@
                                         $&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}
                                     </td>
                                     {{-- % ó $ acordado --}}
-                                    @if ($travelCertificate->commission_type == 'porcentaje')
+                                    @if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado']))
                                         <td data-order="{{ $travelCertificate->percent }}" style="font-size:14px;"
                                             class="text-right">
                                             {{ $travelCertificate->percent }}&nbsp;%

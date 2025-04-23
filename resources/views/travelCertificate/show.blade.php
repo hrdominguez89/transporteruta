@@ -10,7 +10,7 @@
         <div class="col-12 mt-3">
 
 
-            <h1>Liquidación N° <strong><span data-bs-toggle="tooltip" data-bs-placement="top"
+            <h1>Constancia de Viaje N° <strong><span data-bs-toggle="tooltip" data-bs-placement="top"
                         title="Numeración sistema nuevo">{{ number_format($travelCertificate->id, 0, ',', '.') }}</span> /
                     <span data-bs-toggle="tooltip" data-bs-placement="top"
                         title="Numeración sistema antiguo">{{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.') : ' - ' }}</span></strong>
@@ -76,6 +76,7 @@
             <thead class="bg-danger">
                 <tr>
                     <th>Tipo</th>
+                    <th>Descripción</th>
                     <th>Precio Total</th>
                     <th>Acciones</th>
                 </tr>
@@ -84,18 +85,21 @@
                 @foreach ($travelCertificate->travelItems as $travelItem)
                     <tr>
                         <td>{{ $travelItem->type }}</td>
+                        <td class="text-center">{{ $travelItem->description }}</td>
                         <td data-order="{{ $travelItem->price }}">
                             $&nbsp;{{ number_format($travelItem->price, 2, ',', '.') }}</td>
-                        @if ($travelCertificate->invoiced == 'NO')
-                            <td>
-                                <button class="btn btn-danger" data-toggle="modal"
-                                    data-target="#deleteItemModal{{ $travelItem->id }}">Eliminar</button>
-                            </td>
-                        @else
-                            <td>
+                        <td>
+                            @if ($travelCertificate->invoiced == 'NO')
+                                @if ($travelItem->type == 'FIJO' && $tiene_tarifa_adicional)
+                                    <strong class="text-danger">Este ítem tiene un adicional asociado. Eliminá primero el adicional para poder borrarlo.</strong>
+                                @else
+                                    <button class="btn btn-danger" data-toggle="modal"
+                                        data-target="#deleteItemModal{{ $travelItem->id }}">Eliminar</button>
+                                @endif
+                            @else
                                 <strong class="text-danger">¡No se pueden realizar cambios!</strong>
-                            </td>
-                        @endif
+                            @endif
+                        </td>
                     </tr>
                     @include('travelItem.modals.delete')
                 @endforeach

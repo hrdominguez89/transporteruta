@@ -12,34 +12,38 @@ class TravelItemController extends Controller
 {
     public function store(StoreTravelItemRequest $request, $travelCertificateId)
     {
+        $tarifa_fija = TravelItem::where('travelCertificateId', $travelCertificateId)->where('type', 'FIJO')->value('price');
+
         $newTravelItem = new TravelItem;
         $newTravelItem->type = $request->type;
-        $price = $request->price;
-        if($request->type == 'HORA')
-        {
-            $newTravelItem->totalTime = $request->totalTime;
-            $newTravelItem->price = $newTravelItem->totalTime * $price;
-        }
-        elseif($request->type == 'KILOMETRO')
-        {
+        $newTravelItem->description = $request->description;
+        // $price = $request->price;s
+        if ($request->type == 'HORA') {
+            // Convertir minutos a decimal
+            $newTravelItem->totalTime = round($request->totalHours + ($request->totalMinutes / 60), 2);
+            $newTravelItem->price = $newTravelItem->totalTime * $request->price;
+            $newTravelItem->description .= ' (' . $request->totalHours . ':' . $request->totalMinutes . ' Hs. x $ ' . number_format($request->price, 2, ',', '.') . ')';
+        } elseif ($request->type == 'KILOMETRO') {
             $newTravelItem->distance = $request->distance;
-            $newTravelItem->price = $newTravelItem->distance * $price;
-        }
-        else
-        {
-            $newTravelItem->price = $price;
-
+            $newTravelItem->price = $newTravelItem->distance * $request->price;
+            $newTravelItem->description .= ' (' . $request->distance . ' Kms. x $ ' . number_format($request->price, 2, ',', '.') . ')';
+        } elseif ($request->type == 'ADICIONAL') {
+            $newTravelItem->percent = $request->porcentaje;
+            $newTravelItem->price = ($tarifa_fija / 100) *  $request->porcentaje;
+            $newTravelItem->description .= ' (' . number_format($request->porcentaje, 2, ',', '.') . ' % de $ ' . number_format($tarifa_fija, 2, ',', '.') . ')';
+        } else {
+            $newTravelItem->price = $request->price;
         }
         $travelCertificate = TravelCertificate::find($travelCertificateId);
         $travelCertificate->total += $newTravelItem->price;
-        if($request->type != 'PEAJE')
-        {
+        if ($request->type != 'PEAJE') {
             $travelCertificate->iva += $newTravelItem->price * 0.21;
         }
         $newTravelItem->travelCertificateId = $travelCertificateId;
         $newTravelItem->save();
-        $driver = Driver::find($travelCertificate->driverId);
-        $travelCertificate->driverPayment += ($newTravelItem->price * $driver->percent) / 100;
+        // no se porque hacia esto, pero lo comento
+        // $driver = Driver::find($travelCertificate->driverId);
+        // $travelCertificate->driverPayment += ($newTravelItem->price * $driver->percent) / 100;
         $travelCertificate->save();
         return redirect(route('showTravelCertificate', $travelCertificateId));
     }
@@ -49,12 +53,12 @@ class TravelItemController extends Controller
         $travelItem = TravelItem::find($id);
         $travelCertificate = TravelCertificate::find($travelCertificateId);
         $travelCertificate->total -= $travelItem->price;
-        if($travelItem->type != 'PEAJE')
-        {
+        if ($travelItem->type != 'PEAJE') {
             $travelCertificate->iva -= $travelItem->price * 0.21;
         }
-        $driver = Driver::find($travelCertificate->driverId);
-        $travelCertificate->driverPayment -= ($travelItem->price * $driver->percent) / 100;
+        // no se porque hacia esto, pero lo comento
+        // $driver = Driver::find($travelCertificate->driverId);
+        // $travelCertificate->driverPayment -= ($travelItem->price * $driver->percent) / 100;
         $travelCertificate->save();
         $travelItem->delete();
         return redirect(route('showTravelCertificate', $travelCertificateId));

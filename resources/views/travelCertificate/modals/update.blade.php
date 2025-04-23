@@ -1,44 +1,110 @@
-<div class="modal fade" id="updateModal{{ $travelCertificate->id }}" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-danger">
-        <h5 class="modal-title">Actualizar Constancia de Viaje</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form action="{{ Route('updateTravelCertificate', $travelCertificate->id) }}" class="form-group" method="POST">
-            @csrf
-            @method('PUT')
-            <label for="number">Numero:</label>
-            <input type="number" name="number" class="form-control mb-2" value="{{ $travelCertificate->number }}" required>
-            <label for="date">Fecha:</label>
-            <input type="date" name="date" class="form-control mb-2" value="{{ $travelCertificate->date }}" required>
-            <label for="clientId">Cliente:</label>
-            <select name="clientId" class="form-control mb-2" required>
-                <option value="{{ $travelCertificate->client->id }}">{{ $travelCertificate->client->name }}</option>
-                @foreach($clients as $client)
-                    <option value="{{ $client->id }}">{{ $client->name }}</option>
-                @endforeach
-            </select>
-            <label for="driverId">Chofer:</label>
-            <select name="driverId" class="form-control mb-2" required>
-                <option value="{{ $travelCertificate->driver->id }}">{{ $travelCertificate->driver->name }}</option>
-                @foreach($drivers as $driver)
-                    <option value="{{ $driver->id }}">{{ $driver->name }}</option>
-                @endforeach
-            </select>
-            <label for="destiny">Destino:</label>
-            <input type="text" name="destiny" class="form-control mb-2" value="{{ $travelCertificate->destiny }}">
-            <label for="driverPayment">Pago a Chofer:</label>
-            <input type="number" name="driverPayment" class="form-control mb-2" placeholder="Ingrese el monto del pago al chofer.." value="{{ $travelCertificate->driverPayment }}" required>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-success">Actualizar</button>
-        </form>
-      </div>
+<div class="modal fade" id="updateModal{{ $travelCertificate->id }}" tabindex="-1" aria-labelledby="updateModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title">Actualizar Constancia de Viaje</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ Route('updateTravelCertificate', $travelCertificate->id) }}" class="form-group"
+                    method="POST">
+                    @csrf
+                    @method('PUT')
+                    <label for="number">Numero(Sistema Antiguo):</label>
+                    <input type="number" name="number" class="form-control mb-2"
+                        value="{{ $travelCertificate->number }}">
+                    <label for="date">Fecha:<span class="text-danger"> *</span></label>
+                    <input type="date" name="date" class="form-control mb-2"
+                        value="{{ $travelCertificate->date }}" required>
+                    <label for="destiny">Destino:<span class="text-danger"> *</span></label>
+                    <input type="text" name="destiny" class="form-control mb-2"
+                        value="{{ $travelCertificate->destiny }}" required>
+                    <label for="clientId">Cliente:<span class="text-danger"> *</span></label>
+                    <select name="clientId" class="form-control mb-2" required>
+                        <option value="{{ $travelCertificate->client->id }}">{{ $travelCertificate->client->name }}
+                        </option>
+                        @foreach ($clients as $client)
+                            <option value="{{ $client->id }}"
+                                {{ $travelCertificate->client->id == $client->id ? 'selected' : '' }}>
+                                {{ $client->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <label for="driverId">Chofer:<span class="text-danger"> *</span></label>
+                    <select name="driverId" class="form-control mb-2" required>
+                        @foreach ($drivers as $driver)
+                            <option value="{{ $driver->id }}" {{ $driver->id == $travelCertificate->driverId ?'selected':'' }}>{{ $driver->name }} - {{ $driver->percent }} %
+                            </option>
+                        @endforeach
+                    </select>
+
+
+                    <!-- Tipo de comisión -->
+                    <label for="commission_type">Tipo de Comisión:<span class="text-danger"> *</span></label>
+                    <select name="commission_type" id="commission_type" class="form-control mb-2" required>
+                        <option value="porcentaje pactado"
+                            {{ $travelCertificate->commission_type == 'porcentaje pactado' ? 'selected' : '' }}>
+                            Porcentaje pactado con del chofer</option>
+                        <option value="porcentaje"
+                            {{ $travelCertificate->commission_type == 'porcentaje' ? 'selected' : '' }}>Otro
+                            porcentaje</option>
+                        <option value="monto fijo"
+                            {{ $travelCertificate->commission_type == 'monto fijo' ? 'selected' : '' }}>Otro Monto
+                            Fijo</option>
+                    </select>
+
+                    <!-- Porcentaje o Monto Fijo -->
+                    <div id="percent_div"
+                        style="display: {{ $travelCertificate->commission_type == 'porcentaje' ? 'block' : 'none' }}">
+                        <label for="percent">Porcentaje %:<span class="text-danger"> *</span></label>
+                        <input type="number" value="{{ @$travelCertificate->percent }}" id="percent" step="0.01"
+                            name="percent" placeholder="Ej: 30,25" class="form-control mb-2"
+                            {{ $travelCertificate->commission_type == 'porcentaje' ? 'required' : '' }}>
+                    </div>
+
+                    <div id="fixed_amount_div"
+                        style="display: {{ $travelCertificate->commission_type == 'monto fijo' ? 'block' : 'none' }};">
+                        <label for="fixed_amount">Monto Fijo en $:<span class="text-danger"> *</span></label>
+                        <input type="number" value="{{ @$travelCertificate->fixed_amount }}" step="0.01"
+                            id="fixed_amount" name="fixed_amount" placeholder="Ej: 15000" class="form-control mb-2"
+                            {{ $travelCertificate->commission_type == 'monto fijo' ? 'required' : '' }}>
+                    </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-success">Actualizar</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+<script>
+    document.getElementById("commission_type").addEventListener("change", function() {
+        var commissionType = this.value;
+        if (commissionType === "porcentaje") {
+            // Mostrar campo de porcentaje y ocultar monto fijo
+            document.getElementById("percent_div").style.display = "block";
+            document.getElementById("fixed_amount_div").style.display = "none";
+            document.getElementById("percent").setAttribute("required", "required");
+            document.getElementById("fixed_amount").removeAttribute("required");
+        } else if (commissionType === "monto fijo") {
+            // Mostrar campo de monto fijo y ocultar porcentaje
+            document.getElementById("percent_div").style.display = "none";
+            document.getElementById("fixed_amount_div").style.display = "block";
+            document.getElementById("fixed_amount").setAttribute("required", "required");
+            document.getElementById("percent").removeAttribute("required");
+
+        } else {
+            // Si no se selecciona ninguna opción, ocultar ambos campos
+            document.getElementById("percent_div").style.display = "none";
+            document.getElementById("fixed_amount_div").style.display = "none";
+            document.getElementById("percent").removeAttribute("required");
+            document.getElementById("fixed_amount").removeAttribute("required");
+
+        }
+    });
+</script>

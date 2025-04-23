@@ -38,8 +38,18 @@ class InvoiceController extends Controller
 
     public function show($id)
     {
-        $invoice = Invoice::find($id);
-        return view('invoice.show', ['invoice' => $invoice]);
+        $data['invoice'] = Invoice::find($id);
+
+        foreach ($data['invoice']->travelCertificates as $travelCertificate) {
+            // Agregar el total de peajes a cada travelCertificate
+            $travelCertificate->peajes = TravelItem::where('type', 'PEAJE')
+                ->where('travelCertificateId', $travelCertificate->id)
+                ->sum('price');
+            $travelCertificate->importeNeto = $travelCertificate->total - $travelCertificate->peajes;
+            $travelCertificate->iva = $travelCertificate->importeNeto * 0.21;
+        }
+
+        return view('invoice.show', $data);
     }
 
     public function generateInvoicePdf($id)
@@ -60,11 +70,11 @@ class InvoiceController extends Controller
         foreach ($data['invoice']->travelCertificates as $travelCertificate) {
             // Agregar el total de peajes a cada travelCertificate
             $travelCertificate->totalTolls = TravelItem::where('type', 'PEAJE')
-            ->where('travelCertificateId', $travelCertificate->id)
-            ->sum('price');
+                ->where('travelCertificateId', $travelCertificate->id)
+                ->sum('price');
 
             $data['totalImporteNeto'] += $travelCertificate->total - $travelCertificate->totalTolls;
-            
+
             $data['totalTolls'] += $travelCertificate->totalTolls;
         }
 

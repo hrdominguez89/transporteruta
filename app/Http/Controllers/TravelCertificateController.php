@@ -34,18 +34,14 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->invoiceId = 0; // Si necesitas gestionar facturas, ajusta este valor
         $newTravelCertificate->driverSettlementId = 0; // Si necesitas gestionar liquidaciones de choferes, ajusta este valor
 
-        // Lógica para establecer el tipo de comisión
-        if ($request->commission_type == "chofer") {
-            // Si no se seleccionó un tipo de comisión, lo establecemos por defecto como 'porcentaje'
-            $newTravelCertificate->commission_type = 'porcentaje';
+        $newTravelCertificate->commission_type = $request->commission_type;
 
+        // Lógica para establecer el tipo de comisión
+        if ($request->commission_type == "porcentaje pactado") {
             // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
             $driver = Driver::find($request->driverId);
             $newTravelCertificate->percent = $driver->percent; // Asignamos el porcentaje del driver
         } else {
-            // Si se selecciona un tipo de comisión, asignamos el valor correspondiente
-            $newTravelCertificate->commission_type = $request->commission_type;
-
             // Almacenar porcentaje o monto fijo dependiendo del tipo de comisión
             if ($request->commission_type == 'porcentaje') {
                 $newTravelCertificate->percent = $request->percent;
@@ -66,10 +62,14 @@ class TravelCertificateController extends Controller
 
     public function show($id)
     {
-        $travelCertificate = TravelCertificate::find($id);
-        $clients = Client::all();
-        $drivers = Driver::all();
-        return view('travelCertificate.show', ['travelCertificate' => $travelCertificate, 'clients' => $clients, 'drivers' => $drivers]);
+        $data['travelCertificate'] = TravelCertificate::find($id);
+        $data['tarifa_fija'] = TravelItem::where('travelCertificateId', $id)->where('type', 'FIJO')->value('price');
+        $data['tiene_tarifa_adicional'] = TravelItem::where('travelCertificateId', $id)
+            ->where('type', 'ADICIONAL')
+            ->exists();
+        $data['clients'] = Client::orderBy('name', 'asc')->get();
+        $data['drivers'] = Driver::orderBy('name', 'asc')->get();
+        return view('travelCertificate.show', $data);
     }
 
     public function update(UpdateTravelCertificateRequest $request, $id)
@@ -77,10 +77,26 @@ class TravelCertificateController extends Controller
         $travelCertificate = TravelCertificate::find($id);
         $travelCertificate->number = $request->number;
         $travelCertificate->date = $request->date;
+        $travelCertificate->destiny = $request->destiny;
         $travelCertificate->clientId = $request->clientId;
         $travelCertificate->driverId = $request->driverId;
-        $travelCertificate->driverPayment = $request->driverPayment;
-        $travelCertificate->destiny = $request->destiny;
+        $travelCertificate->commission_type = $request->commission_type;
+
+        // Lógica para establecer el tipo de comisión
+        if ($request->commission_type == "porcentaje pactado") {
+            // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
+            $driver = Driver::find($request->driverId);
+            $travelCertificate->percent = $driver->percent; // Asignamos el porcentaje del driver
+        } else {
+            // Almacenar porcentaje o monto fijo dependiendo del tipo de comisión
+            if ($request->commission_type == 'porcentaje') {
+                $travelCertificate->percent = $request->percent;
+                $travelCertificate->fixed_amount = null; // Asegurarse de que `fixed_amount` sea nulo si no se utiliza
+            } else {
+                $travelCertificate->fixed_amount = $request->fixed_amount;
+                $travelCertificate->percent = null; // Asegurarse de que `percent` sea nulo si no se utiliza
+            }
+        }
         $travelCertificate->save();
         return redirect(route('showTravelCertificate', $travelCertificate->id));
     }
