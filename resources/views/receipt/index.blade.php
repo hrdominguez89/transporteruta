@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-10">Recibos</h1>
-        <button class="btn btn-danger" data-toggle="modal" data-target="#generateModal">Generar Recibo</button>
+        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Generar Recibo</button>
     </div>
     @include('receipt.modals.generate')
 @stop
@@ -16,20 +16,24 @@
             <tr>
                 <th>Numero</th>
                 <th>Cliente</th>
-                <th>Total</th>
+                <th>Recibido</th>
+                <th>Retenciones</th>
+                <th>Total Recibido</th>
                 <th>Pagado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($receipts as $receipt)
+            @foreach ($receipts as $receipt)
                 <tr>
-                    <td>{{ $receipt->number }}</td>
+                    <td>{{ number_format($receipt->number, 0, ',', '.') }}</td>
                     <td>{{ $receipt->client->name }}</td>
-                    <td>{{ $receipt->total }}</td>
+                    <td>$&nbsp;{{ number_format($receipt->total, 2, ',', '.') }}</td>
+                    <td>$&nbsp;{{ number_format($receipt->taxTotal, 2, ',', '.') }}</td>
+                    <td>$&nbsp;{{ number_format($receipt->total + $receipt->taxTotal, 2, ',', '.') }}</td>
                     <td>{{ $receipt->paid }}</td>
                     <td>
-                        <a href="{{ Route('showReceipt', $receipt->id) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ Route('showReceipt', $receipt->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
                 </tr>
             @endforeach

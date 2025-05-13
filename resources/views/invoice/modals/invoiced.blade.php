@@ -9,11 +9,11 @@
       </div>
       <div class="modal-body">
         <form action="{{ Route('invoicedInvoice', $invoice->id) }}" class="form-group">
-            <p>Se facturara al cliente: <strong>{{ $invoice->client->name }}</strong><p>
+            <p>Se va a facturar al cliente: <strong>{{ $invoice->client->name }}</strong><p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Confirmar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-primary">Confirmar</button>
         </form>
       </div>
     </div>

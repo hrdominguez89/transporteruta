@@ -47,7 +47,7 @@
                     <select name="commission_type" id="commission_type" class="form-control mb-2" required>
                         <option value="porcentaje pactado"
                             {{ $travelCertificate->commission_type == 'porcentaje pactado' ? 'selected' : '' }}>
-                            Porcentaje pactado con del chofer</option>
+                            Porcentaje pactado con el chofer</option>
                         <option value="porcentaje"
                             {{ $travelCertificate->commission_type == 'porcentaje' ? 'selected' : '' }}>Otro
                             porcentaje</option>
@@ -75,8 +75,8 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="submit" class="btn btn-success">Actualizar</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-sm btn-success">Actualizar</button>
                 </form>
             </div>
         </div>

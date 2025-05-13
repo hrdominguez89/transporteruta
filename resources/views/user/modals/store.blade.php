@@ -18,8 +18,8 @@
             <input type="password" name="password" class="form-control mb-2" placeholder="Ingrese la contraseña..." required>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
         </form>
       </div>
     </div>

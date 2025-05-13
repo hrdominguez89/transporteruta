@@ -25,8 +25,8 @@
                     <input type="date" name="dateTo" class="form-control mb-2" required>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="submit" class="btn btn-primary">Generar</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-sm btn-primary">Generar</button>
                 </form>
             </div>
         </div>

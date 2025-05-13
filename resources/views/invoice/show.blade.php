@@ -6,7 +6,7 @@
     <div class="row">
 
         <div class="col-12">
-            <a href="{{ Route('invoices') }}" class="btn btn-secondary">Volver</a>
+            <a href="{{ Route('invoices') }}" class="btn btn-sm btn-secondary">Volver</a>
         </div>
         <div class="col-12 mt-3">
             <h1>Factura N° <strong>{{ number_format($invoice->number, 0, ',', '.') }}</strong></h1>
@@ -14,20 +14,20 @@
 
         @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-danger col-2 mr-2" data-toggle="modal"
+                <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal"
                     data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-info col-2">Generar PDF</a>
+                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-2">Generar PDF</a>
             </div>
         @elseif($invoice->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-primary col-4" data-toggle="modal"
+                <button class="btn btn-sm btn-primary col-4" data-toggle="modal"
                     data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
             </div>
         @endif
         @if ($invoice->paid == 'SI')
             <div class="col-12 text-right mb-2">
 
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-info col-4">Generar PDF</a>
+                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-4">Generar PDF</a>
             </div>
             <div class="col-12 text-left mb-2">
                 <h5 class="text-danger">La factura se marco como pagada y se desconto el saldo de la cuenta corriente</h5>
@@ -135,7 +135,7 @@
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                <button type="submit" class="btn btn-warning">Quitar de la Factura</button>
+                                <button type="submit" class="btn btn-sm btn-warning">Quitar de la Factura</button>
                             </form>
                         @else
                             <strong class="text-danger">¡No se pueden realizar cambios!</strong>
@@ -162,7 +162,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($invoice->client->travelCertificates as $travelCertificate)
+                @foreach ($clients->travelCertificates as $travelCertificate)
                     @if ($travelCertificate->invoiceId != $invoice->id and $travelCertificate->invoiced == 'NO')
                         <tr>
                             <td data-order="{{ $travelCertificate->id }}">
@@ -193,7 +193,7 @@
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                    <button type="submit" class="btn btn-success">Agregar a la Factura</button>
+                                    <button type="submit" class="btn btn-sm btn-success">Agregar a la Factura</button>
                                 </form>
                             </td>
                         </tr>

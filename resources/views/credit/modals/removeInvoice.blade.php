@@ -12,8 +12,8 @@
             <p>Se quitara la factura relacionada de la nota de credito<br>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-warning">Quitar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-warning">Quitar</button>
         </form>
       </div>
     </div>

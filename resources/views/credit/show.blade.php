@@ -4,12 +4,12 @@
 
 @section('content_header')
     <div class="row">
-    <a href="{{ Route('credits') }}" class="btn btn-secondary">Volver</a>
+    <a href="{{ Route('credits') }}" class="btn btn-sm btn-secondary">Volver</a>
     <h1 class="col-9">Nota de Credito N°<strong>{{ $credit->number }}</strong></h1>
     @if($credit->invoiceId == 0)
-        <button class="btn btn-primary" data-toggle="modal" data-target="#addInvoiceModal{{ $credit->id }}">Agregar Factura</button>
+        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addInvoiceModal{{ $credit->id }}">Agregar Factura</button>
     @else
-        <button class="btn btn-danger" data-toggle="modal" data-target="#removeInvoiceModal{{ $credit->id }}">Quitar Factura</button>
+        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#removeInvoiceModal{{ $credit->id }}">Quitar Factura</button>
     @endif
     </div>
     @include('credit.modals.addInvoice')

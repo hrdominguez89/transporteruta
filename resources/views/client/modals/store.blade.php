@@ -31,8 +31,8 @@
             <input type="text" name="observations" class="form-control mb-2" placeholder="Ingrese las observaciones...">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
         </form>
       </div>
     </div>

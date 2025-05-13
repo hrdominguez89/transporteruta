@@ -57,7 +57,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('facturar/{id}', [InvoiceController::class, 'invoiced'])->name('invoicedInvoice');
     Route::get('imprimir/factura/{id}', [InvoiceController::class, 'generateInvoicePdf'])->name('invoicePdf');
     Route::post('agregar/al/recibo/{id}', [InvoiceController::class, 'addToReceipt'])->name('addToReceipt');
-    Route::put('quitar/al/recbibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
+    Route::post('agregar/tax/al/recibo/{id}', [InvoiceController::class, 'addTaxToReceiptInvoice'])->name('addTaxToReceiptInvoice');
+    Route::delete('remover/tax/al/recibo/{taxId}', [InvoiceController::class, 'removeTaxFromInvoiceReceipt'])->name('removeTaxFromInvoiceReceipt');
+    
+    Route::delete('quitar/al/recbibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
     Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
     
     // DriverSettlement

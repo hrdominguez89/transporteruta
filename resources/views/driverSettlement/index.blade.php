@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-10">Liquidaciones de Choferes</h1>
-        <button class="btn btn-danger" data-toggle="modal" data-target="#generateModal">Generar Liquidacion</button>
+        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Generar Liquidacion</button>
     </div>
     @include('driverSettlement.modals.generate')
 @stop
@@ -40,9 +40,9 @@
                     </td>
                     <td>{{ $driverSettlement->liquidated }}</td>
                     <td class="text-left">
-                        <a href="{{ Route('showDriverSettlement', $driverSettlement->id) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ Route('showDriverSettlement', $driverSettlement->id) }}" class="btn btn-sm btn-info">Ver</a>
                         @if ($driverSettlement->liquidated == 'NO')
-                        <a href="{{ Route('deleteDriverSettlement', $driverSettlement->id) }}" class="btn btn-danger"
+                        <a href="{{ Route('deleteDriverSettlement', $driverSettlement->id) }}" class="btn btn-sm btn-danger"
                             title="Eliminar liquidación"><span class="fas fa-trash"></span></a>
                         @endif
                     </td>

@@ -5,8 +5,8 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-7">Clientes</h1>
-        <a href="{{ Route('generateDebtorsPdf') }}" class="btn btn-info col-2 mr-2">Reporte Deudores</a>
-        <button class="btn btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Cliente</button>
+        <a href="{{ Route('generateDebtorsPdf') }}" class="btn btn-sm btn-info col-2 mr-2">Reporte Deudores</a>
+        <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Cliente</button>
     </div>
     @include('client.modals.store')
 @stop
@@ -15,24 +15,26 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
-                <th>Nombre</th>
-                <th>DNI/CUIT</th>
-                <th>Saldo</th>
-                <th>Acciones</th>
+                <th class="text-center">Nombre</th>
+                <th class="text-center">DNI/CUIT</th>
+                <th class="text-center">Saldo</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($clients as $client)
+            @foreach ($clients as $client)
                 <tr>
-                    <td>{{ $client->name }}</td>
-                    <td>{{ $client->dni }}</td>
-                    @if($client->balance > 0)
-                    <td class="bg-danger">{{ $client->balance }}</td>
+                    <td class="text-center">{{ $client->name }}</td>
+                    <td class="text-center">{{ $client->dni }}</td>
+                    @if ($client->balance > 0)
+                        <td class="bg-danger text-center" data-order="{{ $client->balance }}">
+                            $&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</td>
                     @else
-                    <td>{{ $client->balance }}</td>
+                        <td class="text-right" data-order="{{ $client->balance }}">
+                            $&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</td>
                     @endif
-                    <td>
-                        <a href="{{ Route('showClient', $client->id) }}" class="btn btn-info">Ver</a>
+                    <td class="text-center">
+                        <a href="{{ Route('showClient', $client->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
                 </tr>
             @endforeach

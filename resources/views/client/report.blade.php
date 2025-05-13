@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
     <style>
         /* Control del espaciado entre líneas */
         body,
@@ -33,6 +35,15 @@
         th {
             padding: 5px !important;
         }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        tr:nth-child(even) {
+            background-color: #e9ecef;
+            /* Gris un poco más oscuro */
+        }
     </style>
     <title>Reporte General de Deudores</title>
 </head>
@@ -41,56 +52,66 @@
     <div class="text-center">
         <img src="vendor/adminlte/dist/img/logo.png" width="100px">
         <h5>Reporte General de Deudores</h5>
-        <p>Saldo Total: <strong>{{ $total }}</strong></p>
+        <p>Saldo Total: <strong>$&nbsp;{{ number_format($total, 2, ',', '.') }}</strong></p>
         <hr>
-        @foreach($clients as $client)
-        <div class="table-responsive-sm">
-            <table class="table table-bordered">
-                <thead>
-                    <tr class="table-info">
-                        <th scope="col">Cliente</th>
-                        <th scope="col">DNI/CUIT</th>
-                        <th scope="col">SALDO</th>
+        @foreach ($clients as $client)
+            <div class="table-responsive-sm">
+                <table class="table table-bordered"
+                    style="border-radius:5px; border: 2px solid #dc3546; margin-bottom: 50px;">
+                    <tr style="background-color: #dc3546; color: white;">
+                        <th colspan="2" class="text-center">Cliente</th>
+                        <th class="text-center">DNI/CUIT</th>
+                        <th class="text-center">Saldo</th>
                     </tr>
-                </thead>
-                <tbody>
+
                     <tr>
-                        <td>{{ $client->name }}</td>
-                        <td>{{ $client->dni }}</td>
-                        <td>{{ $client->balance }}</td>
+                        <th colspan="2" class="text-center">{{ $client->name }}</th>
+                        <th class="text-center">{{ $client->dni }}</th>
+                        <th class="text-right">$&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</th>
                     </tr>
-                </tbody>
-            </table>
-            <h6>Facturas</h6>
-            <table class="table table-bordered">
-                <thead>
-                    <tr class="table-secondary">
-                        <th scope="col">Numero</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Vencimiento</th>
-                        <th scope="col">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <tbody>
-                    @foreach($client->invoices as $invoice)
-                    @if($invoice->paid == 'NO')
                     <tr>
-                        <td>{{ $invoice->number }}</td>
-                        <td>{{ $invoice->date }}</td>
-                        <td>{{ \Carbon\Carbon::parse($invoice->date)->addDays(30)->format('Y-m-d') }}</td>
-                        <td>{{ $invoice->totalWithIva }}</td>
+                        <th colspan="4" style="width: 100%;" class="text-center">
+                            Facturas
+                        </th>
                     </tr>
-                    @endif
+
+                    <tr style="background-color: #dc3546; color: white;">
+                        <th class="text-center" style="width:20%">Número</th>
+                        <th class="text-center" style="width:20%">Fecha</th>
+                        <th class="text-center" style="width:20%">Vencimiento</th>
+                        <th class="text-center"style="width:40%">Total</th>
+                    </tr>
+
+                    @foreach ($client->invoices as $invoice)
+                        @if ($invoice->paid == 'NO')
+                            <tr>
+                                <td class="text-center">
+                                    {{ number_format($invoice->number, 0, ',', '.') }}</td>
+                                <td class="text-center">
+                                    {{ \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') }}</td>
+                                <td class="text-center">
+                                    {{ \Carbon\Carbon::parse($invoice->date)->addDays(15)->format('d/m/Y') }}
+                                </td>
+                                <td class="text-right">
+                                    $&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}</td>
+                            </tr>
+                        @endif
                     @endforeach
-                </tbody>
-                </tbody>
-            </table>
-            @endforeach
-        </div>
-        <p>Listado de cuentas corrientes al {{ $date }}</p>
+                </table>
+            </div>
+        @endforeach
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+    <script type="text/php">
+        if (isset($pdf)) {
+            $pagina_x = 500;
+            $pagina_y = 810;
+
+            $texto_x = 50;
+            $texto_y = 810;
+            $pdf->page_text($texto_x, $texto_y, "Listado de cuentas corrientes al {{ \Carbon\Carbon::parse($date)->format('d/m/Y H:i:s') }}", null, 10, [0, 0, 0]);
+            $pdf->page_text($pagina_x, $pagina_y, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, [0, 0, 0]);
+        }
+    </script>
 </body>
+
 </html>

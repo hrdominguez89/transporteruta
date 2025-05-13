@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <div class="col-12">
-            <a href="{{ Route('travelCertificates') }}" class="btn btn-secondary mr-2">Volver</a>
+            <a href="{{ Route('travelCertificates') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         </div>
         <div class="col-12 mt-3">
 
@@ -19,15 +19,15 @@
 
         @if ($travelCertificate->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-danger col-2 mr-2" data-toggle="modal" data-target="#storeModal">Agregar Nuevo
+                <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal" data-target="#storeModal">Agregar Nuevo
                     Item</button>
-                <button class="btn btn-success col-2" data-toggle="modal"
+                <button class="btn btn-sm btn-success col-2" data-toggle="modal"
                     data-target="#updateModal{{ $travelCertificate->id }}">Actualizar Constancia</button>
             </div>
         @else
             <div class="col-12 text-right mb-2">
 
-                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-info col-4">Generar
+                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
                     PDF</a>
 
             </div>
@@ -93,7 +93,7 @@
                                 @if ($travelItem->type == 'FIJO' && $tiene_tarifa_adicional)
                                     <strong class="text-danger">Este ítem tiene un adicional asociado. Eliminá primero el adicional para poder borrarlo.</strong>
                                 @else
-                                    <button class="btn btn-danger" data-toggle="modal"
+                                    <button class="btn btn-sm btn-danger" data-toggle="modal"
                                         data-target="#deleteItemModal{{ $travelItem->id }}">Eliminar</button>
                                 @endif
                             @else

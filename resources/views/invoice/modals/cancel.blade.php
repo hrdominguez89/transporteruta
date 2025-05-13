@@ -12,8 +12,8 @@
             <p>Se anulara la factura <strong>{{ $invoice->number }}</strong> del cliente <strong>{{ $invoice->client->name }}</strong><br>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-warning">Anular</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-warning">Anular</button>
         </form>
       </div>
     </div>

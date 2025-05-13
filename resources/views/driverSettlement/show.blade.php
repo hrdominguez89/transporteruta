@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <div class="col-12">
-            <a href="{{ Route('driverSettlements') }}" class="btn btn-secondary mr-2">Volver</a>
+            <a href="{{ Route('driverSettlements') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         </div>
         <div class="col-12 mt-3">
             <h1>Liquidación N° <strong><span data-bs-toggle="tooltip" data-bs-placement="top"
@@ -16,14 +16,14 @@
         </div>
         <div class="col-12 text-right mb-2">
             @if ($driverSettlement->liquidated == 'NO')
-                <button class="btn btn-primary col-3" data-toggle="modal"
+                <button class="btn btn-sm btn-primary col-3" data-toggle="modal"
                     data-target="#liquidatedModal{{ $driverSettlement->id }}">Liquidar</button>
             @else
-                <button class="btn btn-danger mr-2" data-toggle="modal"
+                <button class="btn btn-sm btn-danger mr-2" data-toggle="modal"
                     data-target="#cancelModal{{ $driverSettlement->id }}">Anular
                     Liquidación</button>
                 <a href="{{ Route('driverSettlementPdf', $driverSettlement->id) }}" target="_blank"
-                    class="btn btn-info">Emitir
+                    class="btn btn-sm btn-info">Emitir
                     Comprobante</a>
             @endif
         </div>
@@ -183,7 +183,7 @@
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="driverSettlementId" value="{{ $driverSettlement->id }}">
-                                    <button type="submit" class="btn btn-sm btn-warning">Quitar de la
+                                    <button type="submit" class="btn btn-sm btn-sm btn-warning">Quitar de la
                                         Liquidación</button>
                                 </form>
                             @else
@@ -330,7 +330,7 @@
                                             @method('PUT')
                                             <input type="hidden" name="driverSettlementId"
                                                 value="{{ $driverSettlement->id }}">
-                                            <button type="submit" class="btn btn-sm btn-success">Agregar a la
+                                            <button type="submit" class="btn btn-sm btn-sm btn-success">Agregar a la
                                                 Liquidación</button>
                                         </form>
                                     </td>

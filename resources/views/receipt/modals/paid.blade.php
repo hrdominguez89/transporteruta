@@ -12,8 +12,8 @@
             <p>Se actualizara la cuenta corriente del cliente: <strong>{{ $receipt->client->name }}</strong><p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Confirmar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-primary">Confirmar</button>
         </form>
       </div>
     </div>
