@@ -203,7 +203,7 @@
                 <tr class="heading" style="font-size:10px;">
                     <td style="text-align:center;width:10%">Nro<br>Nuevo/Antiguo</td>
                     <td style="text-align:center;width:10%">Fecha</td>
-                    <td style="text-align:center;width:50%">Servicio</td>
+                    <td style="text-align:center;width:50%">Servicios</td>
                     <td style="text-align:center;width:30%">Importe Neto</td>
                     <td style="text-align:center;width:30%">I.V.A.</td>
                     <td style="text-align:center;width:30%">Peajes</td>

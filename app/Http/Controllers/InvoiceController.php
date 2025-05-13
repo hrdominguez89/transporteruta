@@ -7,9 +7,12 @@ use App\Models\Client;
 use App\Models\Receipt;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use App\Models\InvoiceReceipt;
+use App\Models\InvoiceReceiptTax;
 use App\Models\TravelItem;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class InvoiceController extends Controller
 {
@@ -39,8 +42,18 @@ class InvoiceController extends Controller
     public function show($id)
     {
         $data['invoice'] = Invoice::find($id);
+        $data['clients'] = $data['invoice']->client;
 
         foreach ($data['invoice']->travelCertificates as $travelCertificate) {
+            // Agregar el total de peajes a cada travelCertificate
+            $travelCertificate->peajes = TravelItem::where('type', 'PEAJE')
+                ->where('travelCertificateId', $travelCertificate->id)
+                ->sum('price');
+            $travelCertificate->importeNeto = $travelCertificate->total - $travelCertificate->peajes;
+            $travelCertificate->iva = $travelCertificate->importeNeto * 0.21;
+        }
+
+        foreach ($data['clients']->travelCertificates as $travelCertificate) {
             // Agregar el total de peajes a cada travelCertificate
             $travelCertificate->peajes = TravelItem::where('type', 'PEAJE')
                 ->where('travelCertificateId', $travelCertificate->id)
@@ -124,49 +137,109 @@ class InvoiceController extends Controller
     public function addToReceipt(UpdateInvoiceRequest $request, $id)
     {
         $balanceToPay = $request->balanceToPay;
-        $taxAmount = $request->taxAmount;
+        // $taxAmount = $request->taxAmount;
         $invoice = Invoice::find($id);
         if ($balanceToPay == $invoice->balance) {
             $invoice->paid = 'SI';
         }
         $receiptId = $request->receiptId;
         $receipt = Receipt::find($receiptId);
-        $invoice->receipts()->attach($receiptId, ['paymentMethodId' => $request->paymentMethodId, 'taxId' => $request->taxId, 'total' => $balanceToPay, 'taxAmount' => $taxAmount]);
+        $invoice->receipts()->attach($receiptId, ['paymentMethodId' => $request->paymentMethodId, 'total' => $balanceToPay]);
         $invoice->balance -= $balanceToPay;
         $receipt->total += $balanceToPay;
-        $receipt->taxTotal += $taxAmount;
         $invoice->save();
         $receipt->save();
         return redirect(route('showReceipt', $receiptId));
     }
 
-    public function removeFromReceipt(UpdateInvoiceRequest $request, $id)
+    public function addTaxToReceiptInvoice(UpdateInvoiceRequest $request, $id)
     {
-        $invoice = Invoice::find($id);
-        $receiptId = $request->receiptId;
-        $receipt = Receipt::find($receiptId);
-        $pivot = DB::table('invoice_receipt')
-            ->where('invoice_id', $id)
-            ->where('receipt_id', $receiptId)
-            ->first();
+        $invoice_receipt_tax = new InvoiceReceiptTax();
+        $invoice_receipt_tax->tax_id = $request->taxId;
+        $invoice_receipt_tax->taxAmount = $request->taxAmount;
+        $invoice_receipt_tax->created_at = Carbon::now();
+        $invoice_receipt_tax->updated_at = Carbon::now();
+        $invoice_receipt_tax->invoice_receipt_id = $id;
 
-        if ($pivot) {
-            $taxAmount = $pivot->taxAmount;
-            $total = $pivot->total;
-            $invoice->receipts()->detach($receiptId);
-            $invoice->balance += $total;
-            $receipt->total -= $total;
-            $receipt->taxTotal -= $taxAmount;
-            if ($invoice->balance > 0) {
-                $invoice->paid = 'NO';
-            } else {
-                $invoice->paid = 'SI';
-            }
-            $invoice->save();
-            $receipt->save();
-        } else {
-            return redirect()->back()->withErrors('Registro de pivote no encontrado.');
+        $invoiceReceipt = InvoiceReceipt::find($id);
+        $invoiceReceipt->taxAmount += $invoice_receipt_tax->taxAmount;
+        $invoiceReceipt->receipt->taxTotal += $invoice_receipt_tax->taxAmount;
+        $invoiceReceipt->invoice->balance -= $invoice_receipt_tax->taxAmount;
+
+        if ($invoiceReceipt->invoice->balance <= 0) {
+            $invoiceReceipt->invoice->paid = 'SI';
         }
-        return redirect(route('showReceipt', $receiptId));
+
+        $invoice_receipt_tax->save();
+        $invoiceReceipt->save();
+        $invoiceReceipt->receipt->save();
+        $invoiceReceipt->invoice->save();
+
+        return redirect(route('showReceipt', $invoiceReceipt->receipt_id));
+    }
+
+
+    public function removeTaxFromInvoiceReceipt($taxId)
+    {
+        $tax = InvoiceReceiptTax::findOrFail($taxId);
+
+        // Obtener relaciones necesarias
+        $invoiceReceipt = $tax->invoiceReceipt;
+        $invoice = $invoiceReceipt->invoice;
+        $receipt = $invoiceReceipt->receipt;
+
+        // Revertir efectos de la retención
+        $invoiceReceipt->taxAmount -= $tax->taxAmount;
+        $receipt->taxTotal -= $tax->taxAmount;
+        $invoice->balance += $tax->taxAmount;
+
+        // Si vuelve a quedar saldo pendiente, desmarcar como pagada
+        if ($invoice->balance > 0) {
+            $invoice->paid = 'NO';
+        }
+
+        // Guardar cambios
+        $invoiceReceipt->save();
+        $receipt->save();
+        $invoice->save();
+
+        // Eliminar la retención
+        $tax->delete();
+
+        return redirect()->route('showReceipt', $invoiceReceipt->receipt_id)
+            ->with('success', 'Retención eliminada correctamente.');
+    }
+
+    public function removeFromReceipt($id)
+    {
+        $invoiceReceipt = InvoiceReceipt::findOrFail($id);
+        $receipt = $invoiceReceipt->receipt;
+        $invoice = $invoiceReceipt->invoice;
+
+        // Sumar nuevamente el total de la factura al balance
+        $invoice->balance += $invoiceReceipt->total;
+        $receipt->total -= $invoiceReceipt->total;
+
+        // Revertir todas las retenciones (InvoiceReceiptTax) asociadas
+        foreach ($invoiceReceipt->taxes as $tax) {
+            $invoice->balance += $tax->taxAmount;
+            $receipt->taxTotal -= $tax->taxAmount;
+            $invoiceReceipt->taxAmount -= $tax->taxAmount;
+            $tax->delete();
+        }
+
+        // Ajustar estado del pago
+        $invoice->paid = $invoice->balance > 0 ? 'NO' : 'SI';
+
+        // Guardar los cambios
+        $invoice->save();
+        $receipt->save();
+        $invoiceReceipt->save(); // Por si quedó taxAmount ajustado (aunque se eliminará)
+
+        // Finalmente, eliminar el registro de relación
+        $invoiceReceipt->delete();
+
+        return redirect(route('showReceipt', $receipt->id))
+            ->with('success', 'Factura y retenciones eliminadas del recibo correctamente.');
     }
 }

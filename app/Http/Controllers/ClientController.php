@@ -13,10 +13,10 @@ class ClientController extends Controller
     public function clients()
     {
         $clients = Client::all();
-        return view('client.index', ['clients'=>$clients]);
+        return view('client.index', ['clients' => $clients]);
     }
 
-   
+
     public function store(StoreClientRequest $request)
     {
         $newClient = new Client;
@@ -35,16 +35,18 @@ class ClientController extends Controller
     public function show($id)
     {
         $client = Client::find($id);
-        return view('client.show', ['client'=>$client]);
+        return view('client.show', ['client' => $client]);
     }
 
     public function generateDebtorsPdf()
     {
-        $clients = Client::all()->where('balance', '>', 0.0);
+        $clients = Client::where('balance', '>', 0.0)
+            ->orderBy('balance', 'desc')
+            ->get();
         $total = Client::all()->sum('balance');
         $date = now();
-        $pdf = Pdf::loadView('client.report', ['clients'=>$clients, 'total'=>$total, 'date'=>$date]);
-        $pdf->setPaper('A4', 'landscape');
+        $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date]);
+        $pdf->setPaper('A4', 'portrait');
         return $pdf->stream('Reporte-cuenta-corriente-general.pdf');
     }
 
@@ -62,4 +64,3 @@ class ClientController extends Controller
         return redirect(route('showClient', $client->id));
     }
 }
-

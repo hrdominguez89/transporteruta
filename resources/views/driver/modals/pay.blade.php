@@ -12,8 +12,8 @@
             <p>Se registrara el pago de <strong>{{ $travelCertificate->driver->name }}</strong> por un total de <strong>{{ $travelCertificate->driverPayment }}</strong><br>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Confirmar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-primary">Confirmar</button>
         </form>
       </div>
     </div>

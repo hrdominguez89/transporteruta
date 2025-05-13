@@ -15,8 +15,8 @@
             <strong class="text-warning">¡ESTA ACCION ES IRREVERSIBLE!</strong></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-warning">Eliminar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-sm btn-warning">Eliminar</button>
         </form>
       </div>
     </div>

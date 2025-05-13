@@ -1,17 +1,17 @@
-<div class="modal fade" id="deleteItemModal{{ $travelItem->id }}" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteReceiptModal{{ $ri->id }}" tabindex="-1" aria-labelledby="deleteReceiptModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header bg-danger">
-        <h5 class="modal-title">Eliminar Item de Viaje</h5>
+        <h5 class="modal-title">Eliminar Recibo</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <form action="{{ Route('deleteTravelItem', [$travelItem->id, $travelCertificate->id]) }}" class="form-group" method="POST">
+        <form action="{{ Route('removeFromReceipt', $ri->id) }}" class="form-group" method="POST">
             @csrf
             @method('DELETE')
-            <p>Se eliminara el item de viaje seleccionado.<br>
+            <p>Se eliminara el recibo y las retenciones que este contenga.<br>
             <strong class="text-warning">¡ESTA ACCION ES IRREVERSIBLE!</strong></p>
       </div>
       <div class="modal-footer">

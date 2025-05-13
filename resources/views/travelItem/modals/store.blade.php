@@ -22,7 +22,7 @@
                             <option value="FIJO">Tarifa Fija</option>
                         @endif
                         <option value="MULTIDESTINO">Multidestino</option>
-                        <option value="DESCARGA">Descarga</option>
+                        <option value="DESCARGA">Carga/Descarga</option>
                     </select>
 
                     <label for="description">Descripción:</label>
@@ -65,8 +65,8 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
                 </form>
             </div>
         </div>

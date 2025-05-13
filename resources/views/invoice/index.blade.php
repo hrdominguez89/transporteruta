@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-10">Facturas</h1>
-        <button class="btn btn-danger" data-toggle="modal" data-target="#generateModal">Generar Factura</button>
+        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Generar Factura</button>
     </div>
     @include('invoice.modals.generate')
 @stop
@@ -34,7 +34,7 @@
                     <td>{{ $invoice->invoiced }}</td>
                     <td>{{ $invoice->paid }}</td>
                     <td>
-                        <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
                 </tr>
             @endforeach

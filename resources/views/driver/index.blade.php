@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-9">Choferes</h1>
-        <button class="btn btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Chofer</button>
+        <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Chofer</button>
     </div>
     @include('driver.modals.store')
 @stop
@@ -25,7 +25,7 @@
                     <td>{{ $driver->name }}</td>
                     <td>{{ $driver->dni }}</td>
                     <td>
-                        <a href="{{ Route('showDriver', $driver->id) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ Route('showDriver', $driver->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
                 </tr>
             @endforeach

@@ -4,9 +4,10 @@
 
 @section('content_header')
     <div class="row">
-        <a href="{{ Route('clients') }}" class="btn btn-secondary mr-2">Volver</a>
+        <a href="{{ Route('clients') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col-9">Cliente: <strong>{{ $client->name }}</strong></h1>
-        <button class="btn btn-success col-2" data-toggle="modal" data-target="#updateModal{{ $client->id }}">Actualizar Cliente</button>
+        <button class="btn btn-sm btn-success col-2" data-toggle="modal" data-target="#updateModal{{ $client->id }}">Actualizar
+            Cliente</button>
         @include('client.modals.update')
     </div>
 @stop
@@ -31,7 +32,7 @@
                 <td>{{ $client->city }}</td>
                 <td>{{ $client->phone }}</td>
                 <td>{{ $client->ivaType }}</td>
-                <td>{{ $client->balance }}</td>
+                <td>$&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
@@ -42,23 +43,23 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
-                <th>Numero</th>
-                <th>Total con IVA</th>
-                <th>Balance</th>
-                <th>Acciones</th>
+                <th class="text-center">Número</th>
+                <th class="text-center">Total con IVA</th>
+                <th class="text-center">Balance</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($client->invoices as $invoice)
-                @if($invoice->paid == 'NO' and $invoice->invoiced == 'SI')
-                <tr>
-                    <td>{{ $invoice->number }}</td>
-                    <td>{{ $invoice->totalWithIva }}</td>
-                    <td>{{ $invoice->balance }}</td>
-                    <td>
-                        <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-info">Ver</a>
-                    </td>
-                </tr>
+            @foreach ($client->invoices as $invoice)
+                @if ($invoice->paid == 'NO' and $invoice->invoiced == 'SI')
+                    <tr>
+                        <td class="text-center">{{ number_format($invoice->number, 0, ',', '.') }}</td>
+                        <td class="text-right">$&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}</td>
+                        <td class="text-right">$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
+                        <td class="text-center">
+                            <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-sm btn-info">Ver</a>
+                        </td>
+                    </tr>
                 @endif
             @endforeach
         </tbody>
@@ -68,21 +69,21 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
-                <th>Numero</th>
-                <th>Total con IVA</th>
-                <th>Acciones</th>
+                <th class="text-center">Número</th>
+                <th class="text-center">Total con IVA</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($client->invoices as $invoice)
-                @if($invoice->invoiced == 'NO')
-                <tr>
-                    <td>{{ $invoice->number }}</td>
-                    <td>{{ $invoice->totalWithIva }}</td>
-                    <td>
-                        <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-info">Ver</a>
-                    </td>
-                </tr>
+            @foreach ($client->invoices as $invoice)
+                @if ($invoice->invoiced == 'NO')
+                    <tr>
+                        <td class="text-center">{{ number_format($invoice->number, 0, ',', '.') }}</td>
+                        <td class="text-right">$&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}</td>
+                        <td class="text-center">
+                            <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-sm btn-info">Ver</a>
+                        </td>
+                    </tr>
                 @endif
             @endforeach
         </tbody>
@@ -92,21 +93,21 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
-                <th>Numero</th>
-                <th>Total con IVA</th>
-                <th>Acciones</th>
+                <th class="text-center">Número</th>
+                <th class="text-center">Total con IVA</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($client->invoices as $invoice)
-                @if($invoice->paid == 'SI')
-                <tr>
-                    <td>{{ $invoice->number }}</td>
-                    <td>{{ $invoice->totalWithIva }}</td>
-                    <td>
-                        <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-info">Ver</a>
-                    </td>
-                </tr>
+            @foreach ($client->invoices as $invoice)
+                @if ($invoice->paid == 'SI')
+                    <tr>
+                        <td class="text-center">{{ number_format($invoice->number, 0, ',', '.') }}</td>
+                        <td class="text-right">$&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}</td>
+                        <td class="text-center">
+                            <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-sm btn-info">Ver</a>
+                        </td>
+                    </tr>
                 @endif
             @endforeach
         </tbody>

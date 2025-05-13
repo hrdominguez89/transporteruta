@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-9">Constancias de Viaje</h1>
-        <button class="btn btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Constancia</button>
+        <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Constancia</button>
     </div>
     @include('travelCertificate.modals.store')
 @stop
@@ -34,7 +34,7 @@
                     <td>{{ $travelCertificate->driver->name }}</td>
                     <td>{{ $travelCertificate->invoiced }}</td>
                     <td>
-                        <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
                 </tr>
             @endforeach
