@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\DriverSettlement;
 use App\Models\Driver;
 use App\Models\PaymentMethod;

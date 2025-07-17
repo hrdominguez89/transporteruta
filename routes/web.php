@@ -34,6 +34,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('guardar/chofer', [DriverController::class, 'store'])->name('storeDriver');
     Route::get('ver/chofer/{id}', [DriverController::class, 'show'])->name('showDriver');
     Route::put('actualizar/chofer/{id}', [DriverController::class, 'update'])->name('updateDriver');
+    //Filtro de liquidaciones de choferes por rango de fechas
+    Route::get('/driver-settlements/print', [DriverSettlementController::class, 'print'])->name('driverSettlements.print');
 
     // TravelCertificate
     Route::get('constancias-de-viaje', [TravelCertificateController::class, 'travelCertificates'])->name('travelCertificates');

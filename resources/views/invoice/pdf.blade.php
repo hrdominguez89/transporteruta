@@ -203,6 +203,8 @@
                 <tr class="heading" style="font-size:10px;">
                     <td style="text-align:center;width:10%">Nro<br>Nuevo/Antiguo</td>
                     <td style="text-align:center;width:10%">Fecha</td>
+                    <!--Nueva columna para el destino para el chofer-->
+                    <td style="text-align:center;width:30%">Chofer</td>
                     <td style="text-align:center;width:50%">Servicios</td>
                     <td style="text-align:center;width:30%">Importe Neto</td>
                     <td style="text-align:center;width:30%">I.V.A.</td>
@@ -217,7 +219,9 @@
                             {{ number_format($travelCertificate->id, 0, ',', '.') }} / {{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.'): ' - ' }}</td>
                         <td style="padding: 2px 8px;text-align:center">
                             {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
-                        <td style="padding: 2px 8px;text-align:left">{{ $travelCertificate->destiny }}</td>
+                            <!-- Estilos nueva columna para el chofer -->
+                        <td style="padding: 2px 8px;text-align:left">
+                            {{ $travelCertificate->driver->name ?? '---' }}</td>
                         <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format((($travelCertificate->total - $travelCertificate->totalTolls) / 100) * 21, 2, ',', '.') }}
