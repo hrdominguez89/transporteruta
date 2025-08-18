@@ -163,6 +163,66 @@ class TravelCertificateController extends Controller
     }
 
     /**
+     * Add multiple travel certificates to an invoice.
+     */
+    public function addMultipleToInvoice(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $invoiceId = $request->input('invoiceId');
+        if (empty($ids) || empty($invoiceId)) {
+            return redirect()->back();
+        }
+
+        DB::transaction(function () use ($ids, $invoiceId) {
+            $invoice = Invoice::find($invoiceId);
+            foreach ($ids as $id) {
+                $tc = TravelCertificate::find($id);
+                if (!$tc) continue;
+                // skip if already invoiced
+                if ($tc->invoiced === 'SI') continue;
+                $tc->invoiceId = $invoiceId;
+                $tc->invoiced = 'SI';
+                $tc->save();
+                $invoice->total += $tc->total;
+                $invoice->iva += $tc->iva;
+            }
+            $invoice->save();
+        });
+
+        return redirect(route('showInvoice', $invoiceId));
+    }
+
+    /**
+     * Remove multiple travel certificates from an invoice.
+     */
+    public function removeMultipleFromInvoice(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $invoiceId = $request->input('invoiceId');
+        if (empty($ids) || empty($invoiceId)) {
+            return redirect()->back();
+        }
+
+        DB::transaction(function () use ($ids, $invoiceId) {
+            $invoice = Invoice::find($invoiceId);
+            foreach ($ids as $id) {
+                $tc = TravelCertificate::find($id);
+                if (!$tc) continue;
+                // skip if not invoiced
+                if ($tc->invoiced !== 'SI') continue;
+                $invoice->total -= $tc->total;
+                $invoice->iva -= $tc->iva;
+                $tc->invoiceId = 0;
+                $tc->invoiced = 'NO';
+                $tc->save();
+            }
+            $invoice->save();
+        });
+
+        return redirect(route('showInvoice', $invoiceId));
+    }
+
+    /**
      * Delete a travel certificate only if it's not invoiced and clean relations.
      */
     public function destroy($id)

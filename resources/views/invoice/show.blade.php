@@ -93,6 +93,7 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
+                <th>Seleccionar</th>
                 <th>Nro. Nuevo</th>
                 <th>Nro. Antiguo</th>
                 <th>Chofer</th>
@@ -106,6 +107,9 @@
         <tbody>
             @foreach ($invoice->travelCertificates as $travelCertificate)
                 <tr>
+                    <td>
+                        <input type="checkbox" class="bulk-select bulk-select-added" data-id="{{ $travelCertificate->id }}">
+                    </td>
                     <td data-order="{{ $travelCertificate->id }}">
                         <a target="_blank"
                             href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}</a>
@@ -145,12 +149,16 @@
             @endforeach
         </tbody>
     </table>
+    <div class="mb-2">
+        <button id="bulk-remove-btn" class="btn btn-sm btn-warning btn-submit-once" disabled>Quitar seleccionados de la Factura</button>
+    </div>
     <br>
     @if ($invoice->invoiced == 'NO')
         <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
         <table class="table table-sm table-bordered text-center data-table">
             <thead class="bg-danger">
                 <tr>
+                    <th>Seleccionar</th>
                     <th>Nro. Nuevo</th>
                     <th>Nro. Antiguo</th>
                     <th>Chofer</th>
@@ -165,6 +173,9 @@
                 @foreach ($clients->travelCertificates as $travelCertificate)
                     @if ($travelCertificate->invoiceId != $invoice->id and $travelCertificate->invoiced == 'NO')
                         <tr>
+                            <td>
+                                <input type="checkbox" class="bulk-select bulk-select-available" data-id="{{ $travelCertificate->id }}">
+                            </td>
                             <td data-order="{{ $travelCertificate->id }}">
                                 <a target="_blank"
                                     href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}</a>
@@ -201,6 +212,9 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="mb-2">
+            <button id="bulk-add-btn" class="btn btn-sm btn-success btn-submit-once" disabled>Agregar seleccionados a la Factura</button>
+        </div>
     @endif
 @stop
 @section('js')
@@ -263,6 +277,67 @@
                     }
                 });
                 return true;
+            });
+        })();
+
+        // Bulk select handling: enable bulk buttons and submit selected ids
+        (function() {
+            function getCsrfToken() {
+                var token = $('meta[name="csrf-token"]').attr('content');
+                if (token) return token;
+                // fallback: try to read from a hidden input in page
+                var input = $('input[name="_token"]').first();
+                return input.length ? input.val() : '';
+            }
+
+            function collectIds(selector) {
+                var ids = [];
+                $(selector).each(function() {
+                    if ($(this).is(':checked')) ids.push($(this).data('id'));
+                });
+                return ids;
+            }
+
+            // toggle bulk buttons depending on which table's checkboxes changed
+            $(document).on('change', '.bulk-select', function() {
+                var anyAvailable = $('.bulk-select-available:checked').length > 0;
+                var anyAdded = $('.bulk-select-added:checked').length > 0;
+                // enable add button only when any available is selected
+                $('#bulk-add-btn').prop('disabled', !anyAvailable);
+                // enable remove button only when any added is selected
+                $('#bulk-remove-btn').prop('disabled', !anyAdded);
+            });
+
+            // submit selected ids to bulk add route
+            $(document).on('click', '#bulk-add-btn', function(e) {
+                e.preventDefault();
+                var ids = collectIds('.bulk-select-available');
+                if (!ids.length) return;
+                // build form
+                var form = $('<form>', { method: 'POST', action: '{{ Route("addMultipleToInvoice") }}' });
+                var token = getCsrfToken();
+                form.append($('<input>', { type: 'hidden', name: '_token', value: token }));
+                form.append($('<input>', { type: 'hidden', name: '_method', value: 'PUT' }));
+                form.append($('<input>', { type: 'hidden', name: 'invoiceId', value: '{{ $invoice->id }}' }));
+                ids.forEach(function(id) { form.append($('<input>', { type: 'hidden', name: 'ids[]', value: id })); });
+                // attach and submit
+                $('body').append(form);
+                form[0].submit();
+            });
+
+            // submit selected ids to bulk remove route
+            $(document).on('click', '#bulk-remove-btn', function(e) {
+                e.preventDefault();
+                var ids = collectIds('.bulk-select-added');
+                if (!ids.length) return;
+                var form = $('<form>', { method: 'POST', action: '{{ Route("removeMultipleFromInvoice") }}' });
+                var token = getCsrfToken();
+                form.append($('<input>', { type: 'hidden', name: '_token', value: token }));
+                form.append($('<input>', { type: 'hidden', name: '_method', value: 'PUT' }));
+                form.append($('<input>', { type: 'hidden', name: 'invoiceId', value: '{{ $invoice->id }}' }));
+                ids.forEach(function(id) { form.append($('<input>', { type: 'hidden', name: 'ids[]', value: id })); });
+                $('body').append(form);
+                form[0].submit();
             });
         })();
     </script>
