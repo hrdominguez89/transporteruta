@@ -131,11 +131,11 @@
                     </td>
                     <td>
                         @if ($invoice->invoiced == 'NO')
-                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST">
+                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST" class="prevent-double-submit">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                <button type="submit" class="btn btn-sm btn-warning">Quitar de la Factura</button>
+                                <button type="submit" class="btn btn-sm btn-warning btn-submit-once">Quitar de la Factura</button>
                             </form>
                         @else
                             <strong class="text-danger">¡No se pueden realizar cambios!</strong>
@@ -189,11 +189,11 @@
                                 $&nbsp;{{ number_format($travelCertificate->importeNeto + $travelCertificate->iva + $travelCertificate->peajes, 2, ',', '.') }}
                             </td>
                             <td>
-                                <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST">
+                                <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST" class="prevent-double-submit">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                    <button type="submit" class="btn btn-sm btn-success">Agregar a la Factura</button>
+                                    <button type="submit" class="btn btn-sm btn-success btn-submit-once">Agregar a la Factura</button>
                                 </form>
                             </td>
                         </tr>
@@ -214,5 +214,56 @@
             }
         });
         $('.select2').select2();
+        // Prevent double form submit: disable submit buttons on click and on submit
+        (function() {
+            // when a button with .btn-submit-once is clicked, disable it and submit its form
+            $(document).on('click', '.btn-submit-once', function(e) {
+                var $btn = $(this);
+                // if button already disabled, prevent further action
+                if ($btn.prop('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+                // find parent form (don't require the prevent-double-submit class to be present)
+                var $form = $btn.closest('form');
+                // prepare UI
+                $btn.data('original-text', $btn.html());
+                $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+
+                // disable all submit buttons in the form (or just this button if no form)
+                if ($form.length) {
+                    // prevent default to ensure disabling doesn't block submission, then submit programmatically
+                    e.preventDefault();
+                    $form.find('button[type="submit"]').each(function() {
+                        $(this).prop('disabled', true);
+                    });
+                    // use native submit to avoid timing issues where disabling the button prevents the native submit
+                    try {
+                        $form[0].submit();
+                    } catch (err) {
+                        // fallback: trigger jQuery submit
+                        $form.trigger('submit');
+                    }
+                } else {
+                    // no form found, just disable the button and let default behavior proceed
+                    $btn.prop('disabled', true);
+                }
+            });
+
+            // as a backup, on submit disable buttons (covers programmatic submits)
+            $(document).on('submit', 'form.prevent-double-submit', function(e) {
+                var $form = $(this);
+                // disable all submit buttons to avoid duplicates
+                $form.find('button[type="submit"]').each(function() {
+                    var $b = $(this);
+                    $b.prop('disabled', true);
+                    if (!$b.data('original-text')) {
+                        $b.data('original-text', $b.html());
+                        $b.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+                    }
+                });
+                return true;
+            });
+        })();
     </script>
 @stop

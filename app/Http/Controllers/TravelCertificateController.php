@@ -11,6 +11,7 @@ use App\Models\TravelItem;
 use App\Http\Requests\StoreTravelCertificateRequest;
 use App\Http\Requests\UpdateTravelCertificateRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TravelCertificateController extends Controller
@@ -111,7 +112,7 @@ class TravelCertificateController extends Controller
         return $pdf->stream('Constancia-' . $travelCertificate->client->name . 'pdf');
     }
 
-    public function addToInvoice(UpdateTravelCertificateRequest $request, $id)
+    public function addToInvoice(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $travelCertificate->invoiceId = $request->invoiceId;
@@ -124,9 +125,8 @@ class TravelCertificateController extends Controller
         return redirect(route('showInvoice', $travelCertificate->invoiceId));
     }
 
-    public function removeFromInvoice(UpdateTravelCertificateRequest $request, $id)
+    public function removeFromInvoice(Request $request, $id)
     {
-        dd('aca');
         $travelCertificate = TravelCertificate::find($id);
         $invoice = Invoice::find($request->invoiceId);
         $invoice->total -= $travelCertificate->total;
@@ -138,7 +138,7 @@ class TravelCertificateController extends Controller
         return redirect(route('showInvoice', $invoice->id));
     }
 
-    public function addToDriverSettlement(UpdateTravelCertificateRequest $request, $id)
+    public function addToDriverSettlement(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $travelCertificate->driverSettlementId = $request->driverSettlementId;
@@ -150,7 +150,7 @@ class TravelCertificateController extends Controller
         return redirect(route('showDriverSettlement', $travelCertificate->driverSettlementId));
     }
 
-    public function removeFromDriverSettlement(UpdateTravelCertificateRequest $request, $id)
+    public function removeFromDriverSettlement(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $driverSettlement = DriverSettlement::find($request->driverSettlementId);
