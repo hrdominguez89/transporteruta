@@ -50,6 +50,7 @@
                 <th>Cliente</th>
                 <th>Total (Sin IVA)</th>
                 <th>IVA</th>
+                <th>Peajes</th>
                 <th>Balance</th>
                 <th>Facturado</th>
                 <th>Total (Con IVA)</th>
@@ -64,6 +65,7 @@
                 </td>
                 <td>$&nbsp;{{ number_format($invoice->total, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($invoice->iva, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($totalTolls, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
                 <td>{{ $invoice->invoiced }}</td>
                 <td>$&nbsp;{{ number_format($invoice->total + $invoice->iva, 2, ',', '.') }}</td>

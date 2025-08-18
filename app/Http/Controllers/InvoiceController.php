@@ -43,6 +43,7 @@ class InvoiceController extends Controller
     {
         $data['invoice'] = Invoice::find($id);
         $data['clients'] = $data['invoice']->client;
+        $data['totalTolls'] = 0;
 
         foreach ($data['invoice']->travelCertificates as $travelCertificate) {
             // Agregar el total de peajes a cada travelCertificate
@@ -50,7 +51,10 @@ class InvoiceController extends Controller
                 ->where('travelCertificateId', $travelCertificate->id)
                 ->sum('price');
             $travelCertificate->importeNeto = $travelCertificate->total - $travelCertificate->peajes;
-            $travelCertificate->iva = $travelCertificate->importeNeto * 0.21;
+            if($data['clients']->ivaType != "EXENTO"){
+                $travelCertificate->iva = $travelCertificate->importeNeto * 0.21;
+            }
+            $data['totalTolls'] += $travelCertificate->peajes;
         }
 
         foreach ($data['clients']->travelCertificates as $travelCertificate) {
@@ -59,7 +63,9 @@ class InvoiceController extends Controller
                 ->where('travelCertificateId', $travelCertificate->id)
                 ->sum('price');
             $travelCertificate->importeNeto = $travelCertificate->total - $travelCertificate->peajes;
-            $travelCertificate->iva = $travelCertificate->importeNeto * 0.21;
+            if($data['clients']->ivaType != "EXENTO"){
+                $travelCertificate->iva = $travelCertificate->importeNeto * 0.21;
+            }
         }
 
         return view('invoice.show', $data);

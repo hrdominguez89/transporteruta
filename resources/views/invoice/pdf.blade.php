@@ -220,7 +220,7 @@
                         <td style="padding: 2px 8px;text-align:left">{{ $travelCertificate->destiny }}</td>
                         <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
                         </td>
-                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format((($travelCertificate->total - $travelCertificate->totalTolls) / 100) * 21, 2, ',', '.') }}
+                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($invoice->client->ivaType != "EXENTO" ? (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * 21 : 0, 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->totalTolls, 2, ',', '.') }}
                         </td>
@@ -243,7 +243,7 @@
                     I.V.A.
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format(($totalImporteNeto / 100) * 21, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($invoice->client->ivaType != "EXENTO" ? ($totalImporteNeto / 100) * 21 : 0, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
@@ -263,7 +263,7 @@
                     Total
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalImporteNeto + ($totalImporteNeto / 100) * 21 + $totalTolls, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalImporteNeto + ($invoice->client->ivaType != "EXENTO" ? ($totalImporteNeto / 100) * 21 : 0) + $totalTolls, 2, ',', '.') }}
                 </th>
             </tr>
         </table>
