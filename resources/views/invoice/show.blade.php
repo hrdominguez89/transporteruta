@@ -9,14 +9,17 @@
             <a href="{{ Route('invoices') }}" class="btn btn-sm btn-secondary">Volver</a>
         </div>
         <div class="col-12 mt-3">
-            <h1>Factura N° <strong>{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</strong></h1>
+            <h1>Factura N°
+                <strong>{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</strong>
+            </h1>
         </div>
 
         @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
             <div class="col-12 text-right mb-2">
                 <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal"
                     data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-2">Generar PDF</a>
+                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-2">Generar
+                    PDF</a>
             </div>
         @elseif($invoice->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
@@ -27,7 +30,8 @@
         @if ($invoice->paid == 'SI')
             <div class="col-12 text-right mb-2">
 
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-4">Generar PDF</a>
+                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-4">Generar
+                    PDF</a>
             </div>
             <div class="col-12 text-left mb-2">
                 <h5 class="text-danger">La factura se marco como pagada y se desconto el saldo de la cuenta corriente</h5>
@@ -55,7 +59,8 @@
             <tr>
                 <td>{{ \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') }}</td>
                 <td>
-                    <a target="_blank" href="{{ Route('showClient', $invoice->client->id) }}">{{ $invoice->client->name }}</a>
+                    <a target="_blank"
+                        href="{{ Route('showClient', $invoice->client->id) }}">{{ $invoice->client->name }}</a>
                 </td>
                 <td>$&nbsp;{{ number_format($invoice->total, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($invoice->iva, 2, ',', '.') }}</td>
@@ -93,7 +98,9 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
-                <th>Seleccionar</th>
+                @if ($invoice->invoiced == 'NO')
+                    <th>Seleccionar</th>
+                @endif
                 <th>Nro. Nuevo</th>
                 <th>Nro. Antiguo</th>
                 <th>Chofer</th>
@@ -107,9 +114,12 @@
         <tbody>
             @foreach ($invoice->travelCertificates as $travelCertificate)
                 <tr>
-                    <td>
-                        <input type="checkbox" class="bulk-select bulk-select-added" data-id="{{ $travelCertificate->id }}">
-                    </td>
+                    @if ($invoice->invoiced == 'NO')
+                        <td>
+                            <input type="checkbox" class="bulk-select bulk-select-added"
+                                data-id="{{ $travelCertificate->id }}">
+                        </td>
+                    @endif
                     <td data-order="{{ $travelCertificate->id }}">
                         <a target="_blank"
                             href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->id, 0, ',', '.') }}</a>
@@ -135,11 +145,13 @@
                     </td>
                     <td>
                         @if ($invoice->invoiced == 'NO')
-                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST" class="prevent-double-submit">
+                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST"
+                                class="prevent-double-submit">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                <button type="submit" class="btn btn-sm btn-warning btn-submit-once">Quitar de la Factura</button>
+                                <button type="submit" class="btn btn-sm btn-warning btn-submit-once">Quitar de la
+                                    Factura</button>
                             </form>
                         @else
                             <strong class="text-danger">¡No se pueden realizar cambios!</strong>
@@ -149,9 +161,12 @@
             @endforeach
         </tbody>
     </table>
-    <div class="mb-2">
-        <button id="bulk-remove-btn" class="btn btn-sm btn-warning btn-submit-once" disabled>Quitar seleccionados de la Factura</button>
-    </div>
+    @if ($invoice->invoiced == 'NO')
+        <div class="mb-2">
+            <button id="bulk-remove-btn" class="btn btn-sm btn-warning btn-submit-once" disabled>Quitar seleccionados de la
+                Factura</button>
+        </div>
+    @endif
     <br>
     @if ($invoice->invoiced == 'NO')
         <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
@@ -174,7 +189,8 @@
                     @if ($travelCertificate->invoiceId != $invoice->id and $travelCertificate->invoiced == 'NO')
                         <tr>
                             <td>
-                                <input type="checkbox" class="bulk-select bulk-select-available" data-id="{{ $travelCertificate->id }}">
+                                <input type="checkbox" class="bulk-select bulk-select-available"
+                                    data-id="{{ $travelCertificate->id }}">
                             </td>
                             <td data-order="{{ $travelCertificate->id }}">
                                 <a target="_blank"
@@ -200,11 +216,13 @@
                                 $&nbsp;{{ number_format($travelCertificate->importeNeto + $travelCertificate->iva + $travelCertificate->peajes, 2, ',', '.') }}
                             </td>
                             <td>
-                                <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST" class="prevent-double-submit">
+                                <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST"
+                                    class="prevent-double-submit">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                    <button type="submit" class="btn btn-sm btn-success btn-submit-once">Agregar a la Factura</button>
+                                    <button type="submit" class="btn btn-sm btn-success btn-submit-once">Agregar a la
+                                        Factura</button>
                                 </form>
                             </td>
                         </tr>
@@ -213,7 +231,8 @@
             </tbody>
         </table>
         <div class="mb-2">
-            <button id="bulk-add-btn" class="btn btn-sm btn-success btn-submit-once" disabled>Agregar seleccionados a la Factura</button>
+            <button id="bulk-add-btn" class="btn btn-sm btn-success btn-submit-once" disabled>Agregar seleccionados a la
+                Factura</button>
         </div>
     @endif
 @stop
@@ -242,7 +261,9 @@
                 var $form = $btn.closest('form');
                 // prepare UI
                 $btn.data('original-text', $btn.html());
-                $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+                $btn.html(
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...'
+                    );
 
                 // disable all submit buttons in the form (or just this button if no form)
                 if ($form.length) {
@@ -273,7 +294,8 @@
                     $b.prop('disabled', true);
                     if (!$b.data('original-text')) {
                         $b.data('original-text', $b.html());
-                        $b.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+                        $b.html(
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
                     }
                 });
                 return true;
@@ -314,12 +336,33 @@
                 var ids = collectIds('.bulk-select-available');
                 if (!ids.length) return;
                 // build form
-                var form = $('<form>', { method: 'POST', action: '{{ Route("addMultipleToInvoice") }}' });
+                var form = $('<form>', {
+                    method: 'POST',
+                    action: '{{ Route('addMultipleToInvoice') }}'
+                });
                 var token = getCsrfToken();
-                form.append($('<input>', { type: 'hidden', name: '_token', value: token }));
-                form.append($('<input>', { type: 'hidden', name: '_method', value: 'PUT' }));
-                form.append($('<input>', { type: 'hidden', name: 'invoiceId', value: '{{ $invoice->id }}' }));
-                ids.forEach(function(id) { form.append($('<input>', { type: 'hidden', name: 'ids[]', value: id })); });
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: '_token',
+                    value: token
+                }));
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: '_method',
+                    value: 'PUT'
+                }));
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: 'invoiceId',
+                    value: '{{ $invoice->id }}'
+                }));
+                ids.forEach(function(id) {
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'ids[]',
+                        value: id
+                    }));
+                });
                 // attach and submit
                 $('body').append(form);
                 form[0].submit();
@@ -330,12 +373,33 @@
                 e.preventDefault();
                 var ids = collectIds('.bulk-select-added');
                 if (!ids.length) return;
-                var form = $('<form>', { method: 'POST', action: '{{ Route("removeMultipleFromInvoice") }}' });
+                var form = $('<form>', {
+                    method: 'POST',
+                    action: '{{ Route('removeMultipleFromInvoice') }}'
+                });
                 var token = getCsrfToken();
-                form.append($('<input>', { type: 'hidden', name: '_token', value: token }));
-                form.append($('<input>', { type: 'hidden', name: '_method', value: 'PUT' }));
-                form.append($('<input>', { type: 'hidden', name: 'invoiceId', value: '{{ $invoice->id }}' }));
-                ids.forEach(function(id) { form.append($('<input>', { type: 'hidden', name: 'ids[]', value: id })); });
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: '_token',
+                    value: token
+                }));
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: '_method',
+                    value: 'PUT'
+                }));
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: 'invoiceId',
+                    value: '{{ $invoice->id }}'
+                }));
+                ids.forEach(function(id) {
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'ids[]',
+                        value: id
+                    }));
+                });
                 $('body').append(form);
                 form[0].submit();
             });
