@@ -27,7 +27,7 @@
         <tbody>
             @foreach ($invoices as $invoice)
                 <tr>
-                    <td data-order="{{ $invoice->number }}">{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</td>
+                    <td data-search="{{ $invoice->number }}-{{ sprintf('%05d', $invoice->pointOfSale) }}" data-order="{{ $invoice->number }}">{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</td>
                     <td>{{ $invoice->client->name }}</td>
                     <td class="text-right" data-order="{{ $invoice->totalWithIva }}">
                         $&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}</td>
@@ -38,7 +38,7 @@
                         <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-sm btn-info">Ver</a>
                         @if($invoice->invoiced === 'NO' && $invoice->paid === 'NO')
                             <button type="button" class="btn btn-sm btn-danger btn-delete-invoice" data-id="{{ $invoice->id }}" data-toggle="modal" data-target="#confirmDeleteModal" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
-                                <i class="fas fa-trash"></i>
+                                Eliminar
                             </button>
                         @endif
                     </td>

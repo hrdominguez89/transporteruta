@@ -12,7 +12,7 @@
             @csrf
             @method('DELETE')
             <p>Se eliminara el item de viaje seleccionado.<br>
-            <strong class="text-warning">¡ESTA ACCION ES IRREVERSIBLE!</strong></p>
+            <strong class="text-danger">¡ESTA ACCION ES IRREVERSIBLE!</strong></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

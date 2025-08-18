@@ -38,6 +38,7 @@ Route::group(['middleware' => 'auth'], function () {
     // TravelCertificate
     Route::get('constancias-de-viaje', [TravelCertificateController::class, 'travelCertificates'])->name('travelCertificates');
     Route::post('guardar/constancia-de-viaje', [TravelCertificateController::class, 'store'])->name('storeTravelCertificate');
+    Route::get('constancia-de-viaje/check-number', [TravelCertificateController::class, 'checkNumberExists'])->name('checkTravelCertificateNumber');
     Route::get('ver/constancia-de-viaje/{id}', [TravelCertificateController::class, 'show'])->name('showTravelCertificate');
     Route::put('actualizar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'update'])->name('updateTravelCertificate');
     Route::get('imprimir/constancia-de-viaje/{id}', [TravelCertificateController::class, 'generateTravelCertificatePdf'])->name('travelCertificatePdf');
@@ -45,6 +46,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
     Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');
     Route::put('quitar/de/la/liquidacion/{id}', [TravelCertificateController::class, 'removeFromDriverSettlement'])->name('removeFromDriverSettlement');
+    // Eliminar constancia de viaje (solo si no está facturada)
+    Route::delete('eliminar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'destroy'])->name('deleteTravelCertificate');
 
     // TravelItem
     Route::post('guardar/item-de-viaje/{travelCertificateId}', [TravelItemController::class, 'store'])->name('storeTravelItem');
