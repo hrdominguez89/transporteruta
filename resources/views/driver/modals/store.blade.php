@@ -38,13 +38,20 @@
                             placeholder="Ingrese el porcentaje de la agencia..." required>
                     </div>
 
-                    <label for="vehicleId">Vehiculo:</label>
-                    <select id="vehicleId" name="vehicleId" class="form-control mb-2">
-                        <option value="">---- Seleccione una opcion ----</option>
-                        @foreach ($vehicles as $vehicle)
-                            <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
-                        @endforeach
-                    </select>
+                     {{-- Nueva refactorizacion si no se ingresa ninguna opcion --}}
+                    <label for="vehicleId">Vehículo:</label>
+                        <select id="vehicleId" name="vehicleId" class="form-control mb-2">
+                            <option value="" selected>---- Seleccione una opción ----</option>
+                            @forelse ($vehicles as $vehicle)
+                                <option value="{{ $vehicle->id }}"
+                                    {{ old('vehicleId') == $vehicle->id ? 'selected' : '' }}>
+                                    {{ $vehicle->plate ?? $vehicle->name }}
+                                </option>
+                            @empty
+                                {{-- No hay vehículos cargados --}}
+                            @endforelse
+                        </select>
+                   
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

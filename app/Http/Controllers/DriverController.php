@@ -17,27 +17,23 @@ class DriverController extends Controller
     }
 
 
-    public function store(StoreDriverRequest $request)
+ public function store(StoreDriverRequest $request) // 👈 usa la request tipada
     {
-        $newDriver = new Driver;
-        $newDriver->name = $request->name;
-        $newDriver->dni = $request->dni;
-        $newDriver->address = $request->address;
-        $newDriver->city = $request->city;
-        $newDriver->phone = $request->phone;
-        $newDriver->type = $request->type;
-        if ($request->type == 'TERCERO') {
-            $newDriver->percent = $request->percent;
-        } else {
-            $newDriver->percent = 100;
-        }
-        if ($request->vehicleId != null) {
-            $newDriver->vehicleId = $request->vehicleId;
-        } else {
-            $newDriver->vehicleId = 1;
-        }
-        $newDriver->save();
-        return redirect(route('showDriver', $newDriver->id));
+        $driver              = new Driver();
+        $driver->name        = $request->name;
+        $driver->dni         = $request->dni;
+        $driver->address     = $request->address;
+        $driver->city        = $request->city;
+        $driver->phone       = $request->phone;
+        $driver->type        = $request->type;
+        // si es TERCERO pedimos porcentaje, si es PROPIO lo dejamos NULL (o 0 si queremos)
+        $driver->percent     = $request->type === 'TERCERO' ? (float) $request->percent : null;
+        // si no selecciona vehículo, guardamos NULL para no romper la FK
+        $driver->vehicleId   = $request->filled('vehicleId') ? (int) $request->vehicleId : null;
+
+        $driver->save();
+
+        return redirect()->route('drivers')->with('success', 'Chofer creado correctamente.');
     }
 
     public function show($id)
@@ -47,21 +43,30 @@ class DriverController extends Controller
         return view('driver.show', ['driver' => $driver, 'vehicles' => $vehicles]);
     }
 
-    public function update(UpdateDriverRequest $request, $id)
+    // refactorizacion nueva método update()
+    public function update(\App\Http\Requests\UpdateDriverRequest $request, $id)
     {
-        $driver = Driver::find($id);
-        $driver->name = $request->name;
-        $driver->dni = $request->dni;
-        $driver->address = $request->address;
-        $driver->city = $request->city;
-        $driver->phone = $request->phone;
-        $driver->type = $request->type;
-        if ($request->type == 'TERCERO') {
-            $driver->percent = $request->percent;
-        } else {
-            $driver->percent = 100;
-        }
-        $driver->save();
-        return redirect(route('showDriver', $driver->id));
+    $driver = \App\Models\Driver::findOrFail($id);
+
+    $driver->name    = $request->name;
+    $driver->dni     = $request->dni;
+    $driver->address = $request->address;
+    $driver->city    = $request->city;
+    $driver->phone   = $request->phone;
+    $driver->type    = $request->type;
+
+    $driver->percent   = $request->type === 'TERCERO' ? (float)$request->percent : null;
+    $driver->vehicleId = $request->filled('vehicleId') ? (int)$request->vehicleId : null;
+
+    $driver->save();
+
+    return redirect()->route('showDriver', $driver->id)
+        ->with('success', 'Chofer actualizado correctamente.');
     }
 }
+
+// Explicación:  
+// 1. La clase DriverController maneja las operaciones relacionadas con los choferes.
+// 2. El método store() utiliza StoreDriverRequest para validar y almacenar un nuevo chofer.        
+// 3. El método update() utiliza UpdateDriverRequest para validar y actualizar un chofer existente.
+// 4. Se asegura que los datos sean consistentes y maneja correctamente los valores nulos para vehicleId y percent.                                                                                                               
