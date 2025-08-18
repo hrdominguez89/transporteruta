@@ -23,6 +23,8 @@
                         @endif
                         <option value="MULTIDESTINO">Multidestino</option>
                         <option value="DESCARGA">Carga/Descarga</option>
+                        <!--AGREGAMOS LA OPCIÓN DESCUENTO-->
+                         <option value="DESCUENTO">Descuento</option> 
                     </select>
 
                     <label for="description">Descripción:</label>
@@ -72,92 +74,112 @@
         </div>
     </div>
 </div>
+
 <script>
-    document.getElementById("type").addEventListener("change", function() {
-        var type = this.value;
-        if (type === "HORA") {
-            document.getElementById("totalTime_div").style.display = "block";
-            document.getElementById("totalHours").setAttribute("required", "required");
-            document.getElementById("totalMinutes").setAttribute("required", "required");
-            document.getElementById("price_div").style.display = "block";
-            document.getElementById("price").setAttribute("required", "required");
+(function() {
+  // Helpers
+  const $ = id => document.getElementById(id);
+  const show = id => $(id).style.display = "block";
+  const hide = id => $(id).style.display = "none";
+  const req  = id => $(id).setAttribute("required", "required");
+  const unreq= id => $(id).removeAttribute("required");
+  const text = (id, val="") => $(id).innerHTML = val;
 
-            document.getElementById("distance_div").style.display = "none";
-            document.getElementById("distance").removeAttribute("required");
-            document.getElementById("porcentaje_div").style.display = "none";
-            document.getElementById("porcentaje").removeAttribute("required");
+  const typeSel = $("type");
 
-            document.getElementById("textoPrecio").innerHTML = "Precio por Hora";
-        } else if (type === "KILOMETRO") {
-            document.getElementById("distance_div").style.display = "block";
-            document.getElementById("distance").setAttribute("required", "required");
-            document.getElementById("price_div").style.display = "block";
-            document.getElementById("price").setAttribute("required", "required");
+  function hideAll() {
+    hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+    hide("distance_div");   unreq("distance");
+    hide("price_div");      unreq("price");
+    hide("porcentaje_div"); unreq("porcentaje");
+    text("textoPrecio", "");
+    text("calculoPorcentaje", "");
+  }
 
-            document.getElementById("totalTime_div").style.display = "none";
-            document.getElementById("totalHours").removeAttribute("required");
-            document.getElementById("totalMinutes").removeAttribute("required");
-            document.getElementById("porcentaje_div").style.display = "none";
-            document.getElementById("porcentaje").removeAttribute("required");
-            document.getElementById("textoPrecio").innerHTML = "Precio por Kilometro";
+  function formatARS(n) {
+    if (isNaN(n)) return "";
+    return n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
-        } else if (type === "ADICIONAL") {
-            document.getElementById("porcentaje_div").style.display = "block";
-            document.getElementById("porcentaje").setAttribute("required", "required");
-
-            document.getElementById("totalTime_div").style.display = "none";
-            document.getElementById("totalHours").removeAttribute("required");
-            document.getElementById("totalMinutes").removeAttribute("required");
-            document.getElementById("distance_div").style.display = "none";
-            document.getElementById("distance").removeAttribute("required");
-            document.getElementById("price_div").style.display = "none";
-            document.getElementById("price").removeAttribute("required");
-            document.getElementById("textoPrecio").innerHTML = "";
-
-            document.getElementById('porcentaje').addEventListener('input', function() {
-                var porcentaje = parseFloat(this.value.replace(',', '.'));
-                var tarifaFija = parseFloat(this.dataset.tarifaFija);
-
-                if (!isNaN(porcentaje) && !isNaN(tarifaFija)) {
-                    var calculo = (porcentaje / 100) * tarifaFija;
-                    var montoFormateado = calculo.toLocaleString('es-AR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                    document.getElementById('calculoPorcentaje').innerHTML = "El monto es: $ " +
-                        montoFormateado;
-                } else {
-                    document.getElementById('calculoPorcentaje').innerHTML = "";
-                }
-            });
-
-
-
-        } else if (type === "") {
-            document.getElementById("totalTime_div").style.display = "none";
-            document.getElementById("totalHours").removeAttribute("required");
-            document.getElementById("totalMinutes").removeAttribute("required");
-            document.getElementById("distance_div").style.display = "none";
-            document.getElementById("distance").removeAttribute("required");
-            document.getElementById("price_div").style.display = "none";
-            document.getElementById("price").removeAttribute("required");
-            document.getElementById("porcentaje_div").style.display = "none";
-            document.getElementById("porcentaje").removeAttribute("required");
-            document.getElementById("textoPrecio").innerHTML = "";
-
-        } else {
-            document.getElementById("price_div").style.display = "block";
-            document.getElementById("price").setAttribute("required", "required");
-
-            document.getElementById("totalTime_div").style.display = "none";
-            document.getElementById("totalHours").removeAttribute("required");
-            document.getElementById("totalMinutes").removeAttribute("required");
-            document.getElementById("distance_div").style.display = "none";
-            document.getElementById("distance").removeAttribute("required");
-            document.getElementById("porcentaje_div").style.display = "none";
-            document.getElementById("porcentaje").removeAttribute("required");
-            document.getElementById("textoPrecio").innerHTML = "";
-
-        }
+  // Listener único para porcentaje (fix de duplicados)
+  const porcentajeInput = $("porcentaje");
+  if (porcentajeInput) {
+    porcentajeInput.addEventListener("input", function() {
+      // Solo calcula si el tipo seleccionado es ADICIONAL
+      if (!typeSel || typeSel.value !== "ADICIONAL") {
+        text("calculoPorcentaje", "");
+        return;
+      }
+      const porc   = parseFloat(this.value.replace(",", "."));
+      const tarifa = parseFloat(this.dataset.tarifaFija);
+      if (!isNaN(porc) && !isNaN(tarifa)) {
+        const monto = (porc / 100) * tarifa;
+        text("calculoPorcentaje", "El monto es: $ " + formatARS(monto));
+      } else {
+        text("calculoPorcentaje", "");
+      }
     });
+  }
+
+  function updateUI() {
+    const type = typeSel ? typeSel.value : "";
+
+    switch (type) {
+      case "HORA":
+        show("totalTime_div"); req("totalHours"); req("totalMinutes");
+        show("price_div");     req("price");
+        hide("distance_div");  unreq("distance");
+        hide("porcentaje_div");unreq("porcentaje");
+        text("textoPrecio", "Precio por Hora");
+        text("calculoPorcentaje", "");
+        break;
+
+      case "KILOMETRO":
+        show("distance_div");  req("distance");
+        show("price_div");     req("price");
+        hide("totalTime_div"); unreq("totalHours"); unreq("totalMinutes");
+        hide("porcentaje_div");unreq("porcentaje");
+        text("textoPrecio", "Precio por Kilometro");
+        text("calculoPorcentaje", "");
+        break;
+
+      case "ADICIONAL":
+        show("porcentaje_div"); req("porcentaje");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("distance_div");   unreq("distance");
+        hide("price_div");      unreq("price");
+        text("textoPrecio", "");
+        // recalcular por si ya había un valor cargado
+        porcentajeInput && porcentajeInput.dispatchEvent(new Event("input"));
+        break;
+
+      case "DESCUENTO":
+        show("price_div");     req("price");
+        hide("totalTime_div"); unreq("totalHours"); unreq("totalMinutes");
+        hide("distance_div");  unreq("distance");
+        hide("porcentaje_div");unreq("porcentaje");
+        text("textoPrecio", "Monto del descuento (ingresá un valor positivo)");
+        text("calculoPorcentaje", "");
+        break;
+
+      case "": // opción vacía
+        hideAll();
+        break;
+
+      default: // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc.
+        show("price_div");     req("price");
+        hide("totalTime_div"); unreq("totalHours"); unreq("totalMinutes");
+        hide("distance_div");  unreq("distance");
+        hide("porcentaje_div");unreq("porcentaje");
+        text("textoPrecio", "");
+        text("calculoPorcentaje", "");
+    }
+  }
+
+  // Cambios de tipo
+  typeSel && typeSel.addEventListener("change", updateUI);
+
+  // Estado inicial (por si el modal abre con algo seleccionado)
+  updateUI();
+})();
 </script>

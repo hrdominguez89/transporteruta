@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('phone');
             $table->integer('percent');
             $table->enum('type', ['PROPIO', 'TERCERO']);
-            $table->foreignId('vehicleId')->references('id')->on('vehicles')->onDelete('CASCADE');
+            $table->foreignId('vehicleId')->nullable()->constrained('vehicles')->nullOnDelete();
             $table->timestamps();
         });
     }
