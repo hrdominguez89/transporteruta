@@ -62,6 +62,8 @@ Route::group(['middleware' => 'auth'], function () {
     
     Route::delete('quitar/al/recbibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
     Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
+    // Eliminar factura (solo si no está facturada y no está pagada)
+    Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');

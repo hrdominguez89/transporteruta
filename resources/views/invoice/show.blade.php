@@ -9,7 +9,7 @@
             <a href="{{ Route('invoices') }}" class="btn btn-sm btn-secondary">Volver</a>
         </div>
         <div class="col-12 mt-3">
-            <h1>Factura N° <strong>{{ number_format($invoice->number, 0, ',', '.') }}</strong></h1>
+            <h1>Factura N° <strong>{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</strong></h1>
         </div>
 
         @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')

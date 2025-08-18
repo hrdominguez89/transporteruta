@@ -242,4 +242,37 @@ class InvoiceController extends Controller
         return redirect(route('showReceipt', $receipt->id))
             ->with('success', 'Factura y retenciones eliminadas del recibo correctamente.');
     }
+
+    /**
+     * Eliminar una factura vía AJAX o petición normal.
+     * Solo se permite eliminar si no está facturada y no está pagada.
+     */
+    public function delete($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+
+        // Comprobar condiciones
+        if ($invoice->invoiced === 'NO' && $invoice->paid === 'NO') {
+            try {
+                $invoice->delete();
+                // Si es petición AJAX, devolver JSON
+                if (request()->ajax()) {
+                    return response()->json(['success' => true, 'message' => 'Factura eliminada correctamente.']);
+                }
+                return redirect(route('invoices'))->with('success', 'Factura eliminada correctamente.');
+            } catch (\Exception $e) {
+                if (request()->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Error al eliminar la factura.'], 500);
+                }
+                return redirect(route('showInvoice', $invoice->id))->with('error', 'Error al eliminar la factura.');
+            }
+        }
+
+        // No permitido
+        if (request()->ajax()) {
+            return response()->json(['success' => false, 'message' => 'No se puede eliminar una factura facturada o pagada.'], 403);
+        }
+
+        return redirect(route('showInvoice', $invoice->id))->with('error', 'No se puede eliminar una factura facturada o pagada.');
+    }
 }
