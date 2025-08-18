@@ -13,6 +13,8 @@ class TravelItemController extends Controller
     public function store(StoreTravelItemRequest $request, $travelCertificateId)
     {
         $tarifa_fija = TravelItem::where('travelCertificateId', $travelCertificateId)->where('type', 'FIJO')->value('price');
+        $travelCertificate = TravelCertificate::find($travelCertificateId);
+        $client = $travelCertificate->client;
 
         $newTravelItem = new TravelItem;
         $newTravelItem->type = $request->type;
@@ -34,9 +36,9 @@ class TravelItemController extends Controller
         } else {
             $newTravelItem->price = $request->price;
         }
-        $travelCertificate = TravelCertificate::find($travelCertificateId);
+
         $travelCertificate->total += $newTravelItem->price;
-        if ($request->type != 'PEAJE') {
+        if ($request->type != 'PEAJE' && $client->ivaType != "EXENTO") {
             $travelCertificate->iva += $newTravelItem->price * 0.21;
         }
         $newTravelItem->travelCertificateId = $travelCertificateId;

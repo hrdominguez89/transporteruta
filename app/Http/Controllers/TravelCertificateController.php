@@ -11,6 +11,8 @@ use App\Models\TravelItem;
 use App\Http\Requests\StoreTravelCertificateRequest;
 use App\Http\Requests\UpdateTravelCertificateRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TravelCertificateController extends Controller
 {
@@ -110,7 +112,7 @@ class TravelCertificateController extends Controller
         return $pdf->stream('Constancia-' . $travelCertificate->client->name . 'pdf');
     }
 
-    public function addToInvoice(UpdateTravelCertificateRequest $request, $id)
+    public function addToInvoice(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $travelCertificate->invoiceId = $request->invoiceId;
@@ -123,7 +125,7 @@ class TravelCertificateController extends Controller
         return redirect(route('showInvoice', $travelCertificate->invoiceId));
     }
 
-    public function removeFromInvoice(UpdateTravelCertificateRequest $request, $id)
+    public function removeFromInvoice(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $invoice = Invoice::find($request->invoiceId);
@@ -136,7 +138,7 @@ class TravelCertificateController extends Controller
         return redirect(route('showInvoice', $invoice->id));
     }
 
-    public function addToDriverSettlement(UpdateTravelCertificateRequest $request, $id)
+    public function addToDriverSettlement(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $travelCertificate->driverSettlementId = $request->driverSettlementId;
@@ -148,7 +150,7 @@ class TravelCertificateController extends Controller
         return redirect(route('showDriverSettlement', $travelCertificate->driverSettlementId));
     }
 
-    public function removeFromDriverSettlement(UpdateTravelCertificateRequest $request, $id)
+    public function removeFromDriverSettlement(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         $driverSettlement = DriverSettlement::find($request->driverSettlementId);
@@ -158,5 +160,134 @@ class TravelCertificateController extends Controller
         $travelCertificate->save();
         $driverSettlement->save();
         return redirect(route('showDriverSettlement', $driverSettlement->id));
+    }
+
+    /**
+     * Add multiple travel certificates to an invoice.
+     */
+    public function addMultipleToInvoice(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $invoiceId = $request->input('invoiceId');
+        if (empty($ids) || empty($invoiceId)) {
+            return redirect()->back();
+        }
+
+        DB::transaction(function () use ($ids, $invoiceId) {
+            $invoice = Invoice::find($invoiceId);
+            foreach ($ids as $id) {
+                $tc = TravelCertificate::find($id);
+                if (!$tc) continue;
+                // skip if already invoiced
+                if ($tc->invoiced === 'SI') continue;
+                $tc->invoiceId = $invoiceId;
+                $tc->invoiced = 'SI';
+                $tc->save();
+                $invoice->total += $tc->total;
+                $invoice->iva += $tc->iva;
+            }
+            $invoice->save();
+        });
+
+        return redirect(route('showInvoice', $invoiceId));
+    }
+
+    /**
+     * Remove multiple travel certificates from an invoice.
+     */
+    public function removeMultipleFromInvoice(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $invoiceId = $request->input('invoiceId');
+        if (empty($ids) || empty($invoiceId)) {
+            return redirect()->back();
+        }
+
+        DB::transaction(function () use ($ids, $invoiceId) {
+            $invoice = Invoice::find($invoiceId);
+            foreach ($ids as $id) {
+                $tc = TravelCertificate::find($id);
+                if (!$tc) continue;
+                // skip if not invoiced
+                if ($tc->invoiced !== 'SI') continue;
+                $invoice->total -= $tc->total;
+                $invoice->iva -= $tc->iva;
+                $tc->invoiceId = 0;
+                $tc->invoiced = 'NO';
+                $tc->save();
+            }
+            $invoice->save();
+        });
+
+        return redirect(route('showInvoice', $invoiceId));
+    }
+
+    /**
+     * Delete a travel certificate only if it's not invoiced and clean relations.
+     */
+    public function destroy($id)
+    {
+        $travelCertificate = TravelCertificate::find($id);
+        if (!$travelCertificate) {
+            return redirect()->route('travelCertificates');
+        }
+
+        // Only allow deletion when not invoiced
+        if ($travelCertificate->invoiced !== 'NO') {
+            return redirect()->route('travelCertificates');
+        }
+
+        DB::transaction(function () use ($travelCertificate) {
+            // If linked to an invoice (defensive), subtract totals
+            if ($travelCertificate->invoiceId && $travelCertificate->invoiceId != 0) {
+                $invoice = Invoice::find($travelCertificate->invoiceId);
+                if ($invoice) {
+                    $invoice->total -= $travelCertificate->total;
+                    $invoice->iva -= $travelCertificate->iva;
+                    $invoice->save();
+                }
+            }
+
+            // If linked to a driver settlement (defensive), subtract totals
+            if ($travelCertificate->driverSettlementId && $travelCertificate->driverSettlementId != 0) {
+                $driverSettlement = DriverSettlement::find($travelCertificate->driverSettlementId);
+                if ($driverSettlement) {
+                    $driverSettlement->total -= ($travelCertificate->total - $travelCertificate->driverPayment);
+                    $driverSettlement->save();
+                }
+            }
+
+            // Delete travel items (migration has onDelete cascade, but explicitly delete to ensure app-level hooks)
+            foreach ($travelCertificate->travelItems as $item) {
+                $item->delete();
+            }
+
+            // Finally delete the travel certificate
+            $travelCertificate->delete();
+        });
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Constancia de viaje eliminada correctamente.']);
+        }
+
+        return redirect()->route('travelCertificates');
+    }
+
+    /**
+     * Check if a travel certificate number already exists (AJAX)
+     */
+    public function checkNumberExists()
+    {
+        $number = request('number');
+        $id = request('id'); // optional: id to ignore (for update)
+        if (empty($number)) {
+            return response()->json(['exists' => false]);
+        }
+        $query = TravelCertificate::where('number', $number);
+        if (!empty($id)) {
+            $query->where('id', '!=', $id);
+        }
+        $exists = $query->exists();
+        return response()->json(['exists' => $exists]);
     }
 }

@@ -30,7 +30,7 @@
         <div class="col-12 table-bordered text-left">
             <p><strong>Cliente:</strong> {{ $travelCertificate->client->name }}</p>
             <p><strong>Chofer:</strong> {{ $travelCertificate->driver->name }}</p>
-            <p><strong>Vehiculo:</strong> {{ $travelCertificate->driver->vehicle->name }}</p>
+            <p><strong>Vehiculo:</strong> {{ $travelCertificate->driver?->vehicle?->name }}</p>
             <p><strong>Hora de Salida:</strong></p>
             <p><strong>Hora de Llegada:</strong></p>
         </div>
@@ -38,7 +38,7 @@
             <p><strong>CONCEPTOS:</strong></p>
             @foreach ($travelCertificate->travelItems as $travelItem)
                 <p><span class="text-danger">Tipo:</span> {{ $travelItem->type }}</p>
-                <p><span class="text-danger">Total:</span> {{ $travelItem->price }}</p>
+                <p><span class="text-danger">Total:</span> $&nbsp;{{ number_format($travelItem->price, 2, ',', '.') }}</p>
             @endforeach
         </div>
         <div class="col-12 table-bordered text-left">

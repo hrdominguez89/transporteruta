@@ -14,8 +14,9 @@
                     @csrf
                     @method('PUT')
                     <label for="number">Numero(Sistema Antiguo):</label>
-                    <input type="number" name="number" class="form-control mb-2"
+                    <input type="number" name="number" id="tc_number_{{ $travelCertificate->id }}" class="form-control mb-2"
                         value="{{ $travelCertificate->number }}">
+                    <small id="number_help_{{ $travelCertificate->id }}" class="text-danger" style="display:none;"></small>
                     <label for="date">Fecha:<span class="text-danger"> *</span></label>
                     <input type="date" name="date" class="form-control mb-2"
                         value="{{ $travelCertificate->date }}" required>
@@ -107,4 +108,55 @@
 
         }
     });
+    // Validación de número único en el modal de actualizar
+    (function(){
+        var id = '{{ $travelCertificate->id }}';
+        var numberInput = document.getElementById('tc_number_' + id);
+        var numberHelp = document.getElementById('number_help_' + id);
+        var form = numberInput ? numberInput.closest('form') : null;
+
+        function checkNumber(done){
+            var val = numberInput.value;
+            if (!val) {
+                numberHelp.style.display = 'none';
+                return done && done(false);
+            }
+            fetch("{{ route('checkTravelCertificateNumber') }}?number="+encodeURIComponent(val)+"&id="+encodeURIComponent(id), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(json){
+                if (json.exists) {
+                    numberHelp.textContent = 'El número ya existe en la base de datos.';
+                    numberHelp.style.display = 'block';
+                    return done && done(true);
+                } else {
+                    numberHelp.style.display = 'none';
+                    return done && done(false);
+                }
+            })
+            .catch(function(){
+                numberHelp.style.display = 'none';
+                return done && done(false);
+            });
+        }
+
+        if (numberInput) {
+            numberInput.addEventListener('blur', function(){ checkNumber(); });
+            numberInput.addEventListener('change', function(){ checkNumber(); });
+        }
+
+        if (form) {
+            form.addEventListener('submit', function(e){
+                e.preventDefault();
+                checkNumber(function(exists){
+                    if (exists) {
+                        numberInput.focus();
+                        return; // don't submit
+                    }
+                    form.submit();
+                });
+            });
+        }
+    })();
 </script>
