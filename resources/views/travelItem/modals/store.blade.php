@@ -7,28 +7,40 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+
+            <!--NUEVO ITEM N° REMITO-->
             <div class="modal-body">
                 <form action="{{ Route('storeTravelItem', $travelCertificate->id) }}" class="form-group" method="POST">
                     @csrf
                     <label for="type">Tipo:<span class="text-danger"> *</span></label>
                     <select id="type" name="type" class="form-control mb-2" required>
-                        <option value="">---- Seleccione una opción ----</option>
-                        <option value="HORA">Por Hora</option>
-                        <option value="KILOMETRO">Por Kilometro</option>
-                        <option value="PEAJE">Peaje</option>
-                        @if ($tarifa_fija)
-                            <option value="ADICIONAL">Adicional</option>
-                        @else
-                            <option value="FIJO">Tarifa Fija</option>
-                        @endif
-                        <option value="MULTIDESTINO">Multidestino</option>
-                        <option value="DESCARGA">Carga/Descarga</option>
-                        <!--AGREGAMOS LA OPCIÓN DESCUENTO-->
-                         <option value="DESCUENTO">Descuento</option> 
+                      <option value="">---- Seleccione una opción ----</option>
+                      <option value="REMITO">N° Remito</option>   {{-- NUEVO --}}
+                      <option value="HORA">Por Hora</option>
+                      <option value="KILOMETRO">Por Kilometro</option>
+                      <option value="PEAJE">Peaje</option>
+                      @if ($tarifa_fija)
+                          <option value="ADICIONAL">Adicional</option>
+                      @else
+                          <option value="FIJO">Tarifa Fija</option>
+                      @endif
+                      <option value="MULTIDESTINO">Multidestino</option>
+                      <option value="DESCARGA">Carga/Descarga</option>
+                      <option value="DESCUENTO">Descuento</option>
                     </select>
 
-                    <label for="description">Descripción:</label>
-                    <input id="description" type="text" name="description" class="form-control mb-2">
+                    {{-- NUEVO: campo específico para N° Remito --}}
+                    <div id="remito_div" style="display:none;">
+                      <label for="remito_number">N° de Remito:<span class="text-danger"> *</span></label>
+                      <input id="remito_number" type="text" name="remito_number" class="form-control mb-2"
+                            placeholder="Ej: 0001-00012345">
+                    </div>
+
+                    {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
+                    <div id="description_div">
+                      <label for="description">Descripción:</label>
+                      <input id="description" type="text" name="description" class="form-control mb-2">
+                    </div>
 
                     <div style="display: none;" id="totalTime_div">
                         <label for="totalHours">Tiempo Total: <span class="text-danger"> *</span></label>
@@ -88,6 +100,8 @@
   const typeSel = $("type");
 
   function hideAll() {
+    hide("remito_div");     unreq("remito_number");   // <-- NUEVO
+    show("description_div");                           // por defecto visible
     hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
     hide("distance_div");   unreq("distance");
     hide("price_div");      unreq("price");
@@ -105,7 +119,6 @@
   const porcentajeInput = $("porcentaje");
   if (porcentajeInput) {
     porcentajeInput.addEventListener("input", function() {
-      // Solo calcula si el tipo seleccionado es ADICIONAL
       if (!typeSel || typeSel.value !== "ADICIONAL") {
         text("calculoPorcentaje", "");
         return;
@@ -125,39 +138,56 @@
     const type = typeSel ? typeSel.value : "";
 
     switch (type) {
+      case "REMITO": // <-- NUEVO
+        show("remito_div");     req("remito_number");
+        hide("description_div");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("distance_div");   unreq("distance");
+        hide("price_div");      unreq("price");
+        hide("porcentaje_div"); unreq("porcentaje");
+        text("textoPrecio", ""); text("calculoPorcentaje", "");
+        break;
+
       case "HORA":
-        show("totalTime_div"); req("totalHours"); req("totalMinutes");
-        show("price_div");     req("price");
-        hide("distance_div");  unreq("distance");
-        hide("porcentaje_div");unreq("porcentaje");
+        hide("remito_div");     unreq("remito_number");
+        show("description_div");
+        show("totalTime_div");  req("totalHours"); req("totalMinutes");
+        show("price_div");      req("price");
+        hide("distance_div");   unreq("distance");
+        hide("porcentaje_div"); unreq("porcentaje");
         text("textoPrecio", "Precio por Hora");
         text("calculoPorcentaje", "");
         break;
 
       case "KILOMETRO":
-        show("distance_div");  req("distance");
-        show("price_div");     req("price");
-        hide("totalTime_div"); unreq("totalHours"); unreq("totalMinutes");
-        hide("porcentaje_div");unreq("porcentaje");
+        hide("remito_div");     unreq("remito_number");
+        show("description_div");
+        show("distance_div");   req("distance");
+        show("price_div");      req("price");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("porcentaje_div"); unreq("porcentaje");
         text("textoPrecio", "Precio por Kilometro");
         text("calculoPorcentaje", "");
         break;
 
       case "ADICIONAL":
+        hide("remito_div");     unreq("remito_number");
+        show("description_div");
         show("porcentaje_div"); req("porcentaje");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("distance_div");   unreq("distance");
         hide("price_div");      unreq("price");
         text("textoPrecio", "");
-        // recalcular por si ya había un valor cargado
         porcentajeInput && porcentajeInput.dispatchEvent(new Event("input"));
         break;
 
       case "DESCUENTO":
-        show("price_div");     req("price");
-        hide("totalTime_div"); unreq("totalHours"); unreq("totalMinutes");
-        hide("distance_div");  unreq("distance");
-        hide("porcentaje_div");unreq("porcentaje");
+        hide("remito_div");     unreq("remito_number");
+        show("description_div");
+        show("price_div");      req("price");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("distance_div");   unreq("distance");
+        hide("porcentaje_div"); unreq("porcentaje");
         text("textoPrecio", "Monto del descuento (ingresá un valor positivo)");
         text("calculoPorcentaje", "");
         break;
@@ -167,19 +197,18 @@
         break;
 
       default: // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc.
-        show("price_div");     req("price");
-        hide("totalTime_div"); unreq("totalHours"); unreq("totalMinutes");
-        hide("distance_div");  unreq("distance");
-        hide("porcentaje_div");unreq("porcentaje");
+        hide("remito_div");     unreq("remito_number");
+        show("description_div");
+        show("price_div");      req("price");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("distance_div");   unreq("distance");
+        hide("porcentaje_div"); unreq("porcentaje");
         text("textoPrecio", "");
         text("calculoPorcentaje", "");
     }
   }
 
-  // Cambios de tipo
   typeSel && typeSel.addEventListener("change", updateUI);
-
-  // Estado inicial (por si el modal abre con algo seleccionado)
-  updateUI();
+  updateUI(); // estado inicial
 })();
 </script>

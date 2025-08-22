@@ -9,16 +9,29 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     public function up(): void
-    {
-        // Modificar el campo percent a DECIMAL(11,9)
-        DB::statement('ALTER TABLE drivers MODIFY percent DECIMAL(12,9) NOT NULL');
-        DB::statement('ALTER TABLE travel_certificates MODIFY percent DECIMAL(12,9) NOT NULL');
-    }
+{
+    // 1) Normalizar datos antes de convertir
+    // Reemplazar comas por punto (si el campo es string / hay comas)
+    DB::statement("UPDATE travel_certificates SET percent = REPLACE(percent, ',', '.') WHERE percent LIKE '%,%'");
 
-    public function down(): void
-    {
-        // Revertir el cambio a DECIMAL(5,2)
-        DB::statement('ALTER TABLE drivers MODIFY percent DECIMAL(5,2) NOT NULL');
-        DB::statement('ALTER TABLE travel_certificates MODIFY percent DECIMAL(5,2) NOT NULL');
-    }
+    // Vacíos -> NULL
+    DB::statement("UPDATE travel_certificates SET percent = NULL WHERE TRIM(COALESCE(percent,'')) = ''");
+
+    // Cualquier valor NO numérico (regex) -> NULL
+    DB::statement("UPDATE travel_certificates SET percent = NULL WHERE percent IS NOT NULL AND percent NOT REGEXP '^[0-9]+(\\.[0-9]+)?$'");
+
+    // 2) Convertir a DECIMAL de forma tolerante (permitimos NULL primero)
+    DB::statement("ALTER TABLE travel_certificates MODIFY percent DECIMAL(10,4) NULL");
+
+    // 3) Setear default para nulos
+    DB::statement("UPDATE travel_certificates SET percent = 0 WHERE percent IS NULL");
+
+    // 4) Endurecer a NOT NULL
+    DB::statement("ALTER TABLE travel_certificates MODIFY percent DECIMAL(10,4) NOT NULL");
+}
+
+public function down(): void
+{
+    DB::statement("ALTER TABLE travel_certificates MODIFY percent VARCHAR(255) NULL");
+}
 };
