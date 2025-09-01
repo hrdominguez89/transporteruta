@@ -82,7 +82,7 @@
                         <th class="text-center"style="width:40%">Total</th>
                     </tr>
 
-                    @foreach ($client->invoices as $invoice)
+                    @foreach ($client->invoices->where('paid', 'NO')->sortBy('date') as $invoice)
                         @if ($invoice->paid == 'NO')
                             <tr>
                                 <td class="text-center">
