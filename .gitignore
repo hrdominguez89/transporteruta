@@ -15,5 +15,4 @@ yarn-error.log
 /.vscode
 /vendor/public/hot
 vendor
-composer.lock
 .gitignore
