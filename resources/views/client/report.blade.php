@@ -67,7 +67,7 @@
                     <tr>
                         <th colspan="2" class="text-center">{{ $client->name }}</th>
                         <th class="text-center">{{ $client->dni }}</th>
-                        <th class="text-right">$&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</th>
+                        <th class="text-right">$&nbsp;{{ number_format( $saldos[$client->id], 2, ',', '.') }}</th>
                     </tr>
                     <tr>
                         <th colspan="4" style="width: 100%;" class="text-center">
