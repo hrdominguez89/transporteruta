@@ -14,6 +14,12 @@ class TravelCertificate extends Model
 
     protected $fillable = ['number', 'total', 'iva', 'date', 'destiny', 'clientId', 'driverId', 'invoiceId'];
 
+    protected $casts = [
+        'total' => 'decimal:2',
+        'iva'   => 'decimal:2',
+        'date'  => 'date',
+    ];
+    
     public function client()
     {
         return $this->belongsTo(Client::class, 'clientId');
@@ -32,5 +38,14 @@ class TravelCertificate extends Model
     public function invoice()
     {
         return $this->belongsTo(Invoice::class, 'invoiceId');
+    }
+    public function recalcTotals(): void
+    {
+        $total   = (float) $this->travelItems()->sum('price');
+        $ivaBase = (float) $this->travelItems()->where('type', '!=', 'PEAJE')->sum('price');
+
+        $this->total = round($total, 2);
+        $this->iva   = round($ivaBase * 0.21, 2);
+        $this->save();
     }
 }

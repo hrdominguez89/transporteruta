@@ -26,9 +26,30 @@ class TravelCertificateController extends Controller
 
     public function store(StoreTravelCertificateRequest $request)
     {
+        $number = $request->number;
+        $date = $request->date;
+        $destiny = $request->destiny;
+        $clientId = $request->clientId;
+        $driverId = $request->driverId;
+        
+        $TC = TravelCertificate::where([
+            ['number', '=', $number],
+            ['date', '=', $date],
+            ['destiny', '=', $destiny],
+            ['driverId', '=', $driverId],
+            ['clientId', '=', $clientId],
+        ])->first();
+            
+        if($TC)
+        {
+            session()->flash('warning', 'Ya se registro esta constancia de viaje.El id de la constancia es :'.$TC->id);
+            
+            return redirect()->route('travelCertificates');
+
+        }
         // Crear una nueva instancia de TravelCertificate
         $newTravelCertificate = new TravelCertificate;
-        $newTravelCertificate->number = $request->number;
+        $newTravelCertificate->number = $number;
         $newTravelCertificate->date = $request->date;
         $newTravelCertificate->destiny = $request->destiny;
         $newTravelCertificate->clientId = $request->clientId;
@@ -37,7 +58,7 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->driverSettlementId = 0; // Si necesitas gestionar liquidaciones de choferes, ajusta este valor
 
         $newTravelCertificate->commission_type = $request->commission_type;
-
+        
         // Lógica para establecer el tipo de comisión
         if ($request->commission_type == "porcentaje pactado") {
             // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`

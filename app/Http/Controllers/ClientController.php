@@ -43,9 +43,20 @@ class ClientController extends Controller
         $clients = Client::where('balance', '>', 0.0)
             ->orderBy('balance', 'desc')
             ->get();
+        $saldos = []; 
+        foreach ($clients as $client) {
+            $saldos[$client->id] = 0;
+            foreach($client->invoices as $invoice) 
+            {
+                if($invoice->paid=='NO')
+                {
+                    $saldos[$client->id] += $invoice->totalWithIva;
+                }
+            }
+        }
         $total = Client::all()->sum('balance');
         $date = now();
-        $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date]);
+        $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date,'saldos' => $saldos]);
         $pdf->setPaper('A4', 'portrait');
         return $pdf->stream('Reporte-cuenta-corriente-general.pdf');
     }
