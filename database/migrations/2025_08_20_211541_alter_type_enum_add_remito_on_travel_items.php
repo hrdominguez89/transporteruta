@@ -9,8 +9,7 @@ return new class extends Migration {
         DB::statement("
             ALTER TABLE travel_items
             MODIFY COLUMN type ENUM(
-                'HORA','KILOMETRO','PEAJE','ADICIONAL','FIJO',
-                'MULTIDESTINO','DESCARGA','DESCUENTO','REMITO'
+                'HORA','KILOMETRO','PEAJE','FIJO','DESCARGA','MULTIDESTINO','ADICIONAL','DESCUENTO','REMITO'
             ) NOT NULL
         ");
     }
