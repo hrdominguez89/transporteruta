@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\QueryException;
 use App\Models\Invoice;
 use App\Models\Client;
 use App\Models\Receipt;
@@ -23,21 +24,42 @@ class InvoiceController extends Controller
         return view('invoice.index', ['clients' => $clients, 'invoices' => $invoices]);
     }
 
+    //Nueva refactorización de la función generate() NO PERMITIR FACTURAS REPETIDAS
     public function generate(StoreInvoiceRequest $request)
     {
-        $newInvoice = new Invoice;
-        $newInvoice->number = $request->number;
-        $newInvoice->date = $request->date;
-        $newInvoice->pointOfSale = $request->pointOfSale ?? 3;
-        $newInvoice->total = 0;
-        $newInvoice->iva = 0;
-        $newInvoice->totalWithIva = 0;
-        $newInvoice->balance = 0;
-        $newInvoice->clientId = $request->clientId;
-        $newInvoice->receiptId = 0;
-        $newInvoice->save();
-        return redirect(route('showInvoice', $newInvoice->id));
+    try {
+        $invoice = new Invoice();
+
+        $invoice->point_of_sale = (int) $request->point_of_sale;
+        $invoice->number        = (int) $request->number;
+        $invoice->date          = $request->date; // o Carbon::parse($request->date)
+        $invoice->clientId      = (int) $request->clientId;
+
+        // Valores iniciales
+        $invoice->total        = 0;
+        $invoice->iva          = 0;
+        $invoice->totalWithIva = 0;
+        $invoice->balance      = 0;
+        $invoice->paid         = 'NO';
+        $invoice->invoiced     = 'NO';
+
+        // LÍNEA ES LA CLAVE PARA ERROR EN LOG
+        $invoice->receiptId    = null;  // o NULL si luego haces la opción B
+
+        $invoice->save();
+
+        return redirect()->route('showInvoice', $invoice->id);
+
+    } catch (\Illuminate\Database\QueryException $e) {
+        // si salta duplicado PV+Número, lo devolvemos al modal con error
+        if (($e->errorInfo[1] ?? null) === 1062) {
+            return back()
+                ->withErrors(['number' => 'Ya existe una factura con ese Punto de Venta y Número.'])
+                ->withInput();
+        }
+        throw $e;
     }
+}
 
     public function show($id)
     {
