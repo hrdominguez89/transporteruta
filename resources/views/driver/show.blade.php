@@ -32,7 +32,7 @@
                 <td>{{ $driver->city }}</td>
                 <td>{{ $driver->phone }}</td>
                 <td>{{ $driver->type }}</td>
-                <td>{{ $driver->vehicle->name }}</td>
+                <td>{{ $driver->vehicle ? $driver->vehicle->name : "" }}</td>
             </tr>
         </tbody>
     </table>
