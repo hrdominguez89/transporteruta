@@ -26,7 +26,7 @@ class TravelCertificateController extends Controller
 
     public function store(StoreTravelCertificateRequest $request)
     {
-        $number = $request->number;
+         $number = $request->number;
         $date = $request->date;
         $destiny = $request->destiny;
         $clientId = $request->clientId;
@@ -49,6 +49,7 @@ class TravelCertificateController extends Controller
         }
         // Crear una nueva instancia de TravelCertificate
         $newTravelCertificate = new TravelCertificate;
+        $newTravelCertificate->number = $number;
         $newTravelCertificate->number = $number;
         $newTravelCertificate->date = $request->date;
         $newTravelCertificate->destiny = $request->destiny;

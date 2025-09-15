@@ -12,16 +12,16 @@
 
 @section('content')
     @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-    
-    @if (session('warning'))
-        <div class="alert alert-warning">
-            {{ session('warning') }}
-        </div>
-    @endif
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+        
+        @if (session('warning'))
+            <div class="alert alert-warning">
+                {{ session('warning') }}
+            </div>
+        @endif
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>

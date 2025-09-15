@@ -30,7 +30,7 @@ class InvoiceController extends Controller
     try {
         $invoice = new Invoice();
 
-        $invoice->point_of_sale = (int) $request->point_of_sale;
+        $invoice->pointOfSale = (int) $request->point_of_sale;
         $invoice->number        = (int) $request->number;
         $invoice->date          = $request->date; // o Carbon::parse($request->date)
         $invoice->clientId      = (int) $request->clientId;
