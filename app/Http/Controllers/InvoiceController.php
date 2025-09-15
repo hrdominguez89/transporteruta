@@ -44,7 +44,7 @@ class InvoiceController extends Controller
         $invoice->invoiced     = 'NO';
 
         // LÍNEA ES LA CLAVE PARA ERROR EN LOG
-        $invoice->receiptId    = null;  // o NULL si luego haces la opción B
+        $invoice->receiptId    = 0;  // o NULL si luego haces la opción B
 
         $invoice->save();
 
