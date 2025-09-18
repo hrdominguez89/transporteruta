@@ -195,8 +195,7 @@
             </tbody>
         </table>
         <br>
-        @if ($driverSettlement->liquidated == 'NO')
-            <h4>Constancias de Viaje del Chofer sin Liquidar</h4>
+            <h4>Constancias de viaje del chofer</h4>
             <table class="table table-sm table-bordered text-center data-table">
                 <thead class="bg-danger">
                     <tr>
@@ -219,7 +218,7 @@
                 <tbody>
                     @foreach ($driverSettlement->driver->travelCertificates as $travelCertificate)
                         @if ($travelCertificate->date >= $driverSettlement->dateFrom and $travelCertificate->date <= $driverSettlement->dateTo)
-                            @if ($travelCertificate->driverSettlementId != $driverSettlement->id and $travelCertificate->isPaidToDriver == 'NO')
+                            @if ($travelCertificate->driverSettlementId != $driverSettlement->id)
                                 <tr>
                                     <td style="font-size:14px;" class="text-center"
                                         data-order="{{ \Carbon\Carbon::parse($travelCertificate->date)->timestamp }}">
@@ -340,7 +339,6 @@
                     @endforeach
                 </tbody>
             </table>
-        @endif
     @stop
     @section('js')
         <script>
