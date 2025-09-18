@@ -16,6 +16,7 @@
         <thead class="bg-danger">
             <tr>
                 <th>Número-Punto de venta</th>
+                <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Total (Con IVA)</th>
                 <th>Balance</th>
@@ -28,6 +29,7 @@
             @foreach ($invoices as $invoice)
                 <tr>
                     <td data-search="{{ $invoice->number }}-{{ sprintf('%05d', $invoice->pointOfSale) }}" data-order="{{ $invoice->number }}">{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</td>
+                    <td> {{ $invoice->date }} </td>
                     <td>{{ $invoice->client->name }}</td>
                     <td class="text-right" data-order="{{ $invoice->totalWithIva }}">
                         $&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}</td>

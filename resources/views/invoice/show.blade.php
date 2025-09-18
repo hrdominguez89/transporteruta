@@ -106,6 +106,7 @@
                 <th>Nro. Nuevo</th>
                 <th>Nro. Antiguo</th>
                 <th>Chofer</th>
+                <th>Fecha</th>
                 <th>Precio Neto</th>
                 <th>I.V.A.</th>
                 <th>Peajes</th>
@@ -131,6 +132,7 @@
                             href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">{{ number_format($travelCertificate->number, 0, ',', '.') }}</a>
                     </td>
                     <td>{{ $travelCertificate->driver->name }}</td>
+                    <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
                     {{-- precio neto --}}
                     <td data-order="{{ $travelCertificate->importeNeto }}">
                         $&nbsp;{{ number_format($travelCertificate->importeNeto, 2, ',', '.') }}</td>

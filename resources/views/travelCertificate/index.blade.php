@@ -29,6 +29,7 @@
                 <th>Nro. Antiguo</th>
                 <th>Cliente</th>
                 <th>Chofer</th>
+                <th>Fecha</th>
                 <th>Facturada</th>
                 <th>Acciones</th>
             </tr>
@@ -43,6 +44,7 @@
                     </td>
                     <td>{{ $travelCertificate->client->name }}</td>
                     <td>{{ $travelCertificate->driver->name }}</td>
+                    <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
                     <td>{{ $travelCertificate->invoiced }}</td>
                     <td>
                             <a href="{{ Route('showTravelCertificate', $travelCertificate->id) }}" class="btn btn-sm btn-info">Ver</a>

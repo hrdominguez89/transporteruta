@@ -17,6 +17,7 @@
                 <th>Número<br>Nuevo</th>
                 <th>Número<br>Antiguo</th>
                 <th>Chofer</th>
+                <th>Fecha</th>
                 <th>Total</th>
                 <th>Medio de Pago</th>
                 <th>Liquidado</th>
@@ -31,6 +32,7 @@
                     <td> {{ $driverSettlement->number ? number_format($driverSettlement->number, 0, ',', '.') : ' - ' }}
                     </td>
                     <td>{{ $driverSettlement->driver->name }}</td>
+                    <td>{{ $driverSettlement->date ? $driverSettlement->date : 'Sin fecha' }}</td>
                     <td data-order="{{ $driverSettlement->total }}" class="text-right">
                         $&nbsp;{{ number_format($driverSettlement->total, 2, ',', '.') }}</td>
                     <td>
