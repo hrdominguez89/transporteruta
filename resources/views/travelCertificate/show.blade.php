@@ -24,12 +24,15 @@
                 <button class="btn btn-sm btn-success col-2" data-toggle="modal"
                     data-target="#updateModal{{ $travelCertificate->id }}">Actualizar Constancia</button>
             </div>
-        @else
             <div class="col-12 text-right mb-2">
-
                 <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
                     PDF</a>
-
+            </div>
+           
+        @else
+            <div class="col-12 text-right mb-2">
+                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
+                    PDF</a>
             </div>
             <div class="col-12 text-left mb-2">
                 <strong class="text-danger">La constancia ha sido agregada a la factura <a
