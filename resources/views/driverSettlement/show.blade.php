@@ -222,7 +222,7 @@
                                 <tr>
                                     <td style="font-size:14px;" class="text-center"
                                         data-order="{{ \Carbon\Carbon::parse($travelCertificate->date)->timestamp }}">
-                                        {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                                            {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
                                     <td data-order="{{ $travelCertificate->id }}" style="font-size:14px;"
                                         class="text-center">
                                         <a target="_blank" title="Numeración Nueva"

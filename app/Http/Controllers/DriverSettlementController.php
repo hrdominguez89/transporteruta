@@ -35,7 +35,6 @@ class DriverSettlementController extends Controller
         $newDriverSettlement->save();
         return redirect(route('showDriverSettlement', $newDriverSettlement->id));
     }
-
     public function show($id)
     {
         $data['driverSettlement'] = DriverSettlement::find($id);
