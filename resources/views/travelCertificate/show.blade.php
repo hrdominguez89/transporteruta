@@ -2,14 +2,19 @@
 
 @section('title', 'Constancias de Viaje')
 
+{{-- REFACTORIZACION:
+     Mostramos el monto REAL de los ítems ADICIONAL usando $travelItem->display_price
+     (calculado como porcentaje * tarifa fija del FIJO), S/ Migraciones.
+     -> Reemplazamos $travelItem->price por $travelItem->display_price en la tabla de ítems.
+     Nota: replicar este mismo cambio en el PDF para que imprima el valor correcto.
+--}}
+
 @section('content_header')
     <div class="row">
         <div class="col-12">
             <a href="{{ Route('travelCertificates') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         </div>
         <div class="col-12 mt-3">
-
-
             <h1>Constancia de Viaje N° <strong><span data-bs-toggle="tooltip" data-bs-placement="top"
                         title="Numeración sistema nuevo">{{ number_format($travelCertificate->id, 0, ',', '.') }}</span> /
                     <span data-bs-toggle="tooltip" data-bs-placement="top"
@@ -28,7 +33,6 @@
                 <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
                     PDF</a>
             </div>
-           
         @else
             <div class="col-12 text-right mb-2">
                 <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
@@ -74,6 +78,7 @@
                 </tr>
             </tbody>
         </table>
+
         <h4>Items de Viaje</h4>
         <table class="table table-sm table-bordered text-center data-table">
             <thead class="bg-danger">
@@ -89,8 +94,12 @@
                     <tr>
                         <td>{{ $travelItem->type }}</td>
                         <td class="text-center">{{ $travelItem->description }}</td>
-                        <td data-order="{{ $travelItem->price }}">
-                            $&nbsp;{{ number_format($travelItem->price, 2, ',', '.') }}</td>
+
+                        {{-- REFACTORIZACION: usar display_price para que ADICIONAL muestre % * FIJO (price en DB puede ser 0) --}}
+                        <td data-order="{{ $travelItem->display_price }}">
+                            $&nbsp;{{ number_format($travelItem->display_price, 2, ',', '.') }}
+                        </td>
+
                         <td>
                             @if ($travelCertificate->invoiced == 'NO')
                                 @if ($travelItem->type == 'FIJO' && $tiene_tarifa_adicional)
@@ -109,6 +118,7 @@
             </tbody>
         </table>
     @stop
+
     @section('js')
         <script>
             $(document).ready(function() {
@@ -126,3 +136,4 @@
             });
         </script>
     @stop
+

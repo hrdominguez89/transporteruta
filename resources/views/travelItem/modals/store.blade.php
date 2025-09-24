@@ -72,7 +72,7 @@
                         <label for="porcentaje">Porcentaje de $ {{ number_format($tarifa_fija, 2, ',', '.') }}:<span
                                 class="text-danger"> *</span></label>
                         <input id="porcentaje" type="number" step="0.01" min="0" max="100"
-                            name="porcentaje" class="form-control mb-2" placeholder="Ingrese el porcentaje"
+                            name="percent" class="form-control mb-2" placeholder="Ingrese el porcentaje"
                             data-tarifa-fija="{{ $tarifa_fija }}">
                         <small id="calculoPorcentaje"></small>
                     </div>
