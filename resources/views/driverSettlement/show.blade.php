@@ -217,7 +217,7 @@
                 </thead>
                 <tbody>
                     @foreach ($driverSettlement->driver->travelCertificates as $travelCertificate)
-                        @if ($travelCertificate->date >= $driverSettlement->dateFrom and $travelCertificate->date <= $driverSettlement->dateTo)
+                        @if ($travelCertificate->date >= $driverSettlement->dateFrom and $travelCertificate->date <= \Carbon\Carbon::parse($driverSettlement->dateTo)->addDay())
                             @if ($travelCertificate->driverSettlementId != $driverSettlement->id)
                                 <tr>
                                     <td style="font-size:14px;" class="text-center"
