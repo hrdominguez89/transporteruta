@@ -28,14 +28,22 @@
             </select>
             <div id="porcentaje_div" style="display: {{ $driver->type == 'TERCERO' ?'block':'none' }}">
                 <label for="porcentaje">Porcentaje de la Agencia:<span class="text-danger"> *</span></label>
-                <input id="porcentaje" type="number" step="0.01" name="percent" class="form-control mb-2"
-                    placeholder="Ingrese el porcentaje de la agencia..." value="{{ $driver->percent }}" {{ $driver->type == 'TERCERO' ?'required':'' }}>
-            </div>
-            <label for="vehicleId">Vehiculo:<span class="text-danger"> *</span></label>
-            <select name="vehicleId" class="form-control mb-2">
-                @foreach($vehicles as $vehicle)
-                    <option value="{{ $vehicle->id }}" {{$vehicle->id == $driver->vehicleId ?'selected':'' }}>{{ $vehicle->name }}</option>
-                @endforeach
+                <input id="porcentaje" 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  max="100"
+                  name="percent" 
+                  class="form-control mb-2"
+                  placeholder="Ingrese el porcentaje de la agencia..." 
+                  value="{{ $driver->percent }}" 
+                  {{ $driver->type == 'TERCERO' ? 'required' : '' }}>
+              </div>
+                <label for="vehicleId">Vehiculo:<span class="text-danger"> *</span></label>
+                <select name="vehicleId" class="form-control mb-2">
+                    @foreach($vehicles as $vehicle)
+                        <option value="{{ $vehicle->id }}" {{$vehicle->id == $driver->vehicleId ?'selected':'' }}>{{ $vehicle->name }}</option>
+                    @endforeach
             </select>
       </div>
       <div class="modal-footer">

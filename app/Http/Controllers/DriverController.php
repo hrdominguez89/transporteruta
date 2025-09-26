@@ -54,7 +54,7 @@ class DriverController extends Controller
     $driver->city    = $request->city;
     $driver->phone   = $request->phone;
     $driver->type    = $request->type;
-
+    
     $driver->percent   = $request->type === 'TERCERO' ? (float)$request->percent : null;
     $driver->vehicleId = $request->filled('vehicleId') ? (int)$request->vehicleId : null;
 
