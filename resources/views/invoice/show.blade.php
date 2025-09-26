@@ -34,7 +34,8 @@
                     PDF</a>
             </div>
             <div class="col-12 text-left mb-2">
-                <h5 class="text-danger">La factura se marco como pagada y se desconto el saldo de la cuenta corriente</h5>
+                {{-- UX: corregimos acentos --}}
+                <h5 class="text-danger">La factura se marcó como pagada y se descontó el saldo de la cuenta corriente</h5>
             </div>
         @endif
     </div>
@@ -43,6 +44,42 @@
 @stop
 
 @section('content')
+
+    {{-- =======================
+        Totales para encabezado de Factura
+        Fuente de verdad = sumatoria sobre travelCertificates (alineado al PDF).
+        NOTA: $invoice->total en BD incluye Peajes; NO usarlo para "Total (Sin IVA)".
+    ======================= --}}
+    @php
+        // Colección segura (si está vacía o no cargó, las sumas dan 0)
+        $items = $invoice->travelCertificates ?? collect();
+
+        /** Total Neto (sin IVA ni Peajes) */
+        $totalNeto = (float) $items->sum('importeNeto');
+
+        /** Condición IVA del cliente:
+         *  - Si es EXENTO (y opcionalmente MONOTRIBUTO), el PDF muestra IVA = 0.
+         *  - Descomentar MONOTRIBUTO si aplica en tu negocio.
+         */
+        $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? '');
+        $esExento = strpos($condIva, 'EXENTO') !== false;
+        // $esExento = preg_match('/EXENTO|MONOTRIBUTO/i', $condIva); // ← usar si corresponde
+
+        /** IVA:
+         *  - Si EXENTO ⇒ 0
+         *  - Si no, usar $invoice->iva (calculado al facturar) o, como fallback, la suma de las constancias.
+         */
+        $totalIva = (float) ($esExento ? 0 : (isset($invoice->iva) ? $invoice->iva : $items->sum('iva')));
+
+        /** Peajes:
+         *  - Usar $totalTolls si viene precalculado desde el controller; si no, sumar de las constancias.
+         */
+        $totalPeajes = (float) (isset($totalTolls) ? $totalTolls : $items->sum('peajes'));
+
+        /** Total (con IVA) = Neto + IVA + Peajes (debe coincidir con el PDF) */
+        $totalConIva = $totalNeto + $totalIva + $totalPeajes;
+    @endphp
+
     <table class="table table-bordered text-center">
         <thead class="bg-danger">
             <tr>
@@ -63,12 +100,21 @@
                     <a target="_blank"
                         href="{{ Route('showClient', $invoice->client->id) }}">{{ $invoice->client->name }}</a>
                 </td>
-                <td>$&nbsp;{{ number_format($invoice->total, 2, ',', '.') }}</td>
-                <td>$&nbsp;{{ number_format($invoice->iva, 2, ',', '.') }}</td>
-                <td>$&nbsp;{{ number_format($totalTolls, 2, ',', '.') }}</td>
+
+                {{-- REF: "Total (Sin IVA)" debe ser SOLO el Neto, sin sumar Peajes --}}
+                <td>$&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}</td>
+
+                {{-- IVA (0 si EXENTO; si no, traído del controller o calculado por fallback arriba) --}}
+                <td>$&nbsp;{{ number_format($totalIva, 2, ',', '.') }}</td>
+
+                {{-- Peajes (usar $totalTolls si vino del controller, si no fallback calculado arriba) --}}
+                <td>$&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}</td>
+
                 <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
                 <td>{{ $invoice->invoiced }}</td>
-                <td>$&nbsp;{{ number_format($invoice->total + $invoice->iva, 2, ',', '.') }}</td>
+
+                {{-- Total (Con IVA) = Neto + IVA + Peajes (debe coincidir con el PDF) --}}
+                <td>$&nbsp;{{ number_format($totalConIva, 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
