@@ -5,64 +5,21 @@
     <meta charset="UTF-8">
     <title>Constancias</title>
 
-    {{-- ==================== REFACTORIZACIÓN (compactación 1 carilla) ====================
-         - Márgenes de página más chicos (@page)
-         - Fuentes y line-height más compactos
-         - Menos padding en el contenedor
-    ------------------------------------------------------------------------------- --}}
+    {{-- ==================== REFACTORIZACIÓN (compactación 1 carilla) ==================== --}}
     <style>
-        @page {
-            margin: 18mm 12mm; /* top-bottom / left-right */
-        }
+        @page { margin: 18mm 12mm; }
+        html, body { font-size: 11.5px; line-height: 1.15; }
+        .container { border: 1px solid #000; padding: 32px; }
+        h5, p { margin: 4px 0; line-height: 1.15; }
+        .kv { display: flex; justify-content: space-between; margin: 3px 0; line-height: 1.5; }
+        .header-img { max-width: 100%; height: auto; display: block; margin: 6px 0 10px; }
 
-        html, body {
-            font-size: 11.5px;
-            line-height: 1.15;
-        }
-
-        .container {
-            border: 1px solid #000;
-            padding: 32px; /* antes 65px */
-        }
-
-        h5, p {
-            margin: 4px 0;
-            line-height: 1.15;
-        }
-
-        .kv {
-            display: flex;
-            justify-content: space-between;
-            margin: 3px 0;
-            line-height: 1.5;
-        }
-
-        .header-img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 6px 0 10px;
-        }
-
-        /* ============== REFACTORIZACIÓN (tabla conceptual compacta) ============== */
-        .conceptos-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 1rem;
-            line-height: 1.5;  /* MUY importante para ganar renglones */
-        }
-        .conceptos-table th, .conceptos-table td {
-            padding: 2px 4px;   /* menos padding vertical */
-            border-bottom: 1px solid #ccc;
-            vertical-align: top; /* evita “estirar” filas */
-        }
+        /* Tabla compacta de conceptos */
+        .conceptos-table { width: 100%; border-collapse: collapse; font-size: 1rem; line-height: 1.5; }
+        .conceptos-table th, .conceptos-table td { padding: 2px 4px; border-bottom: 1px solid #ccc; vertical-align: top; }
 
         /* Totales compactos */
-        .totales p {
-            margin: 2px 0;
-            line-height: 1.5;
-            font-size: 1rem;
-        }
+        .totales p { margin: 2px 0; line-height: 1.5; font-size: 1rem; }
     </style>
     {{-- ============================================================================ --}}
     <link rel="stylesheet"
@@ -94,11 +51,13 @@
     <div class="col-12 table-bordered text-left p-2">
         <p><strong>CONCEPTOS:</strong></p>
 
-        {{-- ================= REFACTORIZACIÓN (PDF Conceptos) =================
-             Para que el ADICIONAL imprima el monto real (% * FIJO) aunque price=0 en BD,
-             usamos $travelItem->display_price (accessor en el modelo TravelItem).
-             Además mostramos los conceptos en una tabla compacta para evitar 2da hoja.
-        ------------------------------------------------------------------- --}}
+        {{-- ================= REFACTORIZACIÓN (Conceptos) =================
+             Mostrar el monto *real* de cada ítem:
+             - DESCUENTO % → monto negativo (computed_price)
+             - ADICIONAL % sobre FIJO → display_price
+             - Resto → price
+             También usamos computed_description cuando exista.
+        ---------------------------------------------------------------- --}}
         <table class="conceptos-table">
             <thead>
             <tr>
@@ -109,40 +68,53 @@
             </thead>
             <tbody>
             @foreach ($travelCertificate->travelItems as $travelItem)
+                @php
+                    // Monto y descripción “inteligentes” (con fallback)
+                    $monto = $travelItem->computed_price
+                          ?? $travelItem->display_price
+                          ?? ($travelItem->price ?? 0);
+
+                    $desc  = $travelItem->computed_description
+                          ?? $travelItem->description;
+
+                    $isNeg = $monto < 0;
+                @endphp
                 <tr>
                     <td>{{ $travelItem->type }}</td>
-                    <td>
-                        {{-- Si querés mostrar el % al lado del adicional (opcional) --}}
-                        @if($travelItem->type === 'ADICIONAL' && !is_null($travelItem->percent))
-                            ({{ (float)$travelItem->percent }}%)
-                        @endif
-                        {{ $travelItem->description }}
+                    <td>{{ $desc }}</td>
+                    <td style="text-align:right; {{ $isNeg ? 'color:#c00' : '' }}">
+                        $&nbsp;{{ number_format($monto, 2, ',', '.') }}
                     </td>
-                    <td style="text-align:right;">$&nbsp;{{ number_format($travelItem->display_price, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
             </tbody>
         </table>
-        {{-- ================= /REFACTORIZACIÓN (PDF Conceptos) ================= --}}
+        {{-- ================= /REFACTORIZACIÓN (Conceptos) ================= --}}
     </div>
 
-    {{-- =====================  REFACTORIZACIÓN (PDF Totales)  =====================
-       - Etiquetas pedidas: IMPORTE NETO, PEAJES, IVA y TOTAL.
-       - Usamos cálculos del modelo (total_calculado / iva_calculado) para que
-         ADICIONALES (% sobre FIJO) y DESCUENTOS impacten sin depender de DB.
-       - TOTAL = IMPORTE NETO + IVA + PEAJES (según requerimiento).
-       --------------------------------------------------------------------------- --}}
+    {{-- =====================  REFACTORIZACIÓN (Totales)  =====================
+         Usamos los accessors del modelo para mantener una única “fuente de verdad”:
+         - subtotal_sin_peajes, total_peajes, descuento_aplicable, monto_adicional
+         - total_calculado e iva_calculado para coherencia con la vista HTML
+       ---------------------------------------------------------------------- --}}
     @php
-        // total_calculado = suma de ítems (incluye peajes) calculada dinámicamente
-        $subtotalCalculado = $travelCertificate->total_calculado ?? ($travelCertificate->total ?? 0);
-        $ivaCalculado      = $travelCertificate->iva_calculado   ?? ($travelCertificate->iva   ?? 0);
-        $peajes            = $totalTolls ?? 0;
+        // Peajes: si el controller pasó $totalTolls lo usamos, sino calculamos acá.
+        $peajes = isset($totalTolls)
+            ? (float) $totalTolls
+            : (float) ($travelCertificate->travelItems->where('type', 'PEAJE')->sum('price'));
 
-        // Importe Neto = subtotal sin IVA NI PEAJES (base imponible)
-        $importeNeto = max(0, $subtotalCalculado - $peajes);
+        // Neto = base gravada sin peajes (subtotal_sin_peajes - descuento + adicional)
+        $importeNeto = max(0,
+            (($travelCertificate->subtotal_sin_peajes ?? 0)
+            - ($travelCertificate->descuento_aplicable ?? 0)
+            + ($travelCertificate->monto_adicional ?? 0))
+        );
 
-        // Total final = Neto + IVA + Peajes
-        $totalFinal  = $importeNeto + $ivaCalculado + $peajes;
+        // IVA calculado por el modelo (21% sobre base gravada)
+        $ivaCalculado = (float) ($travelCertificate->iva_calculado ?? 0);
+
+        // Total final
+        $totalFinal = $importeNeto + $peajes + $ivaCalculado;
     @endphp
 
     <div class="col-12 table-bordered text-left mt-2 p-2 totales">
@@ -159,9 +131,10 @@
             <span>$&nbsp;{{ number_format($totalFinal, 2, ',', '.') }}</span>
         </p>
     </div>
-    {{-- ===================  /REFACTORIZACIÓN (PDF Totales)  ===================== --}}
+    {{-- ===================  /REFACTORIZACIÓN (Totales)  ===================== --}}
 </div>
 </body>
 </html>
+
 
 

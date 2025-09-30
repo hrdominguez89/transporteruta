@@ -2,12 +2,13 @@
 
 @section('title', 'Constancias de Viaje')
 
-{{-- REFACTORIZACION:
-     Mostramos el monto REAL de los ítems ADICIONAL usando $travelItem->display_price
-     (calculado como porcentaje * tarifa fija del FIJO), S/ Migraciones.
-     -> Reemplazamos $travelItem->price por $travelItem->display_price en la tabla de ítems.
-     Nota: replicar este mismo cambio en el PDF para que imprima el valor correcto.
---}}
+{{-- REFACTORIZACIÓN (UI de ítems):
+   - Mostrar montos calculados:
+     * DESCUENTO: usar $travelItem->computed_price (negativo; rojo)
+     * ADICIONAL: usar $travelItem->display_price (% de FIJO)
+     * Resto: price normal
+   - Descripción inteligente para DESCUENTO: $travelItem->computed_description
+   (PDF: replicar misma lógica para mantener consistencia) --}}
 
 @section('content_header')
     <div class="row">
@@ -46,94 +47,108 @@
         @endif
         @include('travelItem.modals.store')
         @include('travelCertificate.modals.update')
-    @stop
+@stop
 
-    @section('content')
-        <h4>Detalles</h4>
-        <table class="table table-sm table-bordered text-center">
-            <thead class="bg-danger">
+@section('content')
+    <h4>Detalles</h4>
+    <table class="table table-sm table-bordered text-center">
+        <thead class="bg-danger">
+            <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Chofer</th>
+                <th>Pago al Chofer</th>
+                <th>Precio (Sin IVA)</th>
+                <th>IVA</th>
+                <th>Destino</th>
+                <th>Precio Total (Con IVA)</th>
+                <th>Facturado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                <td>{{ $travelCertificate->client->name }}</td>
+                <td>{{ $travelCertificate->driver->name }}</td>
+                <td>$&nbsp;{{ number_format($travelCertificate->driverPayment, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($travelCertificate->total, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}</td>
+                <td>{{ $travelCertificate->destiny }}</td>
+                <td>$&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}</td>
+                <td>{{ $travelCertificate->invoiced }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Items de Viaje</h4>
+    <table class="table table-sm table-bordered text-center data-table">
+        <thead class="bg-danger">
+            <tr>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Precio Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($travelCertificate->travelItems as $travelItem)
+                @php
+                    // REFACTORIZACIÓN: monto mostrado por ítem
+                    // 1) DESCUENTO → computed_price (negativo)
+                    // 2) ADICIONAL → display_price (% de FIJO)
+                    // 3) Resto → price
+                    $monto = $travelItem->computed_price ?? $travelItem->display_price ?? ($travelItem->price ?? 0);
+                @endphp
                 <tr>
-                    <th>Fecha</th>
-                    <th>Cliente</th>
-                    <th>Chofer</th>
-                    <th>Pago al Chofer</th>
-                    <th>Precio (Sin IVA)</th>
-                    <th>IVA</th>
-                    <th>Destino</th>
-                    <th>Precio Total (Con IVA)</th>
-                    <th>Facturado</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
-                    <td>{{ $travelCertificate->client->name }}</td>
-                    <td>{{ $travelCertificate->driver->name }}</td>
-                    <td>$&nbsp;{{ number_format($travelCertificate->driverPayment, 2, ',', '.') }}</td>
-                    <td>$&nbsp;{{ number_format($travelCertificate->total, 2, ',', '.') }}</td>
-                    <td>$&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}</td>
-                    <td>{{ $travelCertificate->destiny }}</td>
-                    <td>$&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}</td>
-                    <td>{{ $travelCertificate->invoiced }}</td>
-                </tr>
-            </tbody>
-        </table>
+                    <td>{{ $travelItem->type }}</td>
 
-        <h4>Items de Viaje</h4>
-        <table class="table table-sm table-bordered text-center data-table">
-            <thead class="bg-danger">
-                <tr>
-                    <th>Tipo</th>
-                    <th>Descripción</th>
-                    <th>Precio Total</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($travelCertificate->travelItems as $travelItem)
-                    <tr>
-                        <td>{{ $travelItem->type }}</td>
-                        <td class="text-center">{{ $travelItem->description }}</td>
+                    {{-- REFACTORIZACIÓN: descripción enriquecida para DESCUENTO, fallback al texto original --}}
+                    <td class="text-center">
+                        {{ $travelItem->computed_description ?? $travelItem->description }}
+                    </td>
 
-                        {{-- REFACTORIZACION: usar display_price para que ADICIONAL muestre % * FIJO (price en DB puede ser 0) --}}
-                        <td data-order="{{ $travelItem->display_price }}">
-                            $&nbsp;{{ number_format($travelItem->display_price, 2, ',', '.') }}
-                        </td>
+                    {{-- REFACTORIZACIÓN: precio calculado (descuento negativo en rojo) --}}
+                    <td data-order="{{ $monto }}">
+                        <span class="{{ $monto < 0 ? 'text-danger' : '' }}">
+                            $&nbsp;{{ ($monto < 0 ? '-' : '') . number_format(abs($monto), 2, ',', '.') }}
+                        </span>
+                    </td>
 
-                        <td>
-                            @if ($travelCertificate->invoiced == 'NO')
-                                @if ($travelItem->type == 'FIJO' && $tiene_tarifa_adicional)
-                                    <strong class="text-danger">Este ítem tiene un adicional asociado. Eliminá primero el adicional para poder borrarlo.</strong>
-                                @else
-                                    <button class="btn btn-sm btn-danger" data-toggle="modal"
-                                        data-target="#deleteItemModal{{ $travelItem->id }}">Eliminar</button>
-                                @endif
+                    <td>
+                        @if ($travelCertificate->invoiced == 'NO')
+                            @if ($travelItem->type == 'FIJO' && $tiene_tarifa_adicional)
+                                <strong class="text-danger">Este ítem tiene un adicional asociado. Eliminá primero el adicional para poder borrarlo.</strong>
                             @else
-                                <strong class="text-danger">¡No se pueden realizar cambios!</strong>
+                                <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                    data-target="#deleteItemModal{{ $travelItem->id }}">Eliminar</button>
                             @endif
-                        </td>
-                    </tr>
-                    @include('travelItem.modals.delete')
-                @endforeach
-            </tbody>
-        </table>
-    @stop
+                        @else
+                            <strong class="text-danger">¡No se pueden realizar cambios!</strong>
+                        @endif
+                    </td>
+                </tr>
+                @include('travelItem.modals.delete')
+            @endforeach
+        </tbody>
+    </table>
+@stop
 
-    @section('js')
-        <script>
-            $(document).ready(function() {
-                $('.data-table').DataTable();
-            });
-            var table = new DataTable('.data-table', {
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
-                }
-            });
-            $('.select2').select2();
-            $(document).ready(function() {
-                // Activar tooltips
-                $('[data-bs-toggle="tooltip"]').tooltip();
-            });
-        </script>
-    @stop
+@section('js')
+    <script>
+        $(document).ready(function() {
+            $('.data-table').DataTable();
+        });
+        var table = new DataTable('.data-table', {
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+            }
+        });
+        $('.select2').select2();
+        $(document).ready(function() {
+            // Activar tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+@stop
+
 
