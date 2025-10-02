@@ -76,6 +76,15 @@ class TravelCertificateController extends Controller
             }
         }
 
+        // Si el formulario mandó 0 o vacío, guardamos NULL
+        $newTravelCertificate->invoiceId = ($request->filled('invoiceId') && (int)$request->invoiceId > 0)
+        ? (int) $request->invoiceId
+        : null;
+
+        $newTravelCertificate->driverSettlementId = ($request->filled('driverSettlementId') && (int)$request->driverSettlementId > 0)
+        ? (int) $request->driverSettlementId
+        : null;
+
         // Guardar el nuevo certificado de viaje
         $newTravelCertificate->save();
 

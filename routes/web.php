@@ -42,11 +42,20 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('ver/constancia-de-viaje/{id}', [TravelCertificateController::class, 'show'])->name('showTravelCertificate');
     Route::put('actualizar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'update'])->name('updateTravelCertificate');
     Route::get('imprimir/constancia-de-viaje/{id}', [TravelCertificateController::class, 'generateTravelCertificatePdf'])->name('travelCertificatePdf');
-    Route::put('agregar/a/la/factura/{id}', [TravelCertificateController::class, 'addToInvoice'])->name('addToInvoice');
-    Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
+    
+    //QUITÉ ESTAS RUTAS PARA PODWER VISUALIZAR EN LAS FACTURAS DESCUENTOS Y DEMÁS
+    //Route::put('agregar/a/la/factura/{id}', [TravelCertificateController::class, 'addToInvoice'])->name('addToInvoice');//
+    //Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
     // Bulk add/remove travel certificates to/from an invoice
-    Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
-    Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
+    //Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
+    //Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');//
+    
+    // ✅ NUEVAS: usan InvoiceController (coinciden con los name() que usa nuestro Blade)
+    Route::put('agregar/a/la/factura/{id}', [InvoiceController::class, 'addToInvoice'])->name('addToInvoice');
+    Route::put('quitar/de/la/factura/{id}', [InvoiceController::class, 'removeFromInvoice'])->name('removeFromInvoice');
+    Route::put('agregar/multiples/a/la/factura', [InvoiceController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
+    Route::put('quitar/multiples/de/la/factura', [InvoiceController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
+
     Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');
     Route::put('quitar/de/la/liquidacion/{id}', [TravelCertificateController::class, 'removeFromDriverSettlement'])->name('removeFromDriverSettlement');
     // Eliminar constancia de viaje (solo si no está facturada)
@@ -66,10 +75,19 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('agregar/tax/al/recibo/{id}', [InvoiceController::class, 'addTaxToReceiptInvoice'])->name('addTaxToReceiptInvoice');
     Route::delete('remover/tax/al/recibo/{taxId}', [InvoiceController::class, 'removeTaxFromInvoiceReceipt'])->name('removeTaxFromInvoiceReceipt');
     
-    Route::delete('quitar/al/recbibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
+    Route::delete('quitar/al/recibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
     Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
     // Eliminar factura (solo si no está facturada y no está pagada)
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
+
+    // 🔧 DEV ONLY — Normalizador de factura (recalcula totales/balance/paid)
+    //    Se expone SOLO en entorno local para evitar riesgos en producción.
+    if (app()->environment('local')) {
+        Route::get(
+            'debug/normalizar-factura/{id}',
+            [InvoiceController::class, 'normalizeInvoice']
+        )->name('normalizeInvoice');
+    }
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');

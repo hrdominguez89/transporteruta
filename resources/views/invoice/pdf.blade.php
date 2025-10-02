@@ -28,7 +28,6 @@
             vertical-align: top;
         }
 
-
         .information-empresa table th {
             font-size: 10px;
         }
@@ -53,12 +52,10 @@
 
         .conceptos tbody tr:nth-child(even) {
             background-color: #e9ecef;
-            /* Gris un poco más oscuro */
         }
 
         .totales tr:nth-child(even) {
             background-color: #FFFFFF;
-            /* Gris un poco más oscuro */
         }
 
         .conceptos thead {
@@ -85,7 +82,7 @@
                         <tr>
                             <td>
                                 <img style="width: 100%;"
-                                    src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
+                                     src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
                             </td>
                         </tr>
                         <tr class="information-empresa">
@@ -157,6 +154,7 @@
             </tr>
         </table>
         <hr>
+
         {{-- DATA CLIENTE --}}
         <table>
             <tr class="information-cliente">
@@ -170,7 +168,6 @@
                         </td>
                     </tr>
                     <tr>
-
                         <th style="text-align:left">
                             DNI/CUIT:
                         </th>
@@ -197,6 +194,33 @@
                 </table>
             </tr>
         </table>
+
+        {{-- ===================== REFACT (totales de factura vía modelo) =====================
+             Calculamos por suma de constancias para que apliquen:
+             - Descuentos (monto y %) sobre lo gravado (sin peajes)
+             - Adicionales % sobre FIJO
+             - Peajes por separado
+             Fórmula por constancia:
+               NETO = (subtotal_sin_peajes - descuento_aplicable) + monto_adicional
+               IVA  = iva_calculado (0 si cliente EXENTO)
+               PEAJ = total_peajes
+               TOTAL = NETO + IVA + PEAJ
+        ---------------------------------------------------------------------------- --}}
+        @php
+            $items = $invoice->travelCertificates ?? collect();
+
+            // Detectar condición IVA del cliente (acepta ivaType / ivaCondition)
+            $condIva  = strtoupper($invoice->client->ivaType ?? $invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? '');
+            $esExento = strpos($condIva, 'EXENTO') !== false;
+
+            // Totales por factura (sumando constancias)
+            $totalNeto   = (float) $items->sum(fn ($tc) => (($tc->subtotal_sin_peajes - $tc->descuento_aplicable) + $tc->monto_adicional));
+            $totalIva    = (float) $items->sum(fn ($tc) => $esExento ? 0 : $tc->iva_calculado);
+            $totalPeajes = (float) $items->sum(fn ($tc) => $tc->total_peajes);
+            $totalConIva = $totalNeto + $totalIva + $totalPeajes;
+        @endphp
+        {{-- ===================== /REFACT (totales de factura) ============================ --}}
+
         <hr>
         <table class="conceptos">
             <thead>
@@ -208,34 +232,50 @@
                     <td style="text-align:center;width:30%">I.V.A.</td>
                     <td style="text-align:center;width:30%">Peajes</td>
                 </tr>
-
             </thead>
             <tbody>
                 @foreach ($invoice->travelCertificates as $travelCertificate)
+                    @php
+                        // REFACT (por fila): usamos accessors del modelo para que el cálculo
+                        // coincida con la constancia (descuentos/adicionales/peajes)
+                        $neto   = (($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable) + $travelCertificate->monto_adicional);
+                        $iva    = $esExento ? 0 : $travelCertificate->iva_calculado;
+                        $peajes = $travelCertificate->total_peajes;
+                    @endphp
                     <tr style="font-size:14px;">
                         <td style="padding: 2px 8px;text-align:center">
-                            {{ number_format($travelCertificate->id, 0, ',', '.') }} / {{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.'): ' - ' }}</td>
+                            {{ number_format($travelCertificate->id, 0, ',', '.') }} /
+                            {{ $travelCertificate->number ? number_format($travelCertificate->number, 0, ',', '.') : ' - ' }}
+                        </td>
                         <td style="padding: 2px 8px;text-align:center">
-                            {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                            {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}
+                        </td>
                         <td style="padding: 2px 8px;text-align:left">{{ $travelCertificate->destiny }}</td>
-                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
+
+                        {{-- REFACT: Importe Neto / IVA / Peajes por fila usando accessors --}}
+                        <td style="padding: 2px 8px;text-align:right">
+                            $&nbsp;{{ number_format($neto, 2, ',', '.') }}
                         </td>
-                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($invoice->client->ivaType != "EXENTO" ? (($travelCertificate->total - $travelCertificate->totalTolls) / 100) * 21 : 0, 2, ',', '.') }}
+                        <td style="padding: 2px 8px;text-align:right">
+                            $&nbsp;{{ number_format($iva, 2, ',', '.') }}
                         </td>
-                        <td style="padding: 2px 8px;text-align:right">$&nbsp;{{ number_format($travelCertificate->totalTolls, 2, ',', '.') }}
+                        <td style="padding: 2px 8px;text-align:right">
+                            $&nbsp;{{ number_format($peajes, 2, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+
         <hr>
         <table>
+            {{-- REFACT: totales finales usando $totalNeto / $totalIva / $totalPeajes del bloque superior --}}
             <tr style="background-color:#FFFFFF">
                 <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
                     Subtotal
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalImporteNeto, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
@@ -243,7 +283,7 @@
                     I.V.A.
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($invoice->client->ivaType != "EXENTO" ? ($totalImporteNeto / 100) * 21 : 0, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalIva, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
@@ -251,7 +291,7 @@
                     Peajes
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalTolls, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
@@ -263,30 +303,31 @@
                     Total
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalImporteNeto + ($invoice->client->ivaType != "EXENTO" ? ($totalImporteNeto / 100) * 21 : 0) + $totalTolls, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalConIva, 2, ',', '.') }}
                 </th>
             </tr>
         </table>
     </div>
+
     <script type="text/php">
-            if (isset($pdf)) {
-                $x_pagina = 500;  // Posición en X para el número de página
-                $y_pagina = 810;  // Posición en Y para el número de página
-                
-        
-                $x_factura = 50;  // Posición en X para la info extra
-                $y_factura = 810; // Posición en Y para la info extra
-        
-                $size = 10;
-                $color = array(0,0,0); // Color negro
-        
-                // Texto de la numeración de páginas
-                $pdf->page_text($x_pagina, $y_pagina, "Página {PAGE_NUM} de {PAGE_COUNT}", null, $size, $color);
-        
-                // Texto con número de liquidación y cliente
-                $pdf->page_text($x_factura, $y_factura, "Factura N° {{ number_format($invoice->number,0,',','.') }} - Cliente: {{ $invoice->client->name }}", null, $size, $color);
-            }
-        </script>
+        if (isset($pdf)) {
+            $x_pagina = 500;  // Posición en X para el número de página
+            $y_pagina = 810;  // Posición en Y para el número de página
+
+            $x_factura = 50;  // Posición en X para la info extra
+            $y_factura = 810; // Posición en Y para la info extra
+
+            $size = 10;
+            $color = array(0,0,0); // Color negro
+
+            // Texto de la numeración de páginas
+            $pdf->page_text($x_pagina, $y_pagina, "Página {PAGE_NUM} de {PAGE_COUNT}", null, $size, $color);
+
+            // Texto con número de liquidación y cliente
+            $pdf->page_text($x_factura, $y_factura, "Factura N° {{ number_format($invoice->number,0,',','.') }} - Cliente: {{ $invoice->client->name }}", null, $size, $color);
+        }
+    </script>
 </body>
 
 </html>
+
