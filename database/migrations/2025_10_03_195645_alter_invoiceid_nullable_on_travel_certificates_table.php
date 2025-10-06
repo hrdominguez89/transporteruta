@@ -16,50 +16,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('travel_certificates') || !Schema::hasColumn('travel_certificates', 'invoiceId')) {
-            return;
-        }
-
-        // 1) Buscar nombre real del FK (si lo hay) en information_schema
-        $fkName = DB::table('information_schema.KEY_COLUMN_USAGE')
-            ->whereRaw('TABLE_SCHEMA = DATABASE()')
-            ->where('TABLE_NAME', 'travel_certificates')
-            ->where('COLUMN_NAME', 'invoiceId')
-            ->whereNotNull('REFERENCED_TABLE_NAME')
-            ->value('CONSTRAINT_NAME');
-
-        // 2) Dropear el FK si existe
-        if ($fkName) {
-            try {
-                DB::statement("ALTER TABLE `travel_certificates` DROP FOREIGN KEY `{$fkName}`");
-            } catch (\Throwable $e) {
-                // ignoramos; si no existe o ya se dropeó, seguimos
-            }
-        }
-
-        // 3) Detectar el tipo exacto de la columna para no romper (BIGINT UNSIGNED, etc.)
-        $columnType = DB::table('information_schema.COLUMNS')
-            ->whereRaw('TABLE_SCHEMA = DATABASE()')
-            ->where('TABLE_NAME', 'travel_certificates')
-            ->where('COLUMN_NAME', 'invoiceId')
-            ->value('COLUMN_TYPE') ?? 'bigint unsigned';
-
-        // 4) Volverla NULL
-        DB::statement("ALTER TABLE `travel_certificates` MODIFY `invoiceId` {$columnType} NULL");
-
-        // 5) Re-crear FK con ON DELETE SET NULL (si la tabla invoices existe)
-        if (Schema::hasTable('invoices')) {
-            try {
-                DB::statement("ALTER TABLE `travel_certificates`
-                    ADD CONSTRAINT `tc_invoiceId_fk`
-                    FOREIGN KEY (`invoiceId`) REFERENCES `invoices`(`id`)
-                    ON DELETE SET NULL");
-            } catch (\Throwable $e) {
-                // si falla por nombre duplicado u otro motivo, no interrumpimos el deploy
-            }
-        }
+        DB::statement("ALTER TABLE `travel_certificates` MODIFY `invoiceId` BIGINT(20) UNSIGNED NULL");
+        DB::statement("ALTER TABLE `travel_certificates` MODIFY `driverSettlementId` BIGINT(20) UNSIGNED NULL");
     }
-
     /**
      * Revertir: volver invoiceId NOT NULL.
      * Nota: para que no falle al convertir a NOT NULL, cualquier NULL se pasa a 0.
@@ -67,28 +26,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (!Schema::hasTable('travel_certificates') || !Schema::hasColumn('travel_certificates', 'invoiceId')) {
-            return;
-        }
-
-        // Intentar dropear el FK que agregamos en up()
-        try {
-            DB::statement("ALTER TABLE `travel_certificates` DROP FOREIGN KEY `tc_invoiceId_fk`");
-        } catch (\Throwable $e) {
-            // ignoramos
-        }
-
-        $columnType = DB::table('information_schema.COLUMNS')
-            ->whereRaw('TABLE_SCHEMA = DATABASE()')
-            ->where('TABLE_NAME', 'travel_certificates')
-            ->where('COLUMN_NAME', 'invoiceId')
-            ->value('COLUMN_TYPE') ?? 'bigint unsigned';
-
-        // Asegurar que no queden NULL antes de NOT NULL
+        // Primero actualizar los NULL a 0
         DB::table('travel_certificates')->whereNull('invoiceId')->update(['invoiceId' => 0]);
-
-        DB::statement("ALTER TABLE `travel_certificates` MODIFY `invoiceId` {$columnType} NOT NULL");
-
-        // (Opcional) acá podrías re-crear un FK "estricto" si garantizas que no hay 0s.
+        DB::table('travel_certificates')->whereNull('driverSettlementId')->update(['driverSettlementId' => 0]);
+        // Luego cambiar las columnas
+        DB::statement("ALTER TABLE `travel_certificates` MODIFY `invoiceId` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0");
+        DB::statement("ALTER TABLE `travel_certificates` MODIFY `driverSettlementId` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0");
     }
 };

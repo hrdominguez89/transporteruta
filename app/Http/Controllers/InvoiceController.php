@@ -52,10 +52,7 @@ class InvoiceController extends Controller
             $invoice->paid         = 'NO';
             $invoice->invoiced     = 'NO';
 
-            // Si invoices.receiptId es nullable y con FK, conviene NULL (no 0).
-            // $invoice->receiptId    = 0;
-            // Recomendado:
-            $invoice->receiptId    = null;
+            $invoice->receiptId    = 0;
 
             $invoice->save();
 

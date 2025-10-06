@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::table('invoices', function (Blueprint $table) {
             // Índice único por número + punto de venta
-            $table->unique(['number', 'point_of_sale'], 'unique_invoice_number_point_of_sale');
+            $table->unique(['number', 'pointOfSale'], 'unique_invoice_number_point_of_sale');
         });
     }
 
