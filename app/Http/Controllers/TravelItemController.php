@@ -10,21 +10,9 @@ use Illuminate\Support\Facades\Log;
 
 class TravelItemController extends Controller
 {
-    /**
-     * Guarda un ítem en una Constancia.
-     *
-     * REFACTORIZACIÓN (claridad):
-     * - ADICIONAL: el form puede enviar el porcentaje como `percent` (nuevo)
-     *   o `porcentaje` (legacy). Validamos ambos y guardamos SIEMPRE en `percent`
-     *   con `price=0`. El importe lo calcula el modelo/vistas/PDF.
-     * - DESCUENTO: ahora soporta dos modos:
-     *      - Monto fijo  → guarda `price` > 0, `percent = 0`
-     *      - Porcentaje  → guarda `percent` > 0, `price = 0`
-     *   La resta sobre la base gravada la hace `recalcTotals()` del modelo.
-     */
     public function store(Request $request, $travelCertificateId)
     {
-        // Buscar la constancia (para asegurar que existe)
+        // Busca la constancia (para asegurar que existe)
         $travelCertificate = TravelCertificate::findOrFail($travelCertificateId);
 
         // ================================================================
@@ -38,14 +26,16 @@ class TravelItemController extends Controller
         ];
         $request->merge(['type' => $mapType[$typeRaw] ?? $typeRaw]);
 
+        //Elimíne estos separados de miles porque me dan un monto erróneo del tipo: $ 11.689.750,00 
+
         // ================================================================
         // Mejora — Normalizar PRICE si llega con separadores (12.000,50 -> 12000.50)
         // ================================================================
-        if ($request->has('price')) {
+        /*if ($request->has('price')) {
             $request->merge([
                 'price' => str_replace(['.', ','], ['', '.'], (string) $request->input('price'))
             ]);
-        }
+        }*/
 
         // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
         $rules = [
