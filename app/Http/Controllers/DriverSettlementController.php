@@ -24,9 +24,10 @@ class DriverSettlementController extends Controller
 
     public function generate(StoreDriverSettlementRequest $request)
     {
+
         $newDriverSettlement = new DriverSettlement;
-        $newDriverSettlement->number = $request->number;
-        $newDriverSettlement->date = Carbon::now()->format('Y-m-d');;
+        $newDriverSettlement->number = (DriverSettlement::max('number') ?? 0) + 1;
+        $newDriverSettlement->date = Carbon::now()->format('Y-m-d');
         $newDriverSettlement->total = 0;
         $newDriverSettlement->driverId = $request->driverId;
         $newDriverSettlement->paymentMethodId = 0;

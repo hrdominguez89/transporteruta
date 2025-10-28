@@ -56,6 +56,7 @@ class ClientController extends Controller
         }
         $total = Client::all()->sum('balance');
         $date = now();
+        $clients = $clients->sortBy('name');
         $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date,'saldos' => $saldos]);
         $pdf->setPaper('A4', 'portrait');
         return $pdf->stream('Reporte-cuenta-corriente-general.pdf');

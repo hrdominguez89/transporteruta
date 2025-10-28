@@ -196,7 +196,12 @@
         </table>
         <br>
             <h4>Constancias de viaje del chofer</h4>
-            <table class="table table-sm table-bordered text-center data-table">
+            <form id="formConstancias">
+                <div class="d-flex justify-content-end ">
+                    <button id="btn-ds-id"class="btn btn-sm btn-sm btn-success mb-3" value="{{ $driverSettlement->id }}">Agregar constancias</button>
+                </div>
+            </form>
+            <table class="table table-sm table-bordered text-center data-table " >
                 <thead class="bg-danger">
                     <tr>
                         <th class="text-center" style="font-size:14px">Fecha</th>
@@ -330,8 +335,9 @@
                                             <input type="hidden" name="driverSettlementId"
                                                 value="{{ $driverSettlement->id }}">
                                             <button type="submit" class="btn btn-sm btn-sm btn-success">Agregar a la
-                                                Liquidación</button>
+                                            Liquidación</button>
                                         </form>
+                                        <input type="checkbox" value="{{ $travelCertificate->id }}">
                                     </td>
                                 </tr>
                             @endif
@@ -355,5 +361,37 @@
                 // Activar tooltips
                 $('[data-bs-toggle="tooltip"]').tooltip();
             });
+
+            document.getElementById('formConstancias').addEventListener('submit', function(e) {
+                e.preventDefault();
+                cargaMultiple();
+            });
+
+            function cargaMultiple() {
+                const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                const ids = Array.from(checkedBoxes).map(cb => cb.value);
+                const driverSettlementId = document.getElementById("btn-ds-id").value;
+                if (ids.length === 0) {
+                    alert('Selecciona al menos una constancia');
+                    return;
+                }
+                
+                // OPCIÓN 1: Enviar con AJAX (RECOMENDADO)
+                fetch('{{ route("addMultipleToDriverSettlement") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        ids: ids,
+                        driverSettlementId:driverSettlementId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    window.location.href = data.redirect; // o recargar página
+                });
+            }
         </script>
     @stop

@@ -58,6 +58,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');
     Route::put('quitar/de/la/liquidacion/{id}', [TravelCertificateController::class, 'removeFromDriverSettlement'])->name('removeFromDriverSettlement');
+    Route::post('agregar/varios/la/liquidacion/', [TravelCertificateController::class, 'addMultipleToDriverSettlement'])->name('addMultipleToDriverSettlement');
+
     // Eliminar constancia de viaje (solo si no está facturada)
     Route::delete('eliminar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'destroy'])->name('deleteTravelCertificate');
 

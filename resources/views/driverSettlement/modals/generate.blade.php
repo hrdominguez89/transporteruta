@@ -10,8 +10,8 @@
             <div class="modal-body">
                 <form action="{{ Route('generateDriverSettlement') }}" class="form-group" method="POST">
                     @csrf
-                    <label for="number">Numero (Sistema antiguo):</label>
-                    <input type="number" name="number" id="number" placeholder="Ingrese número del sistema antiguo" class="form-control mb-2">
+                    <!-- <label for="number">Numero (Sistema antiguo):</label> -->
+                    <!-- <input type="number" name="number" id="number" placeholder="Ingrese número del sistema antiguo" class="form-control mb-2"> -->
                     <label for="driverId">Chofer:<span class="text-danger"> *</span></label>
                     <select name="driverId" class="form-control mb-2" required>
                         <option value="">---- Seleccione una opcion ----</option>

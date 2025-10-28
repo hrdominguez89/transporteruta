@@ -317,4 +317,25 @@ class TravelCertificateController extends Controller
         $exists = $query->exists();
         return response()->json(['exists' => $exists]);
     }
+
+    public function addMultipleToDriverSettlement(Request $request)
+    {
+        $ids = $request->ids;
+        $dsId = $request->driverSettlementId;
+        $driverSettlement = DriverSettlement::find(  $dsId );
+        foreach ($ids as $id) {
+            $travelCertificate = TravelCertificate::find($id);
+            $travelCertificate->driverSettlementId =   $dsId ;
+            $driverSettlement->total += ($travelCertificate->total - $travelCertificate->driverPayment);
+            $travelCertificate->isPaidToDriver = 'SI';
+            $travelCertificate->save();
+            $driverSettlement->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'redirect' => route('showDriverSettlement', $dsId)
+        ]);
+    }
+    
 }
