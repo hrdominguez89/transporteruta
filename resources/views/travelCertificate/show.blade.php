@@ -25,28 +25,77 @@
 
         @if ($travelCertificate->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal" data-target="#storeModal">Agregar Nuevo
-                    Item</button>
+                <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal" data-target="#storeModal">
+                    Agregar Nuevo Item
+                </button>
+
+                {{-- NUEVO (10/2025): botón para carga MÚLTIPLE de remitos (no afectan importes) --}}
+                <button class="btn btn-sm btn-primary col-2 mr-2" data-toggle="modal" data-target="#remitosMultipleModal">
+                    Cargar Remitos
+                </button>
+
                 <button class="btn btn-sm btn-success col-2" data-toggle="modal"
                     data-target="#updateModal{{ $travelCertificate->id }}">Actualizar Constancia</button>
             </div>
             <div class="col-12 text-right mb-2">
-                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
-                    PDF</a>
+                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">
+                    Generar PDF
+                </a>
             </div>
         @else
             <div class="col-12 text-right mb-2">
-                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">Generar
-                    PDF</a>
+                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">
+                    Generar PDF
+                </a>
             </div>
             <div class="col-12 text-left mb-2">
-                <strong class="text-danger">La constancia ha sido agregada a la factura <a
-                        href="{{ Route('showInvoice', $travelCertificate->invoice->id) }}">{{ number_format($travelCertificate->invoice->id, 0, ',', '.') }}</a>,
+                <strong class="text-danger">La constancia ha sido agregada a la factura
+                    <a href="{{ Route('showInvoice', $travelCertificate->invoice->id) }}">
+                        {{ number_format($travelCertificate->invoice->id, 0, ',', '.') }}
+                    </a>,
                     no se pueden realizar modificaciones.</strong>
             </div>
         @endif
+
         @include('travelItem.modals.store')
         @include('travelCertificate.modals.update')
+
+        {{-- MODAL NUEVO (10/2025): carga múltiple de remitos. POST a travelItems.storeMultipleRemitos --}}
+        <div class="modal fade" id="remitosMultipleModal" tabindex="-1" aria-labelledby="remitosMultipleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <form method="POST" action="{{ route('travelItems.storeMultipleRemitos', $travelCertificate->id) }}" class="modal-content">
+              @csrf
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="remitosMultipleModalLabel">Cargar Remitos (múltiples)</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+
+              <div class="modal-body">
+                @if(session('remitos_result'))
+                  <div class="alert alert-info mb-2">
+                    {{ session('remitos_result') }}
+                  </div>
+                @endif
+
+                <p class="mb-2">Pegá varios números de remito, <strong>uno por línea</strong> o separados por comas:</p>
+                <textarea name="remitos" class="form-control" rows="6" placeholder="72093
+72094
+72095, 72096"></textarea>
+                <small class="text-muted d-block mt-2">
+                  Duplicados dentro de la misma constancia serán ignorados automáticamente.
+                </small>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        {{-- /MODAL NUEVO --}}
 @stop
 
 @section('content')

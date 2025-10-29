@@ -18,7 +18,7 @@
             <input type="text" name="address" class="form-control mb-2" placeholder="Ingrese la direccion..." required>
             <label for="city">Ciudad:</label>
             <input type="text" name="city" class="form-control mb-2" placeholder="Ingrese la ciudad..." required>
-            <label for="phpne">Telefono:</label>
+            <label for="phone">Telefono:</label>
             <input type="text" name="phone" class="form-control mb-2" placeholder="Ingrese el telefono..." required>
             <label for="ivaType">IVA Tipo:</label>
             <select name="ivaType" class="form-control mb-2" required>
@@ -27,6 +27,20 @@
                 <option value="RESPONSABLE INSCRIPTO">Responsable Inscripto</option>
                 <option value="EXENTO">Exento</option>
             </select>
+            {{-- DÍAS DE VENCIMIENTO POR CLIENTE --}}
+            <label for="paymentTermDays">Días de vencimiento</label>
+            <input
+              type="number"
+              name="paymentTermDays"
+              id="paymentTermDays"
+              class="form-control mb-2"
+              min="0" max="365"
+              value="{{ old('paymentTermDays') }}"
+              placeholder="Ej: 15, 30, 45..."
+            >
+            <small class="text-muted d-block mb-2">
+              Si lo dejás vacío, se usa el valor por defecto del sistema (15 días).
+            </small>
             <label for="observations">Observaciones (Opcional):</label>
             <input type="text" name="observations" class="form-control mb-2" placeholder="Ingrese las observaciones...">
       </div>

@@ -52,7 +52,7 @@ class InvoiceController extends Controller
             $invoice->paid         = 'NO';
             $invoice->invoiced     = 'NO';
 
-            $invoice->receiptId    = 0;
+            $invoice->receiptId    = null;
 
             $invoice->save();
 
@@ -222,7 +222,7 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
     // --- Sumas desde constancias (fuente de verdad) ---
     $items = TravelCertificate::where('invoiceId', $invoice->id)->get();
 
-    $sumNeto   = 0.0; // sin peajes (con descuentos/adicionales)
+    $sumNeto   = 0.0; // sin peajes
     $sumIva    = 0.0;
     $sumPeajes = 0.0;
 
@@ -231,16 +231,35 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
             ->where('travelCertificateId', $tc->id)
             ->sum('price');
 
+        // === NUEVO: asumimos que el total de la constancia YA incluye IVA + peajes ===
+        // Si alguna vez querés volver al cálculo anterior, poné este flag en false.
+        $constanciaIncluyeIva = true;
+
+        // Base sin peajes (lo que queda es neto+iva o solo neto si exento)
         $subtotalSinPeajes = max(0, (float)$tc->total - (float)$peajes);
 
-        $descuento = (float)($tc->descuento_aplicable ?? 0);
-        if (!$descuento && isset($tc->descuento_porcentaje)) {
-            $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
+        if ($constanciaIncluyeIva) {
+            if (!$esExento) {
+                // separar neto e IVA de una base que ya viene con IVA 21%
+                $neto = round($subtotalSinPeajes / 1.21, 2);
+                $iva  = round($subtotalSinPeajes - $neto, 2);
+            } else {
+                // exento: todo es neto, IVA=0
+                $neto = round($subtotalSinPeajes, 2);
+                $iva  = 0.0;
+            }
+        } else {
+            // ===== CÁLCULO ANTERIOR (lo dejamos como fallback, NO se ejecuta con el flag en true) =====
+            $descuento = (float)($tc->descuento_aplicable ?? 0);
+            if (!$descuento && isset($tc->descuento_porcentaje)) {
+                $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
+            }
+            $montoAdic = (float)($tc->monto_adicional ?? 0);
+            $netoCalc  = ($subtotalSinPeajes - $descuento) + $montoAdic;
+            $neto = $netoCalc;
+            $iva  = $esExento ? 0.0 : round($netoCalc * 0.21, 2);
+            // ==========================================================================================
         }
-
-        $montoAdic = (float)($tc->monto_adicional ?? 0);
-        $neto      = ($subtotalSinPeajes - $descuento) + $montoAdic;
-        $iva       = $esExento ? 0.0 : round($neto * 0.21, 2);
 
         $sumNeto   += $neto;
         $sumIva    += $iva;
@@ -248,7 +267,7 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
     }
 
     // --- Persistimos totales de la factura ---
-    $invoice->total = round($sumNeto + $sumPeajes, 2);  // SIN IVA
+    $invoice->total = round($sumNeto + $sumPeajes, 2);  // SIN IVA (neto + peajes)
     $invoice->iva   = round($sumIva, 2);
 
     // Congelar totalWithIva solo si está facturada (si NO, lo dejamos en 0 como venías manejando)
@@ -256,7 +275,6 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
     $invoice->totalWithIva = $invoice->invoiced === 'SI' ? $totalConIva : 0.0;
 
     // --- NUEVO: Normalizar pagos/retenciones SIN reventar si la pivot no existe ---
-    // Intentamos detectar la tabla/columnas reales de la pivot. Si no existen, asumimos 0.
     $pagos = 0.0;
     $retenciones = 0.0;
 
@@ -288,12 +306,7 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
                 }
             }
         }
-
-        // IMPORTANTE:
-        // No hacemos fallback al modelo InvoiceReceipt ni a la relación belongsToMany
-        // para evitar SQLSTATE cuando el esquema difiere entre entornos.
     } catch (\Throwable $e) {
-        // Ante cualquier excepción, dejamos pagos/retenciones en 0 para no romper el flujo.
         $pagos = 0.0;
         $retenciones = 0.0;
     }
@@ -302,17 +315,16 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
     $expectedBalance = round($totalConIva - $pagos - $retenciones, 2);
 
     if ($invoice->invoiced === 'SI') {
-        // Facturada: el saldo refleja total - pagos - retenciones
         $invoice->balance = $expectedBalance;
         $invoice->paid    = $expectedBalance <= 0 ? 'SI' : 'NO';
     } else {
-        // NO facturada: saldo en 0 para no confundir en la UI
         $invoice->balance = 0.0;
         $invoice->paid    = 'NO';
     }
 
     $invoice->save();
 }
+
 
     /**
      * Wrapper público para reparar una factura puntual desde la UI.

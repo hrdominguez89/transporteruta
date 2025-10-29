@@ -7,6 +7,9 @@ use App\Models\TravelCertificate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+
 
 class TravelItemController extends Controller
 {
@@ -149,12 +152,15 @@ class TravelItemController extends Controller
                 break;
 
             case 'REMITO':
-                $item->remito_number = $request->input('remito_number');
-                $item->price         = 0.0;
-                if (empty($item->description)) {
-                    $item->description = 'Remito N° ' . $item->remito_number;
-                }
-                break;
+{
+    $n = trim((string)$request->input('remito_number', '')); // viene del form
+    // guardamos SOLO en description para no requerir columna nueva
+    $item->description = $request->input('description') ?: ('Remito N° ' . $n);
+    $item->price = 0;    // los remitos no suman $ al total
+    $item->percent = 0;  // y no afectan descuentos/porcentajes
+}
+break;
+
 
             case 'HORA':
                 $hours   = (int) $request->input('totalHours', 0);
@@ -237,4 +243,81 @@ class TravelItemController extends Controller
         return redirect()->route('showTravelCertificate', $travelCertificateId)
             ->with('success', 'Ítem eliminado correctamente.');
     }
+
+    // === NUEVO: alta masiva de remitos ===
+public function storeMultipleRemitos(Request $request, $id)
+{
+    $travelCertificate = TravelCertificate::findOrFail($id);
+
+    // Validación simple: pedimos un bloque de texto
+    $request->validate([
+        'remitos' => ['required','string','max:5000'],
+    ]);
+
+    // Normalizamos: permitimos separar por comas, espacios o saltos de línea
+    $raw = $request->input('remitos', '');
+    $tokens = preg_split('/[\s,;]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY);
+
+    // Limpieza: quedarnos con remitos alfanuméricos, max 50 chars (igual que la columna)
+    $remitos = [];
+    foreach ($tokens as $t) {
+        $t = trim($t);
+        if ($t === '') continue;
+        // Permitimos dígitos y letras (por si usan prefijos), guiones opcional
+        $t = mb_substr($t, 0, 50);
+        $remitos[] = $t;
+    }
+
+    // Sacar duplicados de la misma carga
+    $remitos = array_values(array_unique($remitos));
+
+    if (empty($remitos)) {
+        return back()->with('error', 'No se detectaron números de remito válidos.');
+    }
+
+    // Insertamos en transacción. Si alguno ya existe para esta constancia,
+    // el índice único lo frenará: lo atrapamos y seguimos con los demás.
+    $creados = 0;
+    $duplicados = [];
+
+    DB::transaction(function () use ($remitos, $travelCertificate, &$creados, &$duplicados) {
+        foreach ($remitos as $nro) {
+            try {
+                $item = new TravelItem();
+                $item->travelCertificateId = $travelCertificate->id;
+                $item->type = 'REMITO';
+                $item->description = 'Remito N° ' . $nro;
+                $item->remito_number = $nro;
+                // Política decidida: remitos no afectan importes
+                $item->price = 0;
+                $item->percent = 0;
+                $item->save();
+                $creados++;
+            } catch (QueryException $e) {
+                // Duplicado por índice único (SQLSTATE 23000) => lo marcamos y seguimos
+                if (($e->errorInfo[0] ?? '') === '23000') {
+                    $duplicados[] = $nro;
+                } else {
+                    throw $e;
+                }
+            }
+        }
+
+        // Recalcular una sola vez (performance)
+        $travelCertificate->recalcTotals();
+    });
+
+    // Mensaje amigable
+    if ($creados && empty($duplicados)) {
+        return back()->with('success', "Se agregaron {$creados} remito(s) correctamente.");
+    }
+
+    if ($creados && $duplicados) {
+        return back()->with('success', "Se agregaron {$creados} remito(s). Se ignoraron por duplicado: " . implode(', ', $duplicados));
+    }
+
+    // Si ninguno se creó, todos eran duplicados
+    return back()->with('warning', 'Todos los remitos ingresados ya existían para esta constancia.');
+}
+
 }
