@@ -66,7 +66,10 @@ Route::group(['middleware' => 'auth'], function () {
     // TravelItem
     Route::post('guardar/item-de-viaje/{travelCertificateId}', [TravelItemController::class, 'store'])->name('storeTravelItem');
     Route::delete('eliminar/item-de-viaje/{id}/{travelCertificateId}', [TravelItemController::class, 'delete'])->name('deleteTravelItem');
-
+    // Remitos múltiples por constancia
+    Route::post('/constancia/{id}/remitos/multiple', [\App\Http\Controllers\TravelItemController::class, 'storeMultipleRemitos'])
+    ->name('travelItems.storeMultipleRemitos');
+    
     // Invoice
     Route::get('facturas', [InvoiceController::class, 'invoices'])->name('invoices');
     Route::post('generar/factura', [InvoiceController::class, 'generate'])->name('generateInvoice');
