@@ -24,7 +24,7 @@ class TravelCertificateController extends Controller
         return view('travelCertificate.index', $data);
     }
 
-    public function store(StoreTravelCertificateRequest $request)
+     public function store(StoreTravelCertificateRequest $request)
     {
         $number = $request->number;
         $date = $request->date;
@@ -54,7 +54,6 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->destiny = $request->destiny;
         $newTravelCertificate->clientId = $request->clientId;
         $newTravelCertificate->driverId = $request->driverId;
-        
         $newTravelCertificate->invoiceId = 0; // Si necesitas gestionar facturas, ajusta este valor
         $newTravelCertificate->driverSettlementId = 0; // Si necesitas gestionar liquidaciones de choferes, ajusta este valor
 
@@ -73,14 +72,10 @@ class TravelCertificateController extends Controller
             } else {
                 $newTravelCertificate->fixed_amount = $request->fixed_amount;
                 $newTravelCertificate->percent = 0; // Asegurarse de que `percent` sea nulo si no se utiliza
-            }   
+            }
         }
-
-        // Si el formulario mandó 0 o vacío, guardamos NULL
-        $newTravelCertificate->invoiceId = ($request->filled('invoiceId') && (int)$request->invoiceId > 0) ? (int) $request->invoiceId : null;
-
-        $newTravelCertificate->driverSettlementId = ($request->filled('driverSettlementId') && (int)$request->driverSettlementId > 0) ? (int) $request->driverSettlementId : null;
-
+        $newTravelCertificate->total = 0.00;
+        $newTravelCertificate->iva = 0.00;
         // Guardar el nuevo certificado de viaje
         $newTravelCertificate->save();
 
