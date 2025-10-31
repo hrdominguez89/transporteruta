@@ -52,7 +52,7 @@ class InvoiceController extends Controller
             $invoice->paid         = 'NO';
             $invoice->invoiced     = 'NO';
 
-            $invoice->receiptId    = null;
+            $invoice->receiptId    = 0;
 
             $invoice->save();
 
