@@ -108,7 +108,8 @@
                 </td>
 
                 {{-- REF: "Total (Sin IVA)" debe ser SOLO el Neto, sin sumar Peajes --}}
-                <td>$&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}</td>
+                <!-- <td>$&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}</td> -->
+                <td>$&nbsp;{{ $invoice->total }}</td>
 
                 {{-- IVA (0 si EXENTO; si no, calculado por fila arriba) --}}
                 <td>$&nbsp;{{ number_format($totalIva, 2, ',', '.') }}</td>

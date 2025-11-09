@@ -158,29 +158,42 @@ class InvoiceController extends Controller
 
     public function invoiced($id)
     {
-        // Traemos todo lo necesario para que el recálculo sea correcto
-        $invoice = Invoice::with(['client', 'travelCertificates.travelItems'])->findOrFail($id);
+        // // Traemos todo lo necesario para que el recálculo sea correcto
+        // $invoice = Invoice::with(['client', 'travelCertificates.travelItems'])->findOrFail($id);
 
-        // ====================== TOTALES ======================
-        // Antes de marcar como "facturada" recalculamos los totales
-        // a partir de las constancias (fuente única de verdad).
-        // Esto evita desfasajes como balances negativos o totalWithIva erróneo
-        // cuando la BD quedó con valores viejos.
-        $this->recomputeInvoiceTotals($invoice);
-        // ============================================================
+        // // ====================== TOTALES ======================
+        // // Antes de marcar como "facturada" recalculamos los totales
+        // // a partir de las constancias (fuente única de verdad).
+        // // Esto evita desfasajes como balances negativos o totalWithIva erróneo
+        // // cuando la BD quedó con valores viejos.
+        // $this->recomputeInvoiceTotals($invoice);
+        // // ============================================================
 
-        // Congelamos en BD los mismos importes que ve la UI
-        $invoice->invoiced     = 'SI';
-        $invoice->totalWithIva = round(($invoice->total ?? 0) + ($invoice->iva ?? 0), 2);
-        // Al facturar, el saldo inicial = total con IVA (luego se descuenta con recibos/retenciones)
-        $invoice->balance      = $invoice->totalWithIva;
+        // // Congelamos en BD los mismos importes que ve la UI
+        // $invoice->invoiced     = 'SI';
+        // $invoice->totalWithIva = round(($invoice->total ?? 0) + ($invoice->iva ?? 0), 2);
+        // // Al facturar, el saldo inicial = total con IVA (luego se descuenta con recibos/retenciones)
+        // $invoice->balance      = $invoice->totalWithIva;
+        // $invoice->save();
+
+        // // Actualizamos la CC del cliente con el total facturado
+        // $client = $invoice->client; // ya viene cargado por el with()
+        // $client->balance += $invoice->totalWithIva;
+        // $client->save();
+        $invoice = Invoice::find($id);
+        $invoice->invoiced = 'SI';
+        $invoice->totalWithIva = ($invoice->total + $invoice->iva);
+        $invoice->balance = $invoice->totalWithIva;
         $invoice->save();
-
-        // Actualizamos la CC del cliente con el total facturado
-        $client = $invoice->client; // ya viene cargado por el with()
+        $client = Client::find($invoice->client->id);
         $client->balance += $invoice->totalWithIva;
         $client->save();
-
+        $travel_certificate_array = TravelCertificate::where('invoiceId', $invoice->id)->get();
+        foreach( $travel_certificate_array as $travel_certificate )
+        {
+            $travel_certificate->invoiced='SI';
+            $travel_certificate->save();
+        }
         return redirect(route('showInvoice', $invoice->id));
     }
 
@@ -340,6 +353,24 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
     // Agregar UNA constancia a la factura (usa el botón "Agregar a la Factura")
     public function addToInvoice(Request $request, $travelCertificateId)
     {
+        $travelCertificate = TravelCertificate::find($travelCertificateId);
+        if($travelCertificate->invoiced =='NO')
+        {
+            $travelCertificate->invoiceId = $request->invoiceId;
+            $invoice = Invoice::find($request->invoiceId);
+            $invoice->total += $travelCertificate->total;
+            $invoice->iva += $travelCertificate->iva;
+            $travelCertificate->invoiced = 'SI';
+            $travelCertificate->save();
+            $invoice->save();
+        }
+        else
+        {
+            session()->flash('error', 'Este certificado ya esta facturado.');
+        }
+        return redirect(route('showInvoice', $travelCertificate->invoiceId));
+
+
         $invoiceId = (int) $request->input('invoiceId');
         $invoice   = Invoice::with('client')->findOrFail($invoiceId);
 
@@ -366,25 +397,25 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
             ->sum('price');
 
         // Subtotal sin peajes
-        $subtotalSinPeajes = max(0, (float)$tc->total - (float)$totalPeajes);
+        // $b = max(0, (float)$tc->total - (float)$totalPeajes);
 
-        // Descuento: si no hay monto pero sí porcentaje, lo calculamos
-        $descuento = (float)($tc->descuento_aplicable ?? 0);
-        if (!$descuento && isset($tc->descuento_porcentaje)) {
-            $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
-            // NOTA: no lo persistimos para evitar columnas faltantes
-        }
+        // // Descuento: si no hay monto pero sí porcentaje, lo calculamos
+        // $descuento = (float)($tc->descuento_aplicable ?? 0);
+        // if (!$descuento && isset($tc->descuento_porcentaje)) {
+        //     $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
+        //     // NOTA: no lo persistimos para evitar columnas faltantes
+        // }
 
-        // Adicional (monto)
-        $montoAdic = (float)($tc->monto_adicional ?? 0);
+        // // Adicional (monto)
+        // $montoAdic = (float)($tc->monto_adicional ?? 0);
 
-        // Neto refactor = (subtotal_sin_peajes - descuento_aplicable) + monto_adicional
-        $neto = ($subtotalSinPeajes - $descuento) + $montoAdic;
+        // // Neto refactor = (subtotal_sin_peajes - descuento_aplicable) + monto_adicional
+        // $neto = ($subtotalSinPeajes - $descuento) + $montoAdic;
 
-        // IVA: 0 si EXENTO (solo cálculo, no guardamos)
-        $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? $invoice->client->ivaType ?? '');
-        $esExento = strpos($condIva, 'EXENTO') !== false;
-        $ivaCalculado = $esExento ? 0 : round($neto * 0.21, 2);
+        // // IVA: 0 si EXENTO (solo cálculo, no guardamos)
+        // $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? $invoice->client->ivaType ?? '');
+        // $esExento = strpos($condIva, 'EXENTO') !== false;
+        // $ivaCalculado = $esExento ? 0 : round($neto * 0.21, 2);
         // -----------------------------------------------------------------------------------
 
         // Vincular a la factura (único cambio persistente)
@@ -461,6 +492,7 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
         }
 
         $tc->invoiceId = null;
+        $tc->invoiced = 'NO';
         // Dejamos los importes en la constancia como histórico (no se borran)
         $tc->save();
 
