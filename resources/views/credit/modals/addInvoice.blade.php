@@ -11,7 +11,7 @@
         <form action="{{ Route('addInvoiceToCredit', $credit->id) }}" class="form-group" method="POST">
             @csrf
             <label for="total">Saldo a Descontar:</label>
-            <input type="number" name="total" class="form-control mb-2" required>
+            <input type="number" name="total" class="form-control mb-2" required step="any">
             <label for="invoiceId">Facturas:</label>
             <select name="invoiceId" class="form-control mb-2" required>
                 <option value="">---- Seleccione una opcion ----</option>
