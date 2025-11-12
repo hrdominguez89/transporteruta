@@ -27,7 +27,7 @@
         <h5>Reporte General de Deudores</h5>
         <p>Saldo Total: <strong>$&nbsp;{{ number_format($total, 2, ',', '.') }}</strong></p>
         <hr>
-        @foreach ($clients as $client)
+        @foreach ($clients->sortBy('name') as $client)
             <div class="table-responsive-sm">
                 <table class="table table-bordered"
                        style="border-radius:5px; border: 2px solid #dc3546; margin-bottom: 50px;">
@@ -40,7 +40,8 @@
                     <tr>
                         <th colspan="2" class="text-center">{{ $client->name }}</th>
                         <th class="text-center">{{ $client->dni }}</th>
-                        <th class="text-right">$&nbsp;{{ number_format($saldos[$client->id], 2, ',', '.') }}</th>
+                        <th class="text-right">$&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</th>
+                        <!-- <th class="text-right">$&nbsp;{{ number_format($saldos[$client->id], 2, ',', '.') }}</th> -->
                     </tr>
                     <tr>
                         <th colspan="4" style="width: 100%;" class="text-center">Facturas</th>
@@ -69,16 +70,17 @@
                                     @endphp
                                     {{ $vto->format('d/m/Y') }}
                                 </td>
-                                @php
+                                <!-- @php
                                     // AJUSTE: preferimos el totalWithIva congelado; si no existe o es 0, calculamos al vuelo con total + iva
                                     $importeConIva = (float)($invoice->totalWithIva ?? 0);
                                     if ($importeConIva <= 0) {
                                         $importeConIva = (float)($invoice->total ?? 0) + (float)($invoice->iva ?? 0);
                                     }
-                                @endphp
-                                <td class="text-right">
-                                    $&nbsp;{{ number_format($importeConIva, 2, ',', '.') }}
-                                </td>
+                                @endphp -->
+                                <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
+                                <!-- <td class="text-right"> -->
+                                    <!-- $&nbsp;{{ number_format($importeConIva, 2, ',', '.') }} -->
+                                <!-- </td> -->
                             </tr>
                         @endif
                     @endforeach

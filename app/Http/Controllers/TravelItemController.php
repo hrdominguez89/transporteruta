@@ -17,7 +17,12 @@ class TravelItemController extends Controller
     {
         // Busca la constancia (para asegurar que existe)
         $travelCertificate = TravelCertificate::findOrFail($travelCertificateId);
-
+        
+        if($travelCertificate->invoiced =='SI')
+        {
+            return redirect()->route('showTravelCertificate', $travelCertificate->id)
+            ->with('error', 'Ya esta facturada.');
+        }
         // ================================================================
         // FIX #1 — Normalizar TYPE (por si llega "Por Hora/Kilómetro")
         // ================================================================
@@ -152,16 +157,14 @@ class TravelItemController extends Controller
                 break;
 
             case 'REMITO':
-{
-    $n = trim((string)$request->input('remito_number', '')); // viene del form
-    // guardamos SOLO en description para no requerir columna nueva
-    $item->description = $request->input('description') ?: ('Remito N° ' . $n);
-    $item->price = 0;    // los remitos no suman $ al total
-    $item->percent = 0;  // y no afectan descuentos/porcentajes
-}
-break;
-
-
+            {
+                $n = trim((string)$request->input('remito_number', '')); // viene del form
+                // guardamos SOLO en description para no requerir columna nueva
+                $item->description = $request->input('description') ?: ('Remito N° ' . $n);
+                $item->price = 0;    // los remitos no suman $ al total
+                $item->percent = 0;  // y no afectan descuentos/porcentajes
+            }
+            break;
             case 'HORA':
                 $hours   = (int) $request->input('totalHours', 0);
                 $mins    = (int) $request->input('totalMinutes', 0);

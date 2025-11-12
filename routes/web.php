@@ -47,13 +47,13 @@ Route::group(['middleware' => 'auth'], function () {
     //Route::put('agregar/a/la/factura/{id}', [TravelCertificateController::class, 'addToInvoice'])->name('addToInvoice');//
     //Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
     // Bulk add/remove travel certificates to/from an invoice
-    //Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
+    Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
     //Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');//
     
     // ✅ NUEVAS: usan InvoiceController (coinciden con los name() que usa nuestro Blade)
     Route::put('agregar/a/la/factura/{id}', [InvoiceController::class, 'addToInvoice'])->name('addToInvoice');
     Route::put('quitar/de/la/factura/{id}', [InvoiceController::class, 'removeFromInvoice'])->name('removeFromInvoice');
-    Route::put('agregar/multiples/a/la/factura', [InvoiceController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
+    // Route::put('agregar/multiples/a/la/factura', [InvoiceController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
     Route::put('quitar/multiples/de/la/factura', [InvoiceController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
 
     Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');

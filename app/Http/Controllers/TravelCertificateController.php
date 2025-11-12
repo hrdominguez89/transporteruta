@@ -13,6 +13,7 @@ use App\Http\Requests\UpdateTravelCertificateRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\Else_;
 
 class TravelCertificateController extends Controller
 {
@@ -56,7 +57,8 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->driverId = $request->driverId;
         $newTravelCertificate->invoiceId = 0; // Si necesitas gestionar facturas, ajusta este valor
         $newTravelCertificate->driverSettlementId = 0; // Si necesitas gestionar liquidaciones de choferes, ajusta este valor
-
+        $newTravelCertificate->total = 0.00;
+        $newTravelCertificate->iva = 0.00;
         $newTravelCertificate->commission_type = $request->commission_type;
         
         // Lógica para establecer el tipo de comisión
@@ -74,8 +76,7 @@ class TravelCertificateController extends Controller
                 $newTravelCertificate->percent = 0; // Asegurarse de que `percent` sea nulo si no se utiliza
             }
         }
-        $newTravelCertificate->total = 0.00;
-        $newTravelCertificate->iva = 0.00;
+        
         // Guardar el nuevo certificado de viaje
         $newTravelCertificate->save();
 
@@ -99,29 +100,37 @@ class TravelCertificateController extends Controller
     public function update(UpdateTravelCertificateRequest $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
-        $travelCertificate->number = $request->number;
-        $travelCertificate->date = $request->date;
-        $travelCertificate->destiny = $request->destiny;
-        $travelCertificate->clientId = $request->clientId;
-        $travelCertificate->driverId = $request->driverId;
-        $travelCertificate->commission_type = $request->commission_type;
+        if($travelCertificate->invoice == 'NO')
+        {
 
-        // Lógica para establecer el tipo de comisión
-        if ($request->commission_type == "porcentaje pactado") {
-            // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
-            $driver = Driver::find($request->driverId);
-            $travelCertificate->percent = $driver->percent; // Asignamos el porcentaje del driver
-        } else {
-            // Almacenar porcentaje o monto fijo dependiendo del tipo de comisión
-            if ($request->commission_type == 'porcentaje') {
-                $travelCertificate->percent = $request->percent;
-                $travelCertificate->fixed_amount = null; // Asegurarse de que `fixed_amount` sea nulo si no se utiliza
+            $travelCertificate->number = $request->number;
+            $travelCertificate->date = $request->date;
+            $travelCertificate->destiny = $request->destiny;
+            $travelCertificate->clientId = $request->clientId;
+            $travelCertificate->driverId = $request->driverId;
+            $travelCertificate->commission_type = $request->commission_type;
+            
+            // Lógica para establecer el tipo de comisión
+            if ($request->commission_type == "porcentaje pactado") {
+                // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
+                $driver = Driver::find($request->driverId);
+                $travelCertificate->percent = $driver->percent; // Asignamos el porcentaje del driver
             } else {
-                $travelCertificate->fixed_amount = $request->fixed_amount;
-                $travelCertificate->percent = null; // Asegurarse de que `percent` sea nulo si no se utiliza
+                // Almacenar porcentaje o monto fijo dependiendo del tipo de comisión
+                if ($request->commission_type == 'porcentaje') {
+                    $travelCertificate->percent = $request->percent;
+                    $travelCertificate->fixed_amount = null; // Asegurarse de que `fixed_amount` sea nulo si no se utiliza
+                } else {
+                    $travelCertificate->fixed_amount = $request->fixed_amount;
+                    $travelCertificate->percent = null; // Asegurarse de que `percent` sea nulo si no se utiliza
+                }
             }
+            $travelCertificate->save();
         }
-        $travelCertificate->save();
+        else
+        {
+            session()->flash('error', 'Este certificado ya esta facturado.');
+        }            
         return redirect(route('showTravelCertificate', $travelCertificate->id));
     }
 
@@ -137,13 +146,21 @@ class TravelCertificateController extends Controller
     public function addToInvoice(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
-        $travelCertificate->invoiceId = $request->invoiceId;
-        $invoice = Invoice::find($request->invoiceId);
-        $invoice->total += $travelCertificate->total;
-        $invoice->iva += $travelCertificate->iva;
-        $travelCertificate->invoiced = 'SI';
-        $travelCertificate->save();
-        $invoice->save();
+        if($travelCertificate->invoiced =='NO')
+        {
+
+            $travelCertificate->invoiceId = $request->invoiceId;
+            $invoice = Invoice::find($request->invoiceId);
+            $invoice->total += $travelCertificate->total;
+            $invoice->iva += $travelCertificate->iva;
+            $travelCertificate->invoiced = 'SI';
+            $travelCertificate->save();
+            $invoice->save();
+        }
+        else
+        {
+            session()->flash('error', 'Este certificado ya esta facturado.');
+        }
         return redirect(route('showInvoice', $travelCertificate->invoiceId));
     }
 
