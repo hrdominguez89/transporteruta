@@ -71,16 +71,16 @@
                                     {{ $vto->format('d/m/Y') }}
                                 </td>
                                 <!-- @php
+                                <!-- @php
                                     // AJUSTE: preferimos el totalWithIva congelado; si no existe o es 0, calculamos al vuelo con total + iva
                                     $importeConIva = (float)($invoice->totalWithIva ?? 0);
                                     if ($importeConIva <= 0) {
                                         $importeConIva = (float)($invoice->total ?? 0) + (float)($invoice->iva ?? 0);
                                     }
                                 @endphp -->
-                                <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
-                                <!-- <td class="text-right"> -->
-                                    <!-- $&nbsp;{{ number_format($importeConIva, 2, ',', '.') }} -->
-                                <!-- </td> -->
+                                <td class="text-right">
+                                    $&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}
+                                </td>
                             </tr>
                         @endif
                     @endforeach

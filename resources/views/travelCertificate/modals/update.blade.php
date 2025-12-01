@@ -15,7 +15,7 @@
                     @method('PUT')
                     <label for="number">Numero(Sistema Antiguo):</label>
                     <input type="number" name="number" id="tc_number_{{ $travelCertificate->id }}" class="form-control mb-2"
-                        value="{{ $travelCertificate->number }}">
+                        value="{{ $travelCertificate->number }}" readonly>
                     <small id="number_help_{{ $travelCertificate->id }}" class="text-danger" style="display:none;"></small>
                     <label for="date">Fecha:<span class="text-danger"> *</span></label>
                     <input type="date" name="date" class="form-control mb-2"
@@ -146,17 +146,17 @@
             numberInput.addEventListener('change', function(){ checkNumber(); });
         }
 
-        if (form) {
-            form.addEventListener('submit', function(e){
-                e.preventDefault();
-                checkNumber(function(exists){
-                    if (exists) {
-                        numberInput.focus();
-                        return; // don't submit
-                    }
-                    form.submit();
-                });
-            });
-        }
+        // if (form) {
+        //     form.addEventListener('submit', function(e){
+        //         e.preventDefault();
+        //         checkNumber(function(exists){
+        //             if (exists) {
+        //                 numberInput.focus();
+        //                 return; // don't submit
+        //             }
+        //             form.submit();
+        //         });
+        //     });
+        // }
     })();
 </script>
