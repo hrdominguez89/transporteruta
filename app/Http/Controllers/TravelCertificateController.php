@@ -97,7 +97,7 @@ class TravelCertificateController extends Controller
         return view('travelCertificate.show', $data);
     }
 
-    public function update(UpdateTravelCertificateRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
         if($travelCertificate->invoice == 'NO')
