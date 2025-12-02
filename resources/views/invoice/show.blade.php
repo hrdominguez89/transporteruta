@@ -121,7 +121,7 @@
                 <td>{{ $invoice->invoiced }}</td>
 
                 {{-- Total (Con IVA) = Neto + IVA + Peajes --}}
-                <td>$&nbsp;{{ number_format($totalConIva, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($invoice->getTotalWithIvaAttribute(), 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>

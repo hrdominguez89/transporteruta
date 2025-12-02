@@ -369,63 +369,6 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
             session()->flash('error', 'Este certificado ya esta facturado.');
         }
         return redirect(route('showInvoice', $travelCertificate->invoiceId));
-
-
-        $invoiceId = (int) $request->input('invoiceId');
-        $invoice   = Invoice::with('client')->findOrFail($invoiceId);
-
-        if ($invoice->invoiced === 'SI') {
-            return back()->with('error', 'No se puede modificar una factura ya facturada.');
-        }
-
-        $tc = TravelCertificate::with('driver')->findOrFail($travelCertificateId);
-
-        // Validar que la constancia sea del mismo cliente
-        if ((int)$tc->clientId !== (int)$invoice->clientId) {
-            return back()->with('error', "La constancia {$tc->id} pertenece a otro cliente.");
-        }
-
-        // ----- REFACT: cálculos SOLO en memoria (no persistimos columnas inexistentes) -----
-        // (ANTES) Se intentaba escribir total_peajes / subtotal_sin_peajes / iva_calculado y fallaba.
-        // $tc->total_peajes = ...
-        // $tc->subtotal_sin_peajes = ...
-        // $tc->iva_calculado = ...
-
-        // Peajes desde TravelItem
-        $totalPeajes = TravelItem::where('type', 'PEAJE')
-            ->where('travelCertificateId', $tc->id)
-            ->sum('price');
-
-        // Subtotal sin peajes
-        // $b = max(0, (float)$tc->total - (float)$totalPeajes);
-
-        // // Descuento: si no hay monto pero sí porcentaje, lo calculamos
-        // $descuento = (float)($tc->descuento_aplicable ?? 0);
-        // if (!$descuento && isset($tc->descuento_porcentaje)) {
-        //     $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
-        //     // NOTA: no lo persistimos para evitar columnas faltantes
-        // }
-
-        // // Adicional (monto)
-        // $montoAdic = (float)($tc->monto_adicional ?? 0);
-
-        // // Neto refactor = (subtotal_sin_peajes - descuento_aplicable) + monto_adicional
-        // $neto = ($subtotalSinPeajes - $descuento) + $montoAdic;
-
-        // // IVA: 0 si EXENTO (solo cálculo, no guardamos)
-        // $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? $invoice->client->ivaType ?? '');
-        // $esExento = strpos($condIva, 'EXENTO') !== false;
-        // $ivaCalculado = $esExento ? 0 : round($neto * 0.21, 2);
-        // -----------------------------------------------------------------------------------
-
-        // Vincular a la factura (único cambio persistente)
-        $tc->invoiceId = $invoice->id;
-        $tc->save();
-
-        // Recalcular totales de la factura
-        $this->recomputeInvoiceTotals($invoice);
-
-        return redirect()->route('showInvoice', $invoice->id)->with('success', 'Constancia agregada a la factura.');
     }
 
     // Agregar VARIAS constancias (usa el botón masivo)
@@ -435,9 +378,9 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
         $ids       = (array) $request->input('ids', []);
 
         $invoice = Invoice::with('client')->findOrFail($invoiceId);
-        if ($invoice->invoiced === 'SI') {
-            return back()->with('error', 'No se puede modificar una factura ya facturada.');
-        }
+        // if ($invoice->invoiced === 'SI') {
+        //     return back()->with('error', 'No se puede modificar una factura ya facturada.');
+        // }
 
         DB::transaction(function () use ($ids, $invoice) {
             foreach ($ids as $travelCertificateId) {
@@ -447,40 +390,18 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
                     // Si querés continuar en lugar de abortar, reemplazá por "continue;"
                     throw new \RuntimeException("La constancia {$tc->id} pertenece a otro cliente.");
                 }
-
-                // ----- REFACT: cálculos SOLO en memoria (idénticos a addToInvoice) -----
-                $totalPeajes = TravelItem::where('type', 'PEAJE')
-                    ->where('travelCertificateId', $tc->id)
-                    ->sum('price');
-
-                $subtotalSinPeajes = max(0, (float)$tc->total - (float)$totalPeajes);
-
-                $descuento = (float)($tc->descuento_aplicable ?? 0);
-                if (!$descuento && isset($tc->descuento_porcentaje)) {
-                    $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
-                }
-
-                $montoAdic = (float)($tc->monto_adicional ?? 0);
-                $neto      = ($subtotalSinPeajes - $descuento) + $montoAdic;
-
-                $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? $invoice->client->ivaType ?? '');
-                $esExento = strpos($condIva, 'EXENTO') !== false;
-                $ivaCalculado = $esExento ? 0 : round($neto * 0.21, 2);
-                // -----------------------------------------------------------------------
-
-                // ÚNICO campo que persistimos
-                $tc->invoiceId = $invoice->id;
+                //TODO:agregar validacion de que no este ya facturado el ceritificado de viaje. 
+                $invoice->total += $tc->total;
+                $invoice->iva += $tc->iva;
+                $tc->invoiced = 'SI';
                 $tc->save();
+                $invoice->save();
             }
         });
-
-        // Recalcular totales de la factura
-        $this->recomputeInvoiceTotals($invoice);
 
         return redirect()->route('showInvoice', $invoice->id)->with('success', 'Constancias agregadas a la factura.');
     }
 
-    // Quitar UNA constancia de la factura
     public function removeFromInvoice($travelCertificateId)
     {
         $tc = TravelCertificate::findOrFail($travelCertificateId);
@@ -491,41 +412,37 @@ private function recomputeInvoiceTotals(Invoice $invoice): void
             return back()->with('error', 'No se puede modificar una factura ya facturada.');
         }
 
-        $tc->invoiceId = null;
+        $tc->invoiceId = 0;
         $tc->invoiced = 'NO';
-        // Dejamos los importes en la constancia como histórico (no se borran)
+        $invoice->total -= $tc->total;
+        $invoice->iva -= $tc->iva;
+        $invoice->save();
         $tc->save();
-
-        // Recalcular totales de la factura
-        $this->recomputeInvoiceTotals($invoice);
 
         return redirect()->route('showInvoice', $invoiceId)->with('success', 'Constancia quitada de la factura.');
     }
 
-    // Quitar VARIAS constancias (botón masivo)
     public function removeMultipleFromInvoice(Request $request)
     {
         $invoiceId = (int) $request->input('invoiceId');
         $ids       = (array) $request->input('ids', []);
-
-        $invoice = Invoice::findOrFail($invoiceId);
-        if ($invoice->invoiced === 'SI') {
-            return back()->with('error', 'No se puede modificar una factura ya facturada.');
-        }
-
+        
         DB::transaction(function () use ($ids, $invoiceId) {
+            $invoice = Invoice::find($invoiceId);
+            if ($invoice->invoiced === 'SI') {
+                    return back()->with('error', 'No se puede modificar una factura ya facturada.');
+            }
             foreach ($ids as $travelCertificateId) {
                 $tc = TravelCertificate::findOrFail($travelCertificateId);
-                if ((int)$tc->invoiceId !== (int)$invoiceId) {
-                    continue; // no pertenece a esta factura
-                }
-                $tc->invoiceId = null;
+                
+                $invoice->total -= $tc->total;
+                $invoice->iva -= $tc->iva;
+                $tc->invoiceId = 0;
+                $tc->invoiced = 'NO';
                 $tc->save();
+                $invoice->save();
             }
         });
-
-        // Recalcular totales de la factura
-        $this->recomputeInvoiceTotals($invoice);
 
         return redirect()->route('showInvoice', $invoiceId)->with('success', 'Constancias quitadas de la factura.');
     }
