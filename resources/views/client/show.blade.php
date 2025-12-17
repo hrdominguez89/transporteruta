@@ -38,6 +38,8 @@
     </table>
     <h4>Observaciones:</h4>
     <p>{{ $client->observations }}</p>
+    <p>Dias de vencimiento asignado:  {{ $client->paymentTermDays }} dias.</p>
+    
     <br>
     <h4>Facturas Pendientes de Pagar</h4>
     <table class="table table-sm table-bordered text-center data-table">

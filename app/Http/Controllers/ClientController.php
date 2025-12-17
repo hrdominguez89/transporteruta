@@ -82,10 +82,7 @@ class ClientController extends Controller
         $client->phone = $request->phone;
         $client->ivaType = $request->ivaType;
         $client->observations = $request->observations;
-
-        // NUEVO: actualizar días de vencimiento (null o número)
-        $client->paymentTermDays = $request->input('paymentTermDays');
-
+        $client->paymentTermDays = (int)$request->paymentsDay;
         $client->save();
         return redirect(route('showClient', $client->id));
     }

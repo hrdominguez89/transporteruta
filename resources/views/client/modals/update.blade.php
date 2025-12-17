@@ -21,6 +21,8 @@
             <input type="text" name="city" class="form-control mb-2" placeholder="Ingrese la ciudad..." value="{{ $client->city }}" required>
             <label for="phpne">Telefono:</label>
             <input type="text" name="phone" class="form-control mb-2" placeholder="Ingrese el telefono..." value="{{ $client->phone }}" required>
+            <label for="paymentDay">Dias de vencimiento:</label>
+            <input type="number" name="paymentsDay" class="form-control mb-2" placeholder="Ingrese los dias de vencimientos..." value="{{ $client->paymentTermDays }}" required>
             <label for="ivaType">IVA Tipo:</label>
             <select name="ivaType" class="form-control mb-2" required>
                 <option  value="{{ $client->ivaType }}">{{ $client->ivaType }}</option>
