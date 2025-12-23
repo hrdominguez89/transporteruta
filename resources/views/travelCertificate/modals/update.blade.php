@@ -17,9 +17,9 @@
                     <input type="number" name="number" id="tc_number_{{ $travelCertificate->id }}" class="form-control mb-2"
                         value="{{ $travelCertificate->number }}" readonly>
                     <small id="number_help_{{ $travelCertificate->id }}" class="text-danger" style="display:none;"></small>
-                    <label for="date">Fecha:<span class="text-danger"> *</span></label>
+                    <label for="date">Fecha: <span class="text-danger"> *</span></label>
                     <input type="date" name="date" class="form-control mb-2"
-                        value="{{ $travelCertificate->date }}" required>
+                        value="{{ $travelCertificate->date?->format('Y-m-d') }}" required>
                     <label for="destiny">Destino:<span class="text-danger"> *</span></label>
                     <input type="text" name="destiny" class="form-control mb-2"
                         value="{{ $travelCertificate->destiny }}" required>

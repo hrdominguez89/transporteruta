@@ -100,9 +100,8 @@ class TravelCertificateController extends Controller
     public function update(Request $request, $id)
     {
         $travelCertificate = TravelCertificate::find($id);
-        if($travelCertificate->invoice == 'NO')
+        if($travelCertificate->invoiced == 'NO')
         {
-
             $travelCertificate->number = $request->number;
             $travelCertificate->date = $request->date;
             $travelCertificate->destiny = $request->destiny;
