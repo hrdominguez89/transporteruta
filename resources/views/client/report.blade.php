@@ -32,13 +32,13 @@
                 <table class="table table-bordered"
                        style="border-radius:5px; border: 2px solid #dc3546; margin-bottom: 50px;">
                     <tr style="background-color: #dc3546; color: white;">
-                        <th colspan="2" class="text-center">Cliente</th>
+                        <th colspan="3" class="text-center">Cliente</th>
                         <th class="text-center">DNI/CUIT</th>
                         <th class="text-center">Saldo</th>
                     </tr>
 
                     <tr>
-                        <th colspan="2" class="text-center">{{ $client->name }}</th>
+                        <th colspan="3" class="text-center">{{ $client->name }}</th>
                         <th class="text-center">{{ $client->dni }}</th>
                         <th class="text-right">$&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</th>
                         <!-- <th class="text-right">$&nbsp;{{ number_format($saldos[$client->id], 2, ',', '.') }}</th> -->
@@ -51,7 +51,8 @@
                         <th class="text-center" style="width:20%">Número</th>
                         <th class="text-center" style="width:20%">Fecha</th>
                         <th class="text-center" style="width:20%">Vencimiento</th>
-                        <th class="text-center" style="width:40%">Total</th>
+                        <th class="text-center" style="width:20%">Total de la factura</th>
+                        <th class="text-center" style="width:20%">Total adeudado</th>
                     </tr>
 
                     @foreach ($client->invoices->where('paid', 'NO')->sortBy('date') as $invoice)
@@ -77,10 +78,40 @@
                                         $importeConIva = (float)($invoice->total ?? 0) + (float)($invoice->iva ?? 0);
                                     }
                                 @endphp -->
+                                 <td class="text-right">
+                                    $&nbsp;{{ number_format($invoice->totalWithIva, 2, ',', '.') }}
+                                </td>
                                 <td class="text-right">
                                     $&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}
                                 </td>
                             </tr>
+                        @endif
+                    @endforeach
+                    <tr>
+                        <th colspan="5" style="width: 100%;" class="text-center">Notas de credito</th>
+                    </tr>
+                    <tr style="background-color: #dc3546; color: white;">
+                        <th class="text-center" style="width:25%">Numero</th>
+                        <th class="text-center" style="width:25%">Fecha</th>
+                        <th class="text-center" style="width:25%">Factura</th>
+                        <th class="text-center" style="width:25%" colspan="5">Total</th>
+                    </tr>
+                    @foreach ($creditos as $nota )
+                        @if($nota['clientId'] == $client->id)
+                        <tr>
+                            <td class="text-center">
+                                {{ $nota['number'] }}
+                            </td>
+                            <td class="text-center">
+                                {{\Carbon\Carbon::parse($nota['date'])->format('d/m/y') }}
+                            </td>
+                            <td class="text-center">
+                                {{ $nota['invoice']["number"] }}
+                            </td>
+                            <td class="text-center" colspan="5">
+                                {{ $nota['total'] }}
+                            </td>
+                        </tr>
                         @endif
                     @endforeach
                 </table>

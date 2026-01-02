@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Credit;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClientController extends Controller
@@ -47,28 +48,29 @@ class ClientController extends Controller
      */
     public function generateDebtorsPdf()
     {
-        // LEGACY (RESTABLECIDO) 
-        // Trae clientes con balance > 0 y calcula saldos con totalWithIva.
         $clients = Client::where('balance', '>', 0.0)
             ->orderBy('balance', 'desc')
             ->get();
 
         $saldos = [];
+        $creditos= [];
         foreach ($clients as $client) {
             $saldos[$client->id] = 0;
             foreach ($client->invoices as $invoice) {
                 if ($invoice->paid == 'NO') {
-                    // Usamos el campo persistido totalWithIva como antes.
                     $saldos[$client->id] += (float)($invoice->totalWithIva ?? 0);
+                    $credits = Credit::where('invoiceId', $invoice->id)
+                    ->where('clientId',$client->id)
+                    ->with('invoice')->get();
+                    $creditos = array_merge($creditos, $credits->toArray());
                 }
             }
         }
-
-        // Total general como se calculaba originalmente (por balance)
         $total = Client::all()->sum('balance');
         $date = now();
-        $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date,'saldos' => $saldos]);
+        $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date,'saldos' => $saldos,'creditos'=>$creditos]);
         $pdf->setPaper('A4', 'portrait');
+
         return $pdf->stream('Reporte-cuenta-corriente-general.pdf');
     }
 
