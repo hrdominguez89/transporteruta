@@ -20,6 +20,7 @@
 
         /* Totales compactos */
         .totales p { margin: 2px 0; line-height: 1.5; font-size: 1rem; }
+        
     </style>
     {{-- ============================================================================ --}}
     <link rel="stylesheet"
@@ -30,17 +31,22 @@
 
 <body>
 <div class="container text-center">
-    <div class="col-12">
-        <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</p>
-        <h5>CONSTANCIA DE VIAJE N° {{ number_format($travelCertificate->number, 0, ',', '.') }}</h5>
+    <div class="table-bordered">
+        <p style="width: 30px; height: 30px; border: 2px solid #000; font-size: 20px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;">X</p>
+        <div>
+            <div style="display: inline-block; width: 48%; vertical-align: top; margin-right: 2%;">
+                <img class="header-img"
+                src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
+            </div>
+            <div style="display: inline-block; width: 48%; vertical-align: top;">
+                <p>Documento no valido como factura.</p>
+                <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</p>
+                <h5>CONSTANCIA DE VIAJE N° {{ number_format($travelCertificate->number, 0, ',', '.') }}</h5>
+            </div>
+        </div>
     </div>
 
-    <div class="row">
-        <img class="col-7 header-img"
-             src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
-    </div>
-
-    <div class="col-12 table-bordered text-left mt-3 mb-3 p-2">
+    <div class="table-bordered text-left mt-3 mb-3 p-2">
         <p class="kv"><strong>Cliente:</strong> <span>{{ $travelCertificate->client->name }}</span></p>
         <p class="kv"><strong>Chofer:</strong> <span>{{ $travelCertificate->driver->name }}</span></p>
         <p class="kv"><strong>Vehículo:</strong> <span>{{ $travelCertificate->driver?->vehicle?->name }}</span></p>
@@ -117,7 +123,7 @@
         $totalFinal = $importeNeto + $peajes + $ivaCalculado;
     @endphp
 
-    <div class="col-12 table-bordered text-left mt-2 p-2 totales">
+    <div class=" table-bordered text-left mt-2 p-2 totales">
         <p class="kv"><strong>IMPORTE NETO:</strong>
             <span>$&nbsp;{{ number_format($importeNeto, 2, ',', '.') }}</span>
         </p>
@@ -131,10 +137,15 @@
             <span>$&nbsp;{{ number_format($totalFinal, 2, ',', '.') }}</span>
         </p>
     </div>
-    {{-- ===================  /REFACTORIZACIÓN (Totales)  ===================== --}}
+    <div class="table-bordered">
+        <p>LA MERCADERIA VIAJA POR CUENTA Y RIESGO DEL CLIENTE.</p>
+        <P>NOTA: El horario rige desde que el vehiculo sale de la agencia hasta que regresa a la misma.</P>
+    </div>
+    <div class =" text-center table-bordered">
+        <p>La presente no tiene valor como recibo oficial. Se emitirá la factura correspondiente por la suma de los valores de los viajes devengados en las constancias de viaje.</p>
+        <p>Conforme:</p>
+        <p>________________________</p>
+    </div>
 </div>
 </body>
 </html>
-
-
-
