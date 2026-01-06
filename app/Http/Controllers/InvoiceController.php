@@ -9,6 +9,7 @@ use App\Models\Client;
 use App\Models\Receipt;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use App\Models\Credit;
 use App\Models\InvoiceReceipt;
 use App\Models\InvoiceReceiptTax;
 use App\Models\TravelItem;
@@ -199,7 +200,12 @@ class InvoiceController extends Controller
 
     public function cancel($id)
     {
+        $credits = Credit::where('invoiceId',$id)->get();
         $invoice = Invoice::find($id);
+        if($credits->isNotEmpty())
+        {
+            return redirect(route('showInvoice', $invoice->id))->with(['flag' => true, 'message' => 'Debe quitar las notas de credito antes de anular una factura.']);
+        }
         $invoice->invoiced     = 'NO';
         $invoice->balance      = 0;
         $client = Client::find($invoice->client->id);
