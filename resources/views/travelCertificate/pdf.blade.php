@@ -37,6 +37,10 @@
             <div style="display: inline-block; width: 48%; vertical-align: top; margin-right: 2%;">
                 <img class="header-img"
                 src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
+                <p style="font-size: 8.5px;">CUIT:30-70908352-5</p>
+                <p style="font-size: 8.5px;">Santa Maria de Oro 1020</p>
+                <p style="font-size: 8.5px;">B1646AZB San Fernando-PCIA. Bs. As.</p>
+                <p style="font-size: 8.5px;">info@transportesruta.com.ar</p>
             </div>
             <div style="display: inline-block; width: 48%; vertical-align: top;">
                 <p>Documento no valido como factura.</p>
