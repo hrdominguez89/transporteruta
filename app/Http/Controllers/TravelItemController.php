@@ -26,13 +26,13 @@ class TravelItemController extends Controller
         // ================================================================
         // FIX #1 — Normalizar TYPE (por si llega "Por Hora/Kilómetro")
         // ================================================================
-        $typeRaw = strtoupper(trim($request->input('type', '')));
-        $mapType = [
-            'POR HORA'      => 'HORA',
-            'POR KILOMETRO' => 'KILOMETRO',
-            'POR KILÓMETRO' => 'KILOMETRO',
-        ];
-        $request->merge(['type' => $mapType[$typeRaw] ?? $typeRaw]);
+        // $typeRaw = strtoupper(trim($request->input('type', '')));
+        // $mapType = [
+        //     'POR HORA'      => 'HORA',
+        //     'POR KILOMETRO' => 'KILOMETRO',
+        //     'POR KILÓMETRO' => 'KILOMETRO',
+        // ];
+        // $request->merge(['type' => $mapType[$typeRaw] ?? $typeRaw]);
 
         //Elimíne estos separados de miles porque me dan un monto erróneo del tipo: $ 11.689.750,00 
 
@@ -47,15 +47,12 @@ class TravelItemController extends Controller
 
         // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
         $rules = [
-            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,REMITO',
+            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO',
             'description'   => 'nullable|string|max:255',
 
             // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
             'percent'       => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
             'porcentaje'    => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-
-            // REMITO → exigir remito_number sólo en REMITO
-            'remito_number' => 'exclude_unless:type,REMITO|required|string|max:50',
 
             // DESCUENTO → modo y, según el modo, price o discount_percent
             'discount_mode'    => 'exclude_unless:type,DESCUENTO|nullable|in:amount,percent',
@@ -74,7 +71,7 @@ class TravelItemController extends Controller
         ];
 
         $messages = [
-            'remito_number.required'      => 'Ingresá el número de Remito.',
+            // 'remito_number.required'      => 'Ingresá el número de Remito.',
             'price.required_unless'       => 'Ingresá un precio para este tipo de ítem.',
         ];
 
@@ -155,16 +152,6 @@ class TravelItemController extends Controller
                     $item->description = 'Adicional ' . rtrim(rtrim(number_format($item->percent, 2, ',', '.'), '0'), ',') . '%';
                 }
                 break;
-
-            case 'REMITO':
-            {
-                $n = trim((string)$request->input('remito_number', '')); // viene del form
-                // guardamos SOLO en description para no requerir columna nueva
-                $item->description = $request->input('description') ?: ('Remito N° ' . $n);
-                $item->price = 0;    // los remitos no suman $ al total
-                $item->percent = 0;  // y no afectan descuentos/porcentajes
-            }
-            break;
             case 'HORA':
                 $hours   = (int) $request->input('totalHours', 0);
                 $mins    = (int) $request->input('totalMinutes', 0);

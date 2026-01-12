@@ -72,20 +72,19 @@
                 </button>
               </div>
 
-              <div class="modal-body">
+              <div class="modal-body" id="div_remitos">
                 @if(session('remitos_result'))
                   <div class="alert alert-info mb-2">
                     {{ session('remitos_result') }}
                   </div>
                 @endif
 
-                <p class="mb-2">Pegá varios números de remito, <strong>uno por línea</strong> o separados por comas:</p>
-                <textarea name="remitos" class="form-control" rows="6" placeholder="72093
-72094
-72095, 72096"></textarea>
+                <p class="mb-2">Ingrese un numero de remito</p>
                 <small class="text-muted d-block mt-2">
                   Duplicados dentro de la misma constancia serán ignorados automáticamente.
                 </small>
+                <strong id="agregar_remitos">+</strong>
+                <input name="remitos" class="form-control" id="remito_0" pattern="\S*"></input>
               </div>
 
               <div class="modal-footer">
@@ -196,6 +195,34 @@
         $(document).ready(function() {
             // Activar tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+        $(document).ready(function() {
+            const agregarRemito = document.getElementById('agregar_remitos');
+            agregarRemito.addEventListener('click',
+                function(){
+                    input = document.createElement('input');
+                    numero = obtenerUltimoNumero();
+                    input.id = "remito_" + numero;
+                    input.name ="remitos";
+                    divRemitos = document.getElementById('div_remitos');
+                    divRemitos.appendchild(input);
+                }
+            );
+            function obtenerUltimoNumero()
+            {
+                remitos = $('[name="remitos"]');
+                idMax = 0;
+                remitos.each()((r)=>{
+                    idStr = r.id;
+                    id = idStr.split('_')[1];
+                    if (idMax<id)
+                    {
+                        idMax = id;
+                    }
+                });
+                return idMax;
+            }
+            const restarRemito = document.getelementById()
         });
     </script>
 @stop

@@ -48,13 +48,13 @@ Route::group(['middleware' => 'auth'], function () {
     //Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
     // Bulk add/remove travel certificates to/from an invoice
     Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
-    //Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');//
+    Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');//
     
     // ✅ NUEVAS: usan InvoiceController (coinciden con los name() que usa nuestro Blade)
     Route::put('agregar/a/la/factura/{id}', [InvoiceController::class, 'addToInvoice'])->name('addToInvoice');
     Route::put('quitar/de/la/factura/{id}', [InvoiceController::class, 'removeFromInvoice'])->name('removeFromInvoice');
     // Route::put('agregar/multiples/a/la/factura', [InvoiceController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
-    Route::put('quitar/multiples/de/la/factura', [InvoiceController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
+    // Route::put('quitar/multiples/de/la/factura', [InvoiceController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
 
     Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');
     Route::put('quitar/de/la/liquidacion/{id}', [TravelCertificateController::class, 'removeFromDriverSettlement'])->name('removeFromDriverSettlement');
@@ -85,14 +85,6 @@ Route::group(['middleware' => 'auth'], function () {
     // Eliminar factura (solo si no está facturada y no está pagada)
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
 
-    // 🔧 DEV ONLY — Normalizador de factura (recalcula totales/balance/paid)
-    //    Se expone SOLO en entorno local para evitar riesgos en producción.
-    if (app()->environment('local')) {
-        Route::get(
-            'debug/normalizar-factura/{id}',
-            [InvoiceController::class, 'normalizeInvoice']
-        )->name('normalizeInvoice');
-    }
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
