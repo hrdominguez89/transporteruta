@@ -230,131 +230,131 @@ class InvoiceController extends Controller
     // use App\Models\InvoiceReceipt;
 
 // ======================= REFACTORIZACION: Recalcular totales y balance =======================
-private function recomputeInvoiceTotals(Invoice $invoice): void
-{
-    $invoice->loadMissing('client');
+// private function recomputeInvoiceTotals(Invoice $invoice): void
+// {
+//     $invoice->loadMissing('client');
 
-    // --- Condición IVA del cliente ---
-    $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? $invoice->client->ivaType ?? '');
-    $esExento = strpos($condIva, 'EXENTO') !== false;
+//     // --- Condición IVA del cliente ---
+//     $condIva  = strtoupper($invoice->client->ivaCondition ?? $invoice->client->iva_condition ?? $invoice->client->ivaType ?? '');
+//     $esExento = strpos($condIva, 'EXENTO') !== false;
 
-    // --- Sumas desde constancias (fuente de verdad) ---
-    $items = TravelCertificate::where('invoiceId', $invoice->id)->get();
+//     // --- Sumas desde constancias (fuente de verdad) ---
+//     $items = TravelCertificate::where('invoiceId', $invoice->id)->get();
 
-    $sumNeto   = 0.0; // sin peajes
-    $sumIva    = 0.0;
-    $sumPeajes = 0.0;
+//     $sumNeto   = 0.0; // sin peajes
+//     $sumIva    = 0.0;
+//     $sumPeajes = 0.0;
 
-    foreach ($items as $tc) {
-        $peajes = TravelItem::where('type', 'PEAJE')
-            ->where('travelCertificateId', $tc->id)
-            ->sum('price');
+//     foreach ($items as $tc) {
+//         $peajes = TravelItem::where('type', 'PEAJE')
+//             ->where('travelCertificateId', $tc->id)
+//             ->sum('price');
 
-        // === NUEVO: asumimos que el total de la constancia YA incluye IVA + peajes ===
-        // Si alguna vez querés volver al cálculo anterior, poné este flag en false.
-        $constanciaIncluyeIva = true;
+//         // === NUEVO: asumimos que el total de la constancia YA incluye IVA + peajes ===
+//         // Si alguna vez querés volver al cálculo anterior, poné este flag en false.
+//         $constanciaIncluyeIva = true;
 
-        // Base sin peajes (lo que queda es neto+iva o solo neto si exento)
-        $subtotalSinPeajes = max(0, (float)$tc->total - (float)$peajes);
+//         // Base sin peajes (lo que queda es neto+iva o solo neto si exento)
+//         $subtotalSinPeajes = max(0, (float)$tc->total - (float)$peajes);
 
-        if ($constanciaIncluyeIva) {
-            if (!$esExento) {
-                // separar neto e IVA de una base que ya viene con IVA 21%
-                $neto = round($subtotalSinPeajes / 1.21, 2);
-                $iva  = round($subtotalSinPeajes - $neto, 2);
-            } else {
-                // exento: todo es neto, IVA=0
-                $neto = round($subtotalSinPeajes, 2);
-                $iva  = 0.0;
-            }
-        } else {
-            // ===== CÁLCULO ANTERIOR (lo dejamos como fallback, NO se ejecuta con el flag en true) =====
-            $descuento = (float)($tc->descuento_aplicable ?? 0);
-            if (!$descuento && isset($tc->descuento_porcentaje)) {
-                $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
-            }
-            $montoAdic = (float)($tc->monto_adicional ?? 0);
-            $netoCalc  = ($subtotalSinPeajes - $descuento) + $montoAdic;
-            $neto = $netoCalc;
-            $iva  = $esExento ? 0.0 : round($netoCalc * 0.21, 2);
-            // ==========================================================================================
-        }
+//         if ($constanciaIncluyeIva) {
+//             if (!$esExento) {
+//                 // separar neto e IVA de una base que ya viene con IVA 21%
+//                 $neto = round($subtotalSinPeajes / 1.21, 2);
+//                 $iva  = round($subtotalSinPeajes - $neto, 2);
+//             } else {
+//                 // exento: todo es neto, IVA=0
+//                 $neto = round($subtotalSinPeajes, 2);
+//                 $iva  = 0.0;
+//             }
+//         } else {
+//             // ===== CÁLCULO ANTERIOR (lo dejamos como fallback, NO se ejecuta con el flag en true) =====
+//             $descuento = (float)($tc->descuento_aplicable ?? 0);
+//             if (!$descuento && isset($tc->descuento_porcentaje)) {
+//                 $descuento = round($subtotalSinPeajes * ((float)$tc->descuento_porcentaje) / 100, 2);
+//             }
+//             $montoAdic = (float)($tc->monto_adicional ?? 0);
+//             $netoCalc  = ($subtotalSinPeajes - $descuento) + $montoAdic;
+//             $neto = $netoCalc;
+//             $iva  = $esExento ? 0.0 : round($netoCalc * 0.21, 2);
+//             // ==========================================================================================
+//         }
 
-        $sumNeto   += $neto;
-        $sumIva    += $iva;
-        $sumPeajes += (float)$peajes;
-    }
+//         $sumNeto   += $neto;
+//         $sumIva    += $iva;
+//         $sumPeajes += (float)$peajes;
+//     }
 
-    // --- Persistimos totales de la factura ---
-    $invoice->total = round($sumNeto + $sumPeajes, 2);  // SIN IVA (neto + peajes)
-    $invoice->iva   = round($sumIva, 2);
+//     // --- Persistimos totales de la factura ---
+//     $invoice->total = round($sumNeto + $sumPeajes, 2);  // SIN IVA (neto + peajes)
+//     $invoice->iva   = round($sumIva, 2);
 
-    // Congelar totalWithIva solo si está facturada (si NO, lo dejamos en 0 como venías manejando)
-    $totalConIva = $invoice->total + $invoice->iva;
-    $invoice->totalWithIva = $invoice->invoiced === 'SI' ? $totalConIva : 0.0;
+//     // Congelar totalWithIva solo si está facturada (si NO, lo dejamos en 0 como venías manejando)
+//     $totalConIva = $invoice->total + $invoice->iva;
+//     $invoice->totalWithIva = $invoice->invoiced === 'SI' ? $totalConIva : 0.0;
 
-    // --- NUEVO: Normalizar pagos/retenciones SIN reventar si la pivot no existe ---
-    $pagos = 0.0;
-    $retenciones = 0.0;
+//     // --- NUEVO: Normalizar pagos/retenciones SIN reventar si la pivot no existe ---
+//     $pagos = 0.0;
+//     $retenciones = 0.0;
 
-    try {
-        $pivotCandidates = ['invoice_receipts', 'invoice_receipt', 'invoice_receipt_pivot', 'invoices_receipts'];
-        $pivotTable = null;
+//     try {
+//         $pivotCandidates = ['invoice_receipts', 'invoice_receipt', 'invoice_receipt_pivot', 'invoices_receipts'];
+//         $pivotTable = null;
 
-        foreach ($pivotCandidates as $cand) {
-            if (Schema::hasTable($cand)) { $pivotTable = $cand; break; }
-        }
+//         foreach ($pivotCandidates as $cand) {
+//             if (Schema::hasTable($cand)) { $pivotTable = $cand; break; }
+//         }
 
-        if ($pivotTable) {
-            // Detectar posibles nombres de columnas
-            $invoiceCol = Schema::hasColumn($pivotTable, 'invoice_id') ? 'invoice_id'
-                         : (Schema::hasColumn($pivotTable, 'invoiceId') ? 'invoiceId' : null);
+//         if ($pivotTable) {
+//             // Detectar posibles nombres de columnas
+//             $invoiceCol = Schema::hasColumn($pivotTable, 'invoice_id') ? 'invoice_id'
+//                          : (Schema::hasColumn($pivotTable, 'invoiceId') ? 'invoiceId' : null);
 
-            $totalCol   = Schema::hasColumn($pivotTable, 'total') ? 'total'
-                         : (Schema::hasColumn($pivotTable, 'amount') ? 'amount' : null);
+//             $totalCol   = Schema::hasColumn($pivotTable, 'total') ? 'total'
+//                          : (Schema::hasColumn($pivotTable, 'amount') ? 'amount' : null);
 
-            $taxCol     = Schema::hasColumn($pivotTable, 'taxAmount') ? 'taxAmount'
-                         : (Schema::hasColumn($pivotTable, 'tax_amount') ? 'tax_amount' : null);
+//             $taxCol     = Schema::hasColumn($pivotTable, 'taxAmount') ? 'taxAmount'
+//                          : (Schema::hasColumn($pivotTable, 'tax_amount') ? 'tax_amount' : null);
 
-            if ($invoiceCol) {
-                if ($totalCol) {
-                    $pagos = (float) DB::table($pivotTable)->where($invoiceCol, $invoice->id)->sum($totalCol);
-                }
-                if ($taxCol) {
-                    $retenciones = (float) DB::table($pivotTable)->where($invoiceCol, $invoice->id)->sum($taxCol);
-                }
-            }
-        }
-    } catch (\Throwable $e) {
-        $pagos = 0.0;
-        $retenciones = 0.0;
-    }
+//             if ($invoiceCol) {
+//                 if ($totalCol) {
+//                     $pagos = (float) DB::table($pivotTable)->where($invoiceCol, $invoice->id)->sum($totalCol);
+//                 }
+//                 if ($taxCol) {
+//                     $retenciones = (float) DB::table($pivotTable)->where($invoiceCol, $invoice->id)->sum($taxCol);
+//                 }
+//             }
+//         }
+//     } catch (\Throwable $e) {
+//         $pagos = 0.0;
+//         $retenciones = 0.0;
+//     }
 
-    // --- Balance y estado de pago ---
-    $expectedBalance = round($totalConIva - $pagos - $retenciones, 2);
+//     // --- Balance y estado de pago ---
+//     $expectedBalance = round($totalConIva - $pagos - $retenciones, 2);
 
-    if ($invoice->invoiced === 'SI') {
-        $invoice->balance = $expectedBalance;
-        $invoice->paid    = $expectedBalance <= 0 ? 'SI' : 'NO';
-    } else {
-        $invoice->balance = 0.0;
-        $invoice->paid    = 'NO';
-    }
+//     if ($invoice->invoiced === 'SI') {
+//         $invoice->balance = $expectedBalance;
+//         $invoice->paid    = $expectedBalance <= 0 ? 'SI' : 'NO';
+//     } else {
+//         $invoice->balance = 0.0;
+//         $invoice->paid    = 'NO';
+//     }
 
-    $invoice->save();
-}
+//     $invoice->save();
+// }
 
 
     /**
      * Wrapper público para reparar una factura puntual desde la UI.
      * Útil para normalizar saldos viejos que hayan quedado mal grabados.
      */
-    public function normalizeInvoice($id)
-    {
-        $invoice = Invoice::with(['client'])->findOrFail($id);
-        $this->recomputeInvoiceTotals($invoice);
-        return back()->with('success', 'Factura recalculada y balance normalizado.');
-    }
+    // public function normalizeInvoice($id)
+    // {
+    //     $invoice = Invoice::with(['client'])->findOrFail($id);
+    //     $this->recomputeInvoiceTotals($invoice);
+    //     return back()->with('success', 'Factura recalculada y balance normalizado.');
+    // }
 
     // Agregar UNA constancia a la factura (usa el botón "Agregar a la Factura")
     public function addToInvoice(Request $request, $travelCertificateId)

@@ -83,7 +83,7 @@
                 <small class="text-muted d-block mt-2">
                   Duplicados dentro de la misma constancia serán ignorados automáticamente.
                 </small>
-                <strong id="agregar_remitos">+</strong>
+                <button type="button" class="btn btn-sm btn-primary"id="agregar_remitos">+</button>
                 <input name="remitos" class="form-control" id="remito_0" pattern="\S*"></input>
               </div>
 
@@ -212,8 +212,9 @@
             {
                 remitos = $('[name="remitos"]');
                 idMax = 0;
-                remitos.each()((r)=>{
+                remitos.each((r)=>{
                     idStr = r.id;
+                    console.log(r);
                     id = idStr.split('_')[1];
                     if (idMax<id)
                     {
@@ -222,7 +223,7 @@
                 });
                 return idMax;
             }
-            const restarRemito = document.getelementById()
+            // const restarRemito = document.getElementById();
         });
     </script>
 @stop
