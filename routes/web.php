@@ -85,14 +85,14 @@ Route::group(['middleware' => 'auth'], function () {
     // Eliminar factura (solo si no está facturada y no está pagada)
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
 
-    // 🔧 DEV ONLY — Normalizador de factura (recalcula totales/balance/paid)
-    //    Se expone SOLO en entorno local para evitar riesgos en producción.
-    if (app()->environment('local')) {
-        Route::get(
-            'debug/normalizar-factura/{id}',
-            [InvoiceController::class, 'normalizeInvoice']
-        )->name('normalizeInvoice');
-    }
+    // // 🔧 DEV ONLY — Normalizador de factura (recalcula totales/balance/paid)
+    // //    Se expone SOLO en entorno local para evitar riesgos en producción.
+    // if (app()->environment('local')) {
+    //     Route::get(
+    //         'debug/normalizar-factura/{id}',
+    //         [InvoiceController::class, 'normalizeInvoice']
+    //     )->name('normalizeInvoice');
+    // }
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
