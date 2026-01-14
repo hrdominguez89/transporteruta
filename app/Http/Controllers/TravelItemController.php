@@ -238,33 +238,33 @@ class TravelItemController extends Controller
 public function storeMultipleRemitos(Request $request, $id)
 {
     $travelCertificate = TravelCertificate::findOrFail($id);
-
+    $remitos = $request->get('remitos');
+    // dd($remitos);
     // Validación simple: pedimos un bloque de texto
-    $request->validate([
-        'remitos' => ['required','string','max:5000'],
-    ]);
+    // $request->validate([
+    //     'remitos' => ['required','string','max:5000'],
+    // ]);
 
     // Normalizamos: permitimos separar por comas, espacios o saltos de línea
-    $raw = $request->input('remitos', '');
-    $tokens = preg_split('/[\s,;]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY);
-
+    // $raw = $request->input('remitos[]', '');
+    // // $tokens = preg_split('/[\s,;]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY);
     // Limpieza: quedarnos con remitos alfanuméricos, max 50 chars (igual que la columna)
-    $remitos = [];
-    foreach ($tokens as $t) {
-        $t = trim($t);
-        if ($t === '') continue;
-        // Permitimos dígitos y letras (por si usan prefijos), guiones opcional
-        $t = mb_substr($t, 0, 50);
-        $remitos[] = $t;
-    }
+    // $remitos = [];
+    // foreach ($tokens as $t) {
+    //     $t = trim($t);
+    //     if ($t === '') continue;
+    //     // Permitimos dígitos y letras (por si usan prefijos), guiones opcional
+    //     $t = mb_substr($t, 0, 50);
+    //     $remitos[] = $t;
+    // }
 
+    // dd($remitos);
     // Sacar duplicados de la misma carga
     $remitos = array_values(array_unique($remitos));
 
     if (empty($remitos)) {
         return back()->with('error', 'No se detectaron números de remito válidos.');
     }
-
     // Insertamos en transacción. Si alguno ya existe para esta constancia,
     // el índice único lo frenará: lo atrapamos y seguimos con los demás.
     $creados = 0;
@@ -294,7 +294,7 @@ public function storeMultipleRemitos(Request $request, $id)
         }
 
         // Recalcular una sola vez (performance)
-        $travelCertificate->recalcTotals();
+        // $travelCertificate->recalcTotals();
     });
 
     // Mensaje amigable
