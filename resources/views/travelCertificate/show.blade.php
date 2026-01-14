@@ -72,20 +72,18 @@
                 </button>
               </div>
 
-              <div class="modal-body">
+              <div class="modal-body" id="div_remitos">
                 @if(session('remitos_result'))
                   <div class="alert alert-info mb-2">
                     {{ session('remitos_result') }}
                   </div>
                 @endif
 
-                <p class="mb-2">Pegá varios números de remito, <strong>uno por línea</strong> o separados por comas:</p>
-                <textarea name="remitos" class="form-control" rows="6" placeholder="72093
-72094
-72095, 72096"></textarea>
+                <p class="mb-2">Ingrese un numero de remito <button type="button" class="btn btn-sm btn-primary"id="agregar_remitos">+</button></p>
                 <small class="text-muted d-block mt-2">
                   Duplicados dentro de la misma constancia serán ignorados automáticamente.
                 </small>
+                <input name="remitos[]" class="form-control col-md-10" id="remito_0" pattern="\S*" ></input>
               </div>
 
               <div class="modal-footer">
@@ -163,7 +161,7 @@
                         </span>
                     </td>
 
-                    <td>
+                    <td >
                         @if ($travelCertificate->invoiced == 'NO')
                             @if ($travelItem->type == 'FIJO' && $tiene_tarifa_adicional)
                                 <strong class="text-danger">Este ítem tiene un adicional asociado. Eliminá primero el adicional para poder borrarlo.</strong>
@@ -196,6 +194,76 @@
         $(document).ready(function() {
             // Activar tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+        $(document).ready(function() {
+            const agregarRemito = document.getElementById('agregar_remitos');
+            agregarRemito.addEventListener('click',
+                function(){
+                    input = document.createElement('input');
+                    numero = Number(obtenerUltimoNumero());
+                    numero += 1;
+                    input = crearInput(numero);
+                    btnDelet = crearBtnEleminar(input.id);
+                    divRemitos = document.getElementById('div_remitos');
+                    let row = config(input,btnDelet);
+                    divRemitos.appendChild(row);
+                }
+            );
+            function obtenerUltimoNumero()
+            {
+                remitos = document.querySelectorAll('[name="remitos[]"]');
+                idMax = 0;
+                remitos.forEach((r)=>{
+                    idStr = r.id;
+                    id = idStr.split('_')[1];
+                    if (idMax<id)
+                    {
+                        idMax = id;
+                    }
+                });
+                return idMax;
+            }
+            function crearInput(numero)
+            {
+                input.id = "remito_" + numero;
+                input.name ="remitos[]";
+                input.className ="form-control col-md-12";
+                input.style.marginTop = "10px";
+                input.style.marginBottom = "10px";
+                return input;
+            }
+            function crearBtnEleminar(idInput)
+            {
+                btn = document.createElement('button');
+                btn.name = idInput;
+                btn.type = "button";
+                btn.className = "btn btn-danger col-md-2";
+                btn.innerText = "-";
+                btn.style.marginTop = "10px";
+                btn.style.marginBottom = "10px";
+                btn.addEventListener('click',function(){
+                    const idInput = this.name; 
+                    const remito = document.getElementById(idInput);
+                    this.remove();
+                    remito.remove();
+                });
+                return btn;
+            }
+            function config(input,btnDelet)
+            {
+                row = document.createElement('div');
+                row.className = "row";
+                div_input = document.createElement('div');
+                div_input.className= "col-md-10";
+                div_input.appendChild(input);
+                div_btn = document.createElement('div');
+                div_btn.className = "col-ms-2";
+                div_btn.style.textAlign = "center";
+                div_btn.appendChild(btnDelet);
+                row.appendChild(div_input);
+                row.appendChild(div_btn);
+                return row;
+            }
         });
     </script>
 @stop
