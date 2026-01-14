@@ -403,7 +403,7 @@
                 e.preventDefault();
                 var ids = collectIds('.bulk-select-available');
                 if (!ids.length) return;
-                var form = $('<form>', { method: 'POST', action: '{{ Route('addMultipleToInvoice') }}' });
+                var form = $('<form>', { method: 'POST', action: '{{ Route("addMultipleToInvoice") }}' });
                 var token = getCsrfToken();
                 form.append($('<input>', { type: 'hidden', name: '_token', value: token }));
                 form.append($('<input>', { type: 'hidden', name: '_method', value: 'PUT' }));
