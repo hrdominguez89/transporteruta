@@ -15,7 +15,7 @@
                     @method('PUT')
                     <label for="number">Numero(Sistema Antiguo):</label>
                     <input type="number" name="number" id="tc_number_{{ $travelCertificate->id }}" class="form-control mb-2"
-                        value="{{ $travelCertificate->number }}" readonly>
+                        value="{{ $travelCertificate->number }}" >
                     <small id="number_help_{{ $travelCertificate->id }}" class="text-danger" style="display:none;"></small>
                     <label for="date">Fecha: <span class="text-danger"> *</span></label>
                     <input type="date" name="date" class="form-control mb-2"
