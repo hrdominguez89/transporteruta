@@ -30,18 +30,21 @@
 </head>
 
 <body >
-<div class="container text-center" >
-     <div style="
-        position: fixed;
-        top: 0;
-        left: 50;
-        width: 81%;
-        height: 97%;
-        background-image: url('data:image/jpeg;base64,{{ base64_encode(file_get_contents(resource_path('img/fondodeconstancia.jpeg'))) }}');
-        background-size: cover;
-        opacity: 0.1;
-        z-index: -1;
+<div class="container text-center"  style="position: relative;" >
+    <div style="
+    position:absolute;
+    top:0mm;
+    left:0mm;
+    right:0mm;
+    bottom:37mm;
+    background-image: url('data:image/jpeg;base64,{{ base64_encode(file_get_contents(resource_path('img/fondodeconstancia.jpeg'))) }}');
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center;
+    opacity:0.1;
+    z-index:-1;
     "></div>
+
 
     <div class="table-bordered">
         <p style="width: 30px; height: 30px; border: 2px solid #000; font-size: 20px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;">X</p>
