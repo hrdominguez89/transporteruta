@@ -56,6 +56,26 @@
                         <input type="number" step="0.01" id="fixed_amount" name="fixed_amount" placeholder="Ej: 15000" class="form-control mb-2">
                     </div>
 
+                    <div id="hora_salida_div">
+                        <label>Hora de salida:</label>
+                        <input class="form-control mb-2" type="datetime-local" name="horaSalida">
+                    </div>
+
+                    <div id="hora_llegada_div">
+                        <label>Hora de llegada:</label>
+                        <input class="form-control mb-2" type="datetime-local" name="horaLlegada">
+                    </div>
+
+                    <div id="vehiculo_div">
+                        <label for="vehicleId" >Vehículo:</label>
+                        <select class="form-control mb-2" type="text" name="vehicleId">
+                            <option value="">Seleccione un Vehículo</option>
+                            @foreach ($vehicles as $vehicle)
+                                <option value="{{ $vehicle->id }}">{{ $vehicle->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

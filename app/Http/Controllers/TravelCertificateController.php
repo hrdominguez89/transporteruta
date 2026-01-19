@@ -10,6 +10,7 @@ use App\Models\DriverSettlement;
 use App\Models\TravelItem;
 use App\Http\Requests\StoreTravelCertificateRequest;
 use App\Http\Requests\UpdateTravelCertificateRequest;
+use App\Models\Vehicle;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ class TravelCertificateController extends Controller
         $data['travelCertificates'] = TravelCertificate::all();
         $data['clients'] = Client::orderBy('name', 'asc')->get();
         $data['drivers'] = Driver::orderBy('name', 'asc')->get();
+        $data['vehicles'] = Vehicle::orderBy('name', 'asc')->get();
         return view('travelCertificate.index', $data);
     }
 
@@ -32,7 +34,9 @@ class TravelCertificateController extends Controller
         $destiny = $request->destiny;
         $clientId = $request->clientId;
         $driverId = $request->driverId;
-        
+        $vehicleId = $request->vehicleId;
+        $horaSalida = $request->horaSalida;
+        $horaLlegada = $request->horaLlegada;
         $TC = TravelCertificate::where([
             ['number', '=', $number],
             ['date', '=', $date],
@@ -60,7 +64,9 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->total = 0.00;
         $newTravelCertificate->iva = 0.00;
         $newTravelCertificate->commission_type = $request->commission_type;
-        
+        $newTravelCertificate->vehicleId = $vehicleId;
+        $newTravelCertificate->horaLLegada = $horaLlegada;
+        $newTravelCertificate->horaSalida = $horaSalida;
         // Lógica para establecer el tipo de comisión
         if ($request->commission_type == "porcentaje pactado") {
             // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
@@ -87,13 +93,14 @@ class TravelCertificateController extends Controller
 
     public function show($id)
     {
-        $data['travelCertificate'] = TravelCertificate::find($id);
+        $data['travelCertificate'] = TravelCertificate::with('vehicle')->find($id);
         $data['tarifa_fija'] = TravelItem::where('travelCertificateId', $id)->where('type', 'FIJO')->value('price');
         $data['tiene_tarifa_adicional'] = TravelItem::where('travelCertificateId', $id)
             ->where('type', 'ADICIONAL')
             ->exists();
         $data['clients'] = Client::orderBy('name', 'asc')->get();
         $data['drivers'] = Driver::orderBy('name', 'asc')->get();
+        $data['vehicles'] = Vehicle::orderBy('name', 'asc')->get();
         return view('travelCertificate.show', $data);
     }
 
@@ -108,8 +115,10 @@ class TravelCertificateController extends Controller
             $travelCertificate->clientId = $request->clientId;
             $travelCertificate->driverId = $request->driverId;
             $travelCertificate->commission_type = $request->commission_type;
-            
-            // Lógica para establecer el tipo de comisión
+            $travelCertificate->vehicleId = $request->vehicleId;
+            $travelCertificate->horaLLegada = $request->horaLlegada;
+            $travelCertificate->horaSalida = $request->horaSalida;
+            // Lógica para establecer el tip= o de comisn
             if ($request->commission_type == "porcentaje pactado") {
                 // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
                 $driver = Driver::find($request->driverId);
@@ -218,6 +227,7 @@ class TravelCertificateController extends Controller
                 if (!$tc) continue;
                 // skip if already invoiced
                 if ($tc->invoiced === 'SI') continue;
+                if(!$this->validarHorarios($tc)) continue;
                 $tc->invoiceId = $invoiceId;
                 $tc->invoiced = 'SI';
                 $tc->save();
@@ -229,7 +239,20 @@ class TravelCertificateController extends Controller
 
         return redirect(route('showInvoice', $invoiceId));
     }
-
+     public function validarHorarios($travel_certificate)
+    {
+        $items = TravelItem::where('type','HORA')
+        ->where('travelCertificateId',$travel_certificate->id)->get();
+        if(!$items->isNotEmpty())
+        {
+            return true;
+        }
+        if($travel_certificate->horaLLegada == null || $travel_certificate->horaSalida == null)
+        {
+            return false;
+        }
+        return true;
+    }
     /**
      * Remove multiple travel certificates from an invoice.
      */

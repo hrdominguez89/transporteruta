@@ -24,6 +24,7 @@ class TravelCertificate extends Model
     public function client()   { return $this->belongsTo(Client::class,  'clientId'); }
     public function driver()   { return $this->belongsTo(Driver::class,  'driverId'); }
     public function invoice()  { return $this->belongsTo(Invoice::class, 'invoiceId'); }
+    public function vehicle(){ return $this->belongsTo(Vehicle::class,'vehicleId');}
 
     // Nota: FK camelCase en este proyecto
     public function travelItems()

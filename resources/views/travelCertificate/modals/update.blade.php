@@ -73,6 +73,25 @@
                             id="fixed_amount" name="fixed_amount" placeholder="Ej: 15000" class="form-control mb-2"
                             {{ $travelCertificate->commission_type == 'monto fijo' ? 'required' : '' }}>
                     </div>
+                     <div id="hora_salida_div">
+                        <label>Hora de salida:</label>
+                        <input class="form-control mb-2" type="datetime-local" name="horaSalida" value="{{ \Carbon\Carbon::parse($travelCertificate->horaSalida)?->format('Y-m-d\TH:i') ?? '' }}">
+                    </div>
+
+                    <div id="hora_llegada_div">
+                        <label>Hora de llegada:</label>
+                        <input class="form-control mb-2" type="datetime-local" name="horaLlegada"value="{{ \Carbon\Carbon::parse($travelCertificate->horaLLegada)?->format('Y-m-d\TH:i') ?? '' }}">
+                    </div>
+
+                    <div id="vehiculo_div">
+                        <label for="vehicleId" >Vehículo:</label>
+                        <select class="form-control mb-2" type="text" name="vehicleId">
+                            <option value="{{ $travelCertificate->vehicle ?? "" }}">{{ $travelCertificate->vehicle->name ?? "Seleccione un Vehículo" }}</option>
+                            @foreach ($vehicles as $vehicle)
+                                <option value="{{ $vehicle->id }}">{{ $vehicle->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
 
             </div>
             <div class="modal-footer">

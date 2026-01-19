@@ -1,6 +1,6 @@
 {{-- resources/views/travelCertificate/pdf.blade.php --}}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" >
 <head>
     <meta charset="UTF-8">
     <title>Constancias</title>
@@ -29,14 +29,25 @@
           crossorigin="anonymous">
 </head>
 
-<body>
-<div class="container text-center">
+<body >
+<div class="container text-center" >
+     <div style="
+        position: fixed;
+        top: 0;
+        left: 50;
+        width: 81%;
+        height: 97%;
+        background-image: url('data:image/jpeg;base64,{{ base64_encode(file_get_contents(resource_path('img/fondodeconstancia.jpeg'))) }}');
+        background-size: cover;
+        opacity: 0.1;
+        z-index: -1;
+    "></div>
+
     <div class="table-bordered">
         <p style="width: 30px; height: 30px; border: 2px solid #000; font-size: 20px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;">X</p>
         <div>
             <div style="display: inline-block; width: 48%; vertical-align: top; margin-right: 2%;">
-                <img    class="header-img" 
-                src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
+                <img  class="header-img" src="data:image/png;base64,{{ base64_encode(file_get_contents(resource_path('img/Logo_de_TR.png'))) }}">
                 <p style="font-size: 8.5px;">CUIT:30-70908352-5</p>
                 <p style="font-size: 8.5px;">Ing. Brutos C.M.: 902-829006-8</p>
                 <p style="font-size: 8.5px;">Inicio de actividades: 01-04-05</p>
@@ -47,8 +58,9 @@
             </div>
             <div style="display: inline-block; width: 48%; vertical-align: top;">
                 <h5>CONSTANCIA DE VIAJE N° {{ number_format($travelCertificate->number, 0, ',', '.') }}</h5>
-                <p>Documento no valido como factura.</p>
+                <p>Documento no válido como factura.</p>
                 <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</p>
+                <img  class="header-img" src="data:image/png;base64,{{ base64_encode(file_get_contents(resource_path('img/logo_camion.png'))) }}">
             </div>
         </div>
     </div>
@@ -57,8 +69,9 @@
         <p class="kv"><strong>Cliente:</strong> <span>{{ $travelCertificate->client->name }}</span></p>
         <p class="kv"><strong>Chofer:</strong> <span>{{ $travelCertificate->driver->name }}</span></p>
         <p class="kv"><strong>Vehículo:</strong> <span>{{ $travelCertificate->driver?->vehicle?->name }}</span></p>
-        <p class="kv"><strong>Hora de Salida:</strong> <span></span></p>
-        <p class="kv"><strong>Hora de Llegada:</strong> <span></span></p>
+        <p class="kv"><strong>Hora de Salida:</strong> <span>{{ $travelCertificate->horaSalida }}</span></p>
+        <p class="kv"><strong>Hora de Llegada:</strong> <span>{{ $travelCertificate->horaLLegada }}</span></p>
+        <p class="kv"><strong>Destino:</strong> <span>{{ $travelCertificate->destiny }}</span></p>
     </div>
 
     <div class="col-12 table-bordered text-left p-2">
@@ -134,19 +147,19 @@
         <p class="kv"><strong>IMPORTE NETO:</strong>
             <span>$&nbsp;{{ number_format($importeNeto, 2, ',', '.') }}</span>
         </p>
-        <p class="kv"><strong>PEAJES:</strong>
-            <span>$&nbsp;{{ number_format($peajes, 2, ',', '.') }}</span>
-        </p>
         <p class="kv"><strong>IVA:</strong>
             <span>$&nbsp;{{ number_format($ivaCalculado, 2, ',', '.') }}</span>
+        </p>
+        <p class="kv"><strong>PEAJES:</strong>
+            <span>$&nbsp;{{ number_format($peajes, 2, ',', '.') }}</span>
         </p>
         <p class="kv"><strong>TOTAL:</strong>
             <span>$&nbsp;{{ number_format($totalFinal, 2, ',', '.') }}</span>
         </p>
     </div>
     <div class="table-bordered">
-        <p>LA MERCADERIA VIAJA POR CUENTA Y RIESGO DEL CLIENTE.</p>
-        <P>NOTA: El horario rige desde que el vehiculo sale de la agencia hasta que regresa a la misma.</P>
+        <p>LA MERCADERÍA VIAJA POR CUENTA Y RIESGO DEL CLIENTE.</p>
+        <P>NOTA: El horario rige desde que el vehículo sale de la agencia hasta que regresa a la misma.</P>
     </div>
     <div class =" text-center table-bordered">
         <p>La presente no tiene valor como recibo oficial. Se emitirá la factura correspondiente por la suma de los valores de los viajes devengados en las constancias de viaje.</p>

@@ -15,7 +15,6 @@
           <label for="type">Tipo:<span class="text-danger"> *</span></label>
           <select id="type" name="type" class="form-control mb-2" required>
             <option value="">---- Seleccione una opción ----</option>
-            <option value="REMITO">N° Remito</option>   {{-- NUEVO --}}
             <option value="HORA">Por Hora</option>
             <option value="KILOMETRO">Por Kilometro</option>
             <option value="PEAJE">Peaje</option>

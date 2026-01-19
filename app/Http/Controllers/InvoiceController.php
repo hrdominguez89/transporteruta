@@ -355,26 +355,49 @@ class InvoiceController extends Controller
     //     $this->recomputeInvoiceTotals($invoice);
     //     return back()->with('success', 'Factura recalculada y balance normalizado.');
     // }
-
+    public function validarHorarios($travel_certificate)
+    {
+        $items = TravelItem::where('type','HORA')
+        ->where('travelCertificateId',$travel_certificate->id)->get();
+        if(!$items->isNotEmpty())
+        {
+            return true;
+        }
+        if($travel_certificate->horaLLegada == null || $travel_certificate->horaSalida == null)
+        {
+            return false;
+        }
+        return true;
+    }
     // Agregar UNA constancia a la factura (usa el botón "Agregar a la Factura")
     public function addToInvoice(Request $request, $travelCertificateId)
     {
         $travelCertificate = TravelCertificate::find($travelCertificateId);
         if($travelCertificate->invoiced =='NO')
         {
-            $travelCertificate->invoiceId = $request->invoiceId;
-            $invoice = Invoice::find($request->invoiceId);
-            $invoice->total += $travelCertificate->total;
-            $invoice->iva += $travelCertificate->iva;
-            $travelCertificate->invoiced = 'SI';
-            $travelCertificate->save();
-            $invoice->save();
+            if($this->validarHorarios($travelCertificate))
+            {
+
+                $travelCertificate->invoiceId = $request->invoiceId;
+                $invoice = Invoice::find($request->invoiceId);
+                $invoice->total += $travelCertificate->total;
+                $invoice->iva += $travelCertificate->iva;
+                $travelCertificate->invoiced = 'SI';
+                $travelCertificate->save();
+                $invoice->save();
+            }
+            else
+            {
+                session()->flash('flag', true);
+                session()->flash('message', 'Este certificado tiene valor por hora y necesita que se le asigne horario de salida y llegada para ser agregado a la factura.');    
+            }
         }
         else
         {
-            session()->flash('error', 'Este certificado ya esta facturado.');
+            session()->flash('flag', true);
+            session()->flash('message', 'Este certificado ya esta facturado.');
         }
-        return redirect(route('showInvoice', $travelCertificate->invoiceId));
+        return redirect(route('showInvoice',  $request->invoiceId));
     }
 
     // Agregar VARIAS constancias (usa el botón masivo)

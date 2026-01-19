@@ -97,36 +97,52 @@
 @stop
 
 @section('content')
-    <h4>Detalles</h4>
+    <h4>Información del viaje</h4>
     <table class="table table-sm table-bordered text-center">
         <thead class="bg-danger">
             <tr>
-                <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Chofer</th>
+                <th>Vehiculo</th>
+                <th>Destino</th>
+                <th>Fecha</th>
+                <th>Horario de salida</th>
+                <th>Horario de llegada</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ $travelCertificate->client->name }}</td>
+                <td>{{ $travelCertificate->driver->name }}</td>
+                <td>{{ $travelCertificate->vehicle?->name }}</td>
+                <td>{{ $travelCertificate->destiny }}</td>
+                <td>{{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
+                <td>{{ $travelCertificate->horaSalida }}</td>
+                <td>{{ $travelCertificate->horaLLegada }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h4>Resumen de costos</h4>
+    <table class="table table-sm table-bordered text-center">
+        <thead class="bg-danger">
+            <tr>
                 <th>Pago al Chofer</th>
                 <th>Precio (Sin IVA)</th>
                 <th>IVA</th>
-                <th>Destino</th>
                 <th>Precio Total (Con IVA)</th>
                 <th>Facturado</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>{{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
-                <td>{{ $travelCertificate->client->name }}</td>
-                <td>{{ $travelCertificate->driver->name }}</td>
                 <td>$&nbsp;{{ number_format($travelCertificate->driverPayment, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($travelCertificate->total, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}</td>
-                <td>{{ $travelCertificate->destiny }}</td>
                 <td>$&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}</td>
                 <td>{{ $travelCertificate->invoiced }}</td>
             </tr>
         </tbody>
     </table>
-
     <h4>Items de Viaje</h4>
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
