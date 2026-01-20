@@ -241,16 +241,16 @@ class TravelCertificateController extends Controller
     }
      public function validarHorarios($travel_certificate)
     {
-        $items = TravelItem::where('type','HORA')
-        ->where('travelCertificateId',$travel_certificate->id)->get();
-        if(!$items->isNotEmpty())
-        {
-            return true;
-        }
-        if($travel_certificate->horaLLegada == null || $travel_certificate->horaSalida == null)
-        {
-            return false;
-        }
+        // $items = TravelItem::where('type','HORA')
+        // ->where('travelCertificateId',$travel_certificate->id)->get();
+        // if(!$items->isNotEmpty())
+        // {
+        //     return true;
+        // }
+        // if($travel_certificate->horaLLegada == null || $travel_certificate->horaSalida == null)
+        // {
+        //     return false;
+        // }
         return true;
     }
     /**
