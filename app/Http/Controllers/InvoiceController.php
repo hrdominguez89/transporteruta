@@ -27,7 +27,13 @@ class InvoiceController extends Controller
         $clients = Client::orderBy('name', 'asc')->get();
         return view('invoice.index', ['clients' => $clients, 'invoices' => $invoices]);
     }
-
+    public function edit(Request $request,$id)
+    {
+        $invoice = Invoice::find($id);
+        $invoice->reference = $request->reference;
+        $invoice->save();
+        return redirect(route('showInvoice', $invoice->id));
+    }   
     // Nueva refactorización de la función generate() NO PERMITIR FACTURAS REPETIDAS
     public function generate(StoreInvoiceRequest $request)
     {
@@ -54,7 +60,7 @@ class InvoiceController extends Controller
             $invoice->invoiced     = 'NO';
 
             $invoice->receiptId    = 0;
-
+            $invoice->reference = $request->reference;
             $invoice->save();
 
             return redirect()->route('showInvoice', $invoice->id);

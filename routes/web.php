@@ -79,7 +79,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('agregar/al/recibo/{id}', [InvoiceController::class, 'addToReceipt'])->name('addToReceipt');
     Route::post('agregar/tax/al/recibo/{id}', [InvoiceController::class, 'addTaxToReceiptInvoice'])->name('addTaxToReceiptInvoice');
     Route::delete('remover/tax/al/recibo/{taxId}', [InvoiceController::class, 'removeTaxFromInvoiceReceipt'])->name('removeTaxFromInvoiceReceipt');
-    
+    Route::post('edit/{id}',[InvoiceController::class,'edit'])->name("editInvoice");
     Route::delete('quitar/al/recibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
     Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
     // Eliminar factura (solo si no está facturada y no está pagada)

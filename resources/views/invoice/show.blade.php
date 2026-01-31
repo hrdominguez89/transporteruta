@@ -28,8 +28,9 @@
             </div>
         @elseif($invoice->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-primary col-4" data-toggle="modal"
+                <button class="btn btn-sm btn-primary col-1" data-toggle="modal"
                     data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
+                <button class="btn btn-sm btn-secondary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
             </div>
         @endif
         @if ($invoice->paid == 'SI')
@@ -97,6 +98,7 @@
             <tr>
                 <th>Fecha</th>
                 <th>Cliente</th>
+                <th>Referencia</th>
                 <th>Total (Sin IVA)</th>
                 <th>IVA</th>
                 <th>Peajes</th>
@@ -111,7 +113,7 @@
                 <td>
                     <a target="_blank" href="{{ Route('showClient', $invoice->client->id) }}">{{ $invoice->client->name }}</a>
                 </td>
-
+                <td>{{ $invoice->reference ? $invoice->reference : '-' }}</td>
                 {{-- REF: "Total (Sin IVA)" debe ser SOLO el Neto, sin sumar Peajes --}}
                 <!-- <td>$&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}</td> -->
                 <td>$&nbsp;{{ $invoice->total }}</td>
@@ -260,6 +262,7 @@
                     <th>Seleccionar</th>
                     <th>Nro. Nuevo</th>
                     <th>Nro. Antiguo</th>
+                    <th>Fecha de emision</th>
                     <th>Chofer</th>
                     <th>Precio Neto</th>
                     <th>I.V.A.</th>
@@ -294,6 +297,7 @@
                                     {{ number_format($travelCertificate->number, 0, ',', '.') }}
                                 </a>
                             </td>
+                            <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
                             <td>{{ $travelCertificate->driver->name }}</td>
 
                             {{-- Importes calculados (refactor) --}}
@@ -324,6 +328,25 @@
             </button>
         </div>
     @endif
+    <div class="modal fade" id="editReferenceModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5>Editar factura</h5>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ Route('editInvoice', $invoice->id ) }}" class="form-group" method="POST">
+                         @csrf
+                         <div>
+                            <label>Referencia:</label>
+                            <input type="text" name="reference">
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary mt-3">Editar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('js')

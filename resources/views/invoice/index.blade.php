@@ -22,6 +22,7 @@
                 <th>Balance</th>
                 <th>Facturado</th>
                 <th>Pagada</th>
+                <th>Referencia</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -36,6 +37,7 @@
                     <td class="text-right" data-order="{{ $invoice->balance }}">$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
                     <td>{{ $invoice->invoiced }}</td>
                     <td>{{ $invoice->paid }}</td>
+                    <td>{{ $invoice->reference ? $invoice->reference : '-' }}</td>
                     <td>
                         <a href="{{ Route('showInvoice', $invoice->id) }}" class="btn btn-sm btn-info">Ver</a>
                         @if($invoice->invoiced === 'NO' && $invoice->paid === 'NO')

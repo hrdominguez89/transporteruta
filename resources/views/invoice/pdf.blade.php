@@ -191,6 +191,14 @@
                             {{ $invoice->client->ivaType }}
                         </td>
                     </tr>
+                    <tr>
+                        <th style="text-align:left">
+                            Referencia:
+                        </th>
+                        <td style="text-align:left">
+                            {{ $invoice->reference ? $invoice->reference :'-' }}
+                        </td>
+                    </tr>
                 </table>
             </tr>
         </table>

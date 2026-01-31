@@ -37,6 +37,10 @@
                             <option value="{{ $client->id }}" {{ old('clientId') == $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
                         @endforeach
                     </select>
+
+                    <label>Referencia:</label>
+                    <input type="text" name="reference"class="form-control mb-2">
+
                     @error('clientId')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
