@@ -158,6 +158,29 @@
         </tbody>
     </table>
 
+    <h4>Notas de Debito</h4>
+    <table class="table table-sm table-bordered text-center data-table">
+        <thead class="bg-danger">
+            <tr>
+                <th>Numero</th>
+                <th>Fecha</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($invoice->debits as $debit)
+                <tr>
+                    <td>
+                        <a target="_blank" href="{{ Route('debitshow', $debit->id) }}">{{ $debit->referenceNumber }}</a>
+                    </td>
+                    <td data-order="{{ \Carbon\Carbon::parse($debit->emission_date)->timestamp }}">
+                        {{ \Carbon\Carbon::parse($debit->date)->format('d/m/Y') }}</td>
+                    <td data-order="{{ $debit->balance }}">$&nbsp;{{ number_format($debit->balance, 2, ',', '.') }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
     <br>
 
     <h4>Constancias de Viaje Agregadas</h4>

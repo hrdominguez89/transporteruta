@@ -33,4 +33,8 @@ class Client extends Model
     {
         return $this->hasMany(Credit::class, 'clientId');
     }
+    public function debits()
+    {
+        return $this->hasMany(Debit::class, 'clientId');
+    }
 }

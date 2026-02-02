@@ -113,7 +113,34 @@
                                 {{ $nota['invoice']["number"] }}
                             </td>
                             <td class="text-center" colspan="5">
-                                {{ $nota['total'] }}
+                                $&nbsp;{{ number_format($notad['total'], 2, ',', '.') }}
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+                     <tr>
+                        <th colspan="5" style="width: 100%;" class="text-center">Notas de debito</th>
+                    </tr>
+                    <tr style="background-color: #dc3546; color: white;">
+                        <th class="text-center" style="width:25%">Numero</th>
+                        <th class="text-center" style="width:25%">Fecha</th>
+                        <th class="text-center" style="width:25%">Factura</th>
+                        <th class="text-center" style="width:25%" colspan="5">Total</th>
+                    </tr>
+                    @foreach ($debitos as $notad )
+                        @if($notad['clientId'] == $client->id)
+                        <tr>
+                            <td class="text-center">
+                                {{ $notad['referenceNumber'] }}
+                            </td>
+                            <td class="text-center">
+                                {{\Carbon\Carbon::parse($notad['emission_date'])->format('d/m/y') }}
+                            </td>
+                            <td class="text-center">
+                                {{ $notad['invoice']["number"] }}
+                            </td>
+                            <td class="text-center" colspan="5">
+                                $&nbsp;{{ number_format($notad['balance'], 2, ',', '.') }}
                             </td>
                         </tr>
                         @endif

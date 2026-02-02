@@ -343,6 +343,12 @@ return [
             'icon' => 'fas fa-times-circle',
         ],
         [
+            'text' => 'Notas de Debito',
+            'url'  => 'notas-de-debito',
+            'icon' => 'far fa-dot-circle'
+
+        ],
+        [
             'text' => 'Recibos',
             'url'  => 'recibos',
             'icon' => 'fas fa-receipt',

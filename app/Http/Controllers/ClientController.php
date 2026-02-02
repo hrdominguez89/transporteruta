@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\Credit;
+use App\Models\Debit;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClientController extends Controller
@@ -54,6 +55,7 @@ class ClientController extends Controller
 
         $saldos = [];
         $creditos= [];
+        $debitos= [];
         foreach ($clients as $client) {
             $saldos[$client->id] = 0;
             foreach ($client->invoices as $invoice) {
@@ -63,12 +65,22 @@ class ClientController extends Controller
                     ->where('clientId',$client->id)
                     ->with('invoice')->get();
                     $creditos = array_merge($creditos, $credits->toArray());
+                    $debits = Debit::where('invoiceId', $invoice->id)
+                    ->where('clientId',$client->id)
+                    ->with('invoice')->get();
+                    $debitos = array_merge($debitos, $debits->toArray());
                 }
             }
         }
         $total = Client::all()->sum('balance');
         $date = now();
-        $pdf = Pdf::loadView('client.report', ['clients' => $clients, 'total' => $total, 'date' => $date,'saldos' => $saldos,'creditos'=>$creditos]);
+        $pdf = Pdf::loadView('client.report', [
+            'clients' => $clients, 
+            'total'   => $total, 
+            'date'    => $date,
+            'saldos'  => $saldos,
+            'creditos'=>$creditos,
+            'debitos' =>$debitos]);
         $pdf->setPaper('A4', 'portrait');
 
         return $pdf->stream('Reporte-cuenta-corriente-general.pdf');

@@ -11,6 +11,7 @@ use App\Http\Controllers\DriverSettlementController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CreditController;
+use App\Http\Controllers\DebitController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\UserController;
@@ -85,14 +86,6 @@ Route::group(['middleware' => 'auth'], function () {
     // Eliminar factura (solo si no está facturada y no está pagada)
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
 
-    // // 🔧 DEV ONLY — Normalizador de factura (recalcula totales/balance/paid)
-    // //    Se expone SOLO en entorno local para evitar riesgos en producción.
-    // if (app()->environment('local')) {
-    //     Route::get(
-    //         'debug/normalizar-factura/{id}',
-    //         [InvoiceController::class, 'normalizeInvoice']
-    //     )->name('normalizeInvoice');
-    // }
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
@@ -138,4 +131,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('guardar/usuario', [UserController::class, 'store'])->name('storeUser');
     Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
     Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
+
+    Route::get('notas-de-debito',[DebitController::class , 'index'])->name('debitos');
+    Route::post('nota-D/generar',[DebitController::class , 'generate'])->name('generateDebit');
+    Route::post('nota-D/add/{id}',[DebitController::class , 'addToInvoice'])->name('addInvoiceToDebit');
+    Route::post('nota-D/show',[DebitController::class , 'show'])->name('showDebit');
+    Route::get('nota-D/remove/{id}',[DebitController::class , 'remove'])->name('removeInvoiceFromDebit');
+    Route::get('nota-D/delete/{id}',[DebitController::class , 'delete'])->name('deleteDebit');
+    Route::get('nota-D/showd/{id}',[DebitController::class , 'show'])->name('debitshow');
 });

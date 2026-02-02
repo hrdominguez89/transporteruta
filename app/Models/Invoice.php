@@ -39,6 +39,10 @@ class Invoice extends Model
         'clientId',
         'receiptId',
     ];
+    public function debits()
+    {
+        return $this->hasMany(Debit::class, 'invoiceId');
+    }
 
     // Que se castee numéricos como float
     protected $casts = [
