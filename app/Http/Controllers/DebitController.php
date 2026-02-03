@@ -70,8 +70,12 @@ class DebitController extends Controller
     }
     public function addToInvoice(Request $request,$id)
     {
-        $invoiceId = $request->invoiceId;
         $debit = Debit::find($id);
+        if($debit->invoiceId != null)
+        {
+            return view('debit.show',['debit'=>$debit]);            
+        }
+        $invoiceId = $request->invoiceId;
         $debit->invoiceId = $invoiceId;
         $debit->save();
         $debit->load('invoice');

@@ -81,6 +81,10 @@ class ReceiptController extends Controller
     public function paid($id)
     {
         $receipt = Receipt::find($id);
+        if($receipt->paid == 'SI')
+        {
+            return redirect(route('showReceipt', $receipt->id));    
+        }
         $receipt->paid = 'SI';
         $receipt->save();
         $client = Client::find($receipt->client->id);
@@ -92,6 +96,10 @@ class ReceiptController extends Controller
     public function cancel($id)
     {
         $receipt = Receipt::find($id);
+        if($receipt->paid == 'NO')
+        {
+            return redirect(route('showReceipt', $receipt->id));
+        }
         $receipt->paid = 'NO';
         $receipt->save();
         $client = Client::find($receipt->client->id);
