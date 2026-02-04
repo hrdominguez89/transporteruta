@@ -192,8 +192,8 @@
                 @endif
                 <th>Nro. Nuevo</th>
                 <th>Nro. Antiguo</th>
+                <th>Fecha de emision</th>
                 <th>Chofer</th>
-                <th>Fecha</th>
                 <th>Precio Neto</th>
                 <th>I.V.A.</th>
                 <th>Peajes</th>
@@ -238,8 +238,8 @@
                             {{ number_format($travelCertificate->number, 0, ',', '.') }}
                         </a>
                     </td>
-                    <td>{{ $travelCertificate->driver->name }}</td>
                     <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
+                    <td>{{ $travelCertificate->driver->name }}</td>
 
                     {{-- Importes calculados (refactor) --}}
                     <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
