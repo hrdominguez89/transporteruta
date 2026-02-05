@@ -219,7 +219,6 @@ class InvoiceController extends Controller
         // }
         return true;
     }
-    // Agregar UNA constancia a la factura (usa el botón "Agregar a la Factura")
     public function addToInvoice(Request $request, $travelCertificateId)
     {
         $travelCertificate = TravelCertificate::find($travelCertificateId);
@@ -248,7 +247,6 @@ class InvoiceController extends Controller
         }
         return redirect(route('showInvoice',  $request->invoiceId));
     }
-    // Agregar VARIAS constancias (usa el botón masivo)
     public function addMultipleToInvoice(Request $request)
     {
         $invoiceId = (int) $request->input('invoiceId');
@@ -438,6 +436,7 @@ class InvoiceController extends Controller
         // Comprobar condiciones
         if ($invoice->invoiced === 'NO' && $invoice->paid === 'NO') {
             try {
+                $this->limpiarFacturaAntesDeEliminar($invoice->id);
                 $invoice->delete();
                 // Si es petición AJAX, devolver JSON
                 if (request()->ajax()) {
@@ -458,5 +457,13 @@ class InvoiceController extends Controller
         }
 
         return redirect(route('showInvoice', $invoice->id))->with('error', 'No se puede eliminar una factura facturada o pagada.');
+    }
+    public function limpiarFacturaAntesDeEliminar($id)
+    {
+        TravelCertificate::where('invoiceId',$id)
+        ->update([
+            'invoiceId' => 0,
+            'invoiced' => 'NO'
+        ]);
     }
 }
