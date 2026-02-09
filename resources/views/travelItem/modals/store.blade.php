@@ -8,7 +8,6 @@
         </button>
       </div>
 
-      <!-- NUEVO ITEM N° REMITO -->
       <div class="modal-body">
         <form action="{{ Route('storeTravelItem', $travelCertificate->id) }}" class="form-group" method="POST">
           @csrf
@@ -27,13 +26,6 @@
             <option value="DESCARGA">Carga/Descarga</option>
             <option value="DESCUENTO">Descuento</option>
           </select>
-
-          {{-- NUEVO: campo específico para N° Remito --}}
-          <div id="remito_div" style="display:none;">
-            <label for="remito_number">N° de Remito:<span class="text-danger"> *</span></label>
-            <input id="remito_number" type="text" name="remito_number" class="form-control mb-2"
-                   placeholder="Ej: 0001-00012345">
-          </div>
 
           {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
           <div id="description_div">

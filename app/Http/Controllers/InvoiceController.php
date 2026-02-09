@@ -32,6 +32,7 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::find($id);
         $invoice->reference = $request->reference;
+        $invoice->date = $request->date;
         $invoice->save();
         return redirect(route('showInvoice', $invoice->id));
     }   
@@ -40,14 +41,7 @@ class InvoiceController extends Controller
     {
         try {
             $invoice = new Invoice();
-
-            // ==================== REFACT PV (muy importante) ====================
-            // Guardamos en la columna real de la BD => point_of_sale (snake_case).
-            // Aceptamos ambos nombres desde el form para no romper compatibilidad.
-            // ¡NO usar $invoice->pointOfSale acá si la columna no existe en la BD!
             $invoice->point_of_sale = (int) $request->input('point_of_sale', $request->input('pointOfSale'));
-            // ===================================================================
-
             $invoice->number        = (int) $request->number;
             $invoice->date          = $request->date; // o Carbon::parse($request->date)
             $invoice->clientId      = (int) $request->clientId;

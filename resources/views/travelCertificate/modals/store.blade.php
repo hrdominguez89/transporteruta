@@ -10,11 +10,6 @@
             <div class="modal-body">
                 <form action="{{ Route('storeTravelCertificate') }}" class="form-group" method="POST">
                     @csrf
-                    
-                    <label for="number">Numero(Sistema Antiguo):</label>
-                    <input type="number" placeholder="Ingrese numero del sistema antiguo" name="number" id="tc_number" class="form-control mb-2">
-                    <small id="number_help" class="text-danger" style="display:none;"></small>
-
                     <label for="date">Fecha:<span class="text-danger"> *</span></label>
                     <input type="date" name="date" class="form-control mb-2" required>
 
@@ -75,7 +70,6 @@
                             @endforeach
                         </select>
                     </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

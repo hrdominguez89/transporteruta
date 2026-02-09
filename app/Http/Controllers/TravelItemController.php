@@ -15,7 +15,6 @@ class TravelItemController extends Controller
 {
     public function store(Request $request, $travelCertificateId)
     {
-        // Busca la constancia (para asegurar que existe)
         $travelCertificate = TravelCertificate::findOrFail($travelCertificateId);
         
         if($travelCertificate->invoiced =='SI')
@@ -23,27 +22,6 @@ class TravelItemController extends Controller
             return redirect()->route('showTravelCertificate', $travelCertificate->id)
             ->with('error', 'Ya esta facturada.');
         }
-        // ================================================================
-        // FIX #1 — Normalizar TYPE (por si llega "Por Hora/Kilómetro")
-        // ================================================================
-        // $typeRaw = strtoupper(trim($request->input('type', '')));
-        // $mapType = [
-        //     'POR HORA'      => 'HORA',
-        //     'POR KILOMETRO' => 'KILOMETRO',
-        //     'POR KILÓMETRO' => 'KILOMETRO',
-        // ];
-        // $request->merge(['type' => $mapType[$typeRaw] ?? $typeRaw]);
-
-        //Elimíne estos separados de miles porque me dan un monto erróneo del tipo: $ 11.689.750,00 
-
-        // ================================================================
-        // Mejora — Normalizar PRICE si llega con separadores (12.000,50 -> 12000.50)
-        // ================================================================
-        /*if ($request->has('price')) {
-            $request->merge([
-                'price' => str_replace(['.', ','], ['', '.'], (string) $request->input('price'))
-            ]);
-        }*/
 
         // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
         $rules = [
@@ -219,7 +197,6 @@ class TravelItemController extends Controller
         return redirect()->route('showTravelCertificate', $travelCertificate->id)
             ->with('success', 'Ítem agregado correctamente.');
     }
-
     public function delete($id, $travelCertificateId)
     {
         $travelItem = TravelItem::findOrFail($id);
@@ -233,81 +210,49 @@ class TravelItemController extends Controller
         return redirect()->route('showTravelCertificate', $travelCertificateId)
             ->with('success', 'Ítem eliminado correctamente.');
     }
+    public function storeMultipleRemitos(Request $request, $id)
+    {
+        $travelCertificate = TravelCertificate::findOrFail($id);
+        $remitos = $request->get('remitos');
+        $remitos = array_values(array_unique($remitos));
 
-    // === NUEVO: alta masiva de remitos ===
-public function storeMultipleRemitos(Request $request, $id)
-{
-    $travelCertificate = TravelCertificate::findOrFail($id);
-    $remitos = $request->get('remitos');
-    // dd($remitos);
-    // Validación simple: pedimos un bloque de texto
-    // $request->validate([
-    //     'remitos' => ['required','string','max:5000'],
-    // ]);
+        if (empty($remitos)) {
+            return back()->with('error', 'No se detectaron números de remito válidos.');
+        }
+        $creados = 0;
+        $duplicados = [];
 
-    // Normalizamos: permitimos separar por comas, espacios o saltos de línea
-    // $raw = $request->input('remitos[]', '');
-    // // $tokens = preg_split('/[\s,;]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY);
-    // Limpieza: quedarnos con remitos alfanuméricos, max 50 chars (igual que la columna)
-    // $remitos = [];
-    // foreach ($tokens as $t) {
-    //     $t = trim($t);
-    //     if ($t === '') continue;
-    //     // Permitimos dígitos y letras (por si usan prefijos), guiones opcional
-    //     $t = mb_substr($t, 0, 50);
-    //     $remitos[] = $t;
-    // }
-
-    // dd($remitos);
-    // Sacar duplicados de la misma carga
-    $remitos = array_values(array_unique($remitos));
-
-    if (empty($remitos)) {
-        return back()->with('error', 'No se detectaron números de remito válidos.');
-    }
-    // Insertamos en transacción. Si alguno ya existe para esta constancia,
-    // el índice único lo frenará: lo atrapamos y seguimos con los demás.
-    $creados = 0;
-    $duplicados = [];
-
-    DB::transaction(function () use ($remitos, $travelCertificate, &$creados, &$duplicados) {
-        foreach ($remitos as $nro) {
-            try {
-                $item = new TravelItem();
-                $item->travelCertificateId = $travelCertificate->id;
-                $item->type = 'REMITO';
-                $item->description = 'Remito N° ' . $nro;
-                $item->remito_number = $nro;
-                // Política decidida: remitos no afectan importes
-                $item->price = 0;
-                $item->percent = 0;
-                $item->save();
-                $creados++;
-            } catch (QueryException $e) {
-                // Duplicado por índice único (SQLSTATE 23000) => lo marcamos y seguimos
-                if (($e->errorInfo[0] ?? '') === '23000') {
-                    $duplicados[] = $nro;
-                } else {
-                    throw $e;
+        DB::transaction(function () use ($remitos, $travelCertificate, &$creados, &$duplicados) {
+            foreach ($remitos as $nro) {
+                try {
+                    $item = new TravelItem();
+                    $item->travelCertificateId = $travelCertificate->id;
+                    $item->type = 'REMITO';
+                    $item->description = 'Remito N° ' . $nro;
+                    $item->remito_number = $nro;
+                    // Política decidida: remitos no afectan importes
+                    $item->price = 0;
+                    $item->percent = 0;
+                    $item->save();
+                    $creados++;
+                } catch (QueryException $e) {
+                    // Duplicado por índice único (SQLSTATE 23000) => lo marcamos y seguimos
+                    if (($e->errorInfo[0] ?? '') === '23000') {
+                        $duplicados[] = $nro;
+                    } else {
+                        throw $e;
+                    }
                 }
             }
+        });
+
+        if ($creados && empty($duplicados)) {
+            return back()->with('success', "Se agregaron {$creados} remito(s) correctamente.");
         }
 
-        // Recalcular una sola vez (performance)
-        // $travelCertificate->recalcTotals();
-    });
-
-    // Mensaje amigable
-    if ($creados && empty($duplicados)) {
-        return back()->with('success', "Se agregaron {$creados} remito(s) correctamente.");
+        if ($creados && $duplicados) {
+            return back()->with('success', "Se agregaron {$creados} remito(s). Se ignoraron por duplicado: " . implode(', ', $duplicados));
+        }
+        return back()->with('warning', 'Todos los remitos ingresados ya existían para esta constancia.');
     }
-
-    if ($creados && $duplicados) {
-        return back()->with('success', "Se agregaron {$creados} remito(s). Se ignoraron por duplicado: " . implode(', ', $duplicados));
-    }
-
-    // Si ninguno se creó, todos eran duplicados
-    return back()->with('warning', 'Todos los remitos ingresados ya existían para esta constancia.');
-}
-
 }

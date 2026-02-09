@@ -1,4 +1,3 @@
-{{-- resources/views/travelCertificate/pdf.blade.php --}}
 <!DOCTYPE html>
 <html lang="es" >
 <head>
@@ -9,18 +8,24 @@
     <style>
         @page { margin: 18mm 12mm; }
         html, body { font-size: 11.5px; line-height: 1.15; }
-        .container { border: 1px solid #000; padding: 32px; }
+        .container { 
+            border: 1px solid #000; 
+            padding: 32px;
+            background-image: url('data:image/jpeg;base64,{{ $fondoBase64 }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
         h5, p { margin: 4px 0; line-height: 1.15; }
-        .kv { display: flex; justify-content: space-between; margin: 3px 0; line-height: 1.5; }
+        .kv { display: flex; justify-content: space-between; margin: 3px 0; line-height: 1.5;}
         .header-img { max-width: 100%; height: auto; display: block; margin: 6px 0 10px; }
 
         /* Tabla compacta de conceptos */
-        .conceptos-table { width: 100%; border-collapse: collapse; font-size: 1rem; line-height: 1.5; }
-        .conceptos-table th, .conceptos-table td { padding: 2px 4px; border-bottom: 1px solid #ccc; vertical-align: top; }
+        .conceptos-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; line-height: 1.5; }
+        .conceptos-table th, .conceptos-table td { padding: 2px 4px;font-size: 0.7rem; border-bottom: 1px solid #ccc; vertical-align: top; }
 
         /* Totales compactos */
         .totales p { margin: 2px 0; line-height: 1.5; font-size: 1rem; }
-        
     </style>
     {{-- ============================================================================ --}}
     <link rel="stylesheet"
@@ -30,22 +35,7 @@
 </head>
 
 <body >
-<div class="container text-center"  style="position: relative;" >
-    <div style="
-    position:absolute;
-    top:0mm;
-    left:0mm;
-    right:0mm;
-    bottom:37mm;
-    background-image: url('data:image/jpeg;base64,{{ base64_encode(file_get_contents(resource_path('img/fondodeconstancia.jpeg'))) }}');
-    background-size:cover;
-    background-repeat:no-repeat;
-    background-position:center;
-    opacity:0.1;
-    z-index:-1;
-    "></div>
-
-
+<div class="container text-center"  id ="div-gral-body"style="position: relative;" >
     <div class="table-bordered">
         <p style="width: 30px; height: 30px; border: 2px solid #000; font-size: 20px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;">X</p>
         <div>
@@ -67,65 +57,75 @@
             </div>
         </div>
     </div>
-
-    <div class="table-bordered text-left mt-3 mb-3 p-2">
+    <div class="table-bordered text-left mt-3 mb-3 p-2" style="font-size: 0.8rem;">
         <p class="kv"><strong>Cliente:</strong> <span>{{ $travelCertificate->client->name }}</span></p>
         <p class="kv"><strong>Chofer:</strong> <span>{{ $travelCertificate->driver->name }}</span></p>
-        <p class="kv"><strong>Vehículo:</strong> <span>{{ $travelCertificate->driver?->vehicle?->name }}</span></p>
+        <p class="kv"><strong>Vehículo:</strong> <span>{{ $travelCertificate->vehicle ?? $travelCertificate->driver->vehicle->name ?? ''  }}</span></p>
         <p class="kv"><strong>Hora de Salida:</strong> <span>{{ $travelCertificate->horaSalida }}</span></p>
         <p class="kv"><strong>Hora de Llegada:</strong> <span>{{ $travelCertificate->horaLLegada }}</span></p>
         <p class="kv"><strong>Destino:</strong> <span>{{ $travelCertificate->destiny }}</span></p>
     </div>
-
-    <div class="col-12 table-bordered text-left p-2">
-        <p><strong>CONCEPTOS:</strong></p>
-
-        {{-- ================= REFACTORIZACIÓN (Conceptos) =================
-             Mostrar el monto *real* de cada ítem:
-             - DESCUENTO % → monto negativo (computed_price)
-             - ADICIONAL % sobre FIJO → display_price
-             - Resto → price
-             También usamos computed_description cuando exista.
-        ---------------------------------------------------------------- --}}
-        <table class="conceptos-table">
-            <thead>
-            <tr>
-                <th>Tipo</th>
-                <th>Descripción</th>
-                <th style="text-align:right;">Total</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach ($travelCertificate->travelItems as $travelItem)
-                @php
-                    // Monto y descripción “inteligentes” (con fallback)
-                    $monto = $travelItem->computed_price
-                          ?? $travelItem->display_price
-                          ?? ($travelItem->price ?? 0);
-
-                    $desc  = $travelItem->computed_description
-                          ?? $travelItem->description;
-
-                    $isNeg = $monto < 0;
-                @endphp
-                <tr>
-                    <td>{{ $travelItem->type }}</td>
-                    <td>{{ $desc }}</td>
-                    <td style="text-align:right; {{ $isNeg ? 'color:#c00' : '' }}">
-                        $&nbsp;{{ number_format($monto, 2, ',', '.') }}
-                    </td>
-                </tr>
+    <div class="table-bordered text-left mt-3 mb-3 p-2">
+    <p><strong style="font-size: 0.8rem;">CONCEPTOS:</strong></p>
+    @php
+        $filteredItems = $travelCertificate->travelItems->filter(fn($item) => $item->type != 'REMITO');
+        $chunks = $filteredItems->chunk(6);
+        $rows = $chunks->chunk(2);
+    @endphp
+    @foreach($rows as $row)
+        <div style="width: 100%; overflow: hidden; margin-bottom: 20px;">
+            @foreach($row as $chunk)
+                <div style="float: left; width: 48%; margin-right: 2%;">
+                    <table class="conceptos-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th style="text-align:right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($chunk as $travelItem)
+                                @php
+                                    $monto = $travelItem->computed_price ?? $travelItem->display_price ?? ($travelItem->price ?? 0);
+                                    $desc  = $travelItem->computed_description ?? $travelItem->description;
+                                    $isNeg = $monto < 0;
+                                @endphp
+                                <tr>
+                                    <td>{{ $travelItem->type }}</td>
+                                    <td>{{ $desc }}</td>
+                                    <td style="text-align:right; {{ $isNeg ? 'color:#c00' : '' }}">
+                                        $&nbsp;{{ number_format($monto, 2, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endforeach
+            <div style="clear: both;"></div>
+        </div>
+    @endforeach
+    </div>
+    <div class="table-bordered text-left mt-3 mb-3 p-2">
+             <table>
+            <thead>
+                <tr>
+                    <th style="font-size: 0.8rem;">Remitos</th>
+                </tr>
+            </thead>
+            @php
+                $remitos = $travelCertificate->travelItems->where('type', 'REMITO');
+            @endphp
+            <tbody>
+                @foreach ($remitos as $item)
+                <tr>
+                    <td style="font-size: 0.7rem;">{{ $item->description }}</td>
+                </tr>
+                @endforeach
             </tbody>
         </table>
-        {{-- ================= /REFACTORIZACIÓN (Conceptos) ================= --}}
     </div>
-
-    {{-- =====================  REFACTORIZACIÓN (Totales)  =====================
-         Usamos los accessors del modelo para mantener una única “fuente de verdad”:
-         - subtotal_sin_peajes, total_peajes, descuento_aplicable, monto_adicional
-         - total_calculado e iva_calculado para coherencia con la vista HTML
-       ---------------------------------------------------------------------- --}}
     @php
         // Peajes: si el controller pasó $totalTolls lo usamos, sino calculamos acá.
         $peajes = isset($totalTolls)
@@ -145,26 +145,25 @@
         // Total final
         $totalFinal = $importeNeto + $peajes + $ivaCalculado;
     @endphp
-
-    <div class=" table-bordered text-left mt-2 p-2 totales">
-        <p class="kv"><strong>IMPORTE NETO:</strong>
+    <div class="table-bordered text-left mt-2 p-2 totales" >
+        <p class="kv"  style="font-size: 0.87rem;"><strong>IMPORTE NETO:</strong>
             <span>$&nbsp;{{ number_format($importeNeto, 2, ',', '.') }}</span>
         </p>
-        <p class="kv"><strong>IVA:</strong>
+        <p class="kv" style="font-size: 0.87rem;"><strong>IVA:</strong>
             <span>$&nbsp;{{ number_format($ivaCalculado, 2, ',', '.') }}</span>
         </p>
-        <p class="kv"><strong>PEAJES:</strong>
+        <p class="kv" style="font-size: 0.87rem;"><strong>PEAJES:</strong>
             <span>$&nbsp;{{ number_format($peajes, 2, ',', '.') }}</span>
         </p>
-        <p class="kv"><strong>TOTAL:</strong>
+        <p class="kv" style="font-size: 0.87rem;"><strong>TOTAL:</strong>
             <span>$&nbsp;{{ number_format($totalFinal, 2, ',', '.') }}</span>
         </p>
     </div>
-    <div class="table-bordered">
+    <div class="table-bordered" style="font-size: 0.87rem;">
         <p>LA MERCADERÍA VIAJA POR CUENTA Y RIESGO DEL CLIENTE.</p>
         <P>NOTA: El horario rige desde que el vehículo sale de la agencia hasta que regresa a la misma.</P>
     </div>
-    <div class =" text-center table-bordered">
+    <div class =" text-center table-bordered" style="font-size: 0.87rem;">
         <p>La presente no tiene valor como recibo oficial. Se emitirá la factura correspondiente por la suma de los valores de los viajes devengados en las constancias de viaje.</p>
         <p>Conforme:</p>
         <p>________________________</p>

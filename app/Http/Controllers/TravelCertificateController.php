@@ -147,7 +147,30 @@ class TravelCertificateController extends Controller
         $travelCertificate = TravelCertificate::find($id);
         $tolls = TravelItem::where('type', 'PEAJE')->where('travelCertificateId', $id);
         $totalTolls = $tolls->sum('price');
-        $pdf = Pdf::loadView('travelCertificate.pdf', ['travelCertificate' => $travelCertificate, 'totalTolls' => $totalTolls]);
+        // Procesar imagen con opacidad
+        $imagePath = resource_path('img/fondodeconstancia.jpeg');
+        $image = imagecreatefromjpeg($imagePath);
+        
+        // Crear imagen transparente
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $transparent = imagecreatetruecolor($width, $height);
+        
+        // Fondo blanco
+        $white = imagecolorallocate($transparent, 255, 255, 255);
+        imagefill($transparent, 0, 0, $white);
+        
+        // Combinar con 12% de opacidad (88% de transparencia)
+        imagecopymerge($transparent, $image, 0, 0, 0, 0, $width, $height, 12);
+        
+        ob_start();
+        imagejpeg($transparent, null, 90);
+        $imageData = ob_get_clean();
+        
+        $fondoBase64 = base64_encode($imageData);
+    
+        $pdf = Pdf::loadView('travelCertificate.pdf', ['travelCertificate' => $travelCertificate, 'totalTolls' => $totalTolls,'fondoBase64' =>$fondoBase64]);
+
         return $pdf->stream('Constancia-' . $travelCertificate->client->name . 'pdf');
     }
 

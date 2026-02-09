@@ -21,16 +21,15 @@
 
         @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal"
-                    data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-2">Generar
-                    PDF</a>
+                <button class="btn btn-sm btn-danger col-1 mr-1" data-toggle="modal" data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
+                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-1">Generar PDF</a>
+                <button class="btn btn-sm btn-primary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
             </div>
         @elseif($invoice->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
                 <button class="btn btn-sm btn-primary col-1" data-toggle="modal"
                     data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
-                <button class="btn btn-sm btn-secondary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
+                <button class="btn btn-sm btn-primary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
             </div>
         @endif
         @if ($invoice->paid == 'SI')
@@ -38,6 +37,8 @@
                 <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-4">Generar
                     PDF</a>
             </div>
+            
+
             <div class="col-12 text-left mb-2">
                 {{-- UX: corregimos acentos --}}
                 <h5 class="text-danger">La factura se marcó como pagada y se descontó el saldo de la cuenta corriente</h5>
@@ -360,10 +361,12 @@
                 <div class="modal-body">
                     <form action="{{ Route('editInvoice', $invoice->id ) }}" class="form-group" method="POST">
                          @csrf
-                         <div>
-                            <label>Referencia:</label>
-                            <input type="text" name="reference">
-                        </div>
+                            <label for="reference">Referencia:</label>
+                            <input type="text" name="reference" class="form-control mb-2" value="{{ $invoice->reference ? $invoice->reference : "" }}">
+
+                            <label for="date">Fecha:</label>
+                            <input type="date" name="date" class="form-control mb-2" value = "{{ $invoice->date ? $invoice->date->format('Y-m-d') : "" }}">
+
                         <button type="submit" class="btn btn-sm btn-primary mt-3">Editar</button>
                     </form>
                 </div>
