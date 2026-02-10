@@ -23,71 +23,9 @@ class TravelItemController extends Controller
             ->with('error', 'Ya esta facturada.');
         }
 
-        // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
-        $rules = [
-            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO',
-            'description'   => 'nullable|string|max:255',
-
-            // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
-            'percent'       => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-            'porcentaje'    => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-
-            // DESCUENTO → modo y, según el modo, price o discount_percent
-            'discount_mode'    => 'exclude_unless:type,DESCUENTO|nullable|in:amount,percent',
-            'discount_percent' => 'exclude_unless:discount_mode,percent|nullable|numeric|min:0|max:100',
-
-            // price: NO exigir en ADICIONAL/REMITO ni cuando el descuento es por %
-            // (el requerido se fuerza en un after() según el modo)
-            'price'         => 'exclude_if:type,ADICIONAL|exclude_if:type,REMITO|exclude_if:discount_mode,percent|nullable|numeric|min:0',
-
-            // HORA
-            'totalHours'    => 'exclude_unless:type,HORA|nullable|integer|min:0',
-            'totalMinutes'  => 'exclude_unless:type,HORA|nullable|integer|in:0,15,30,45',
-
-            // KILOMETRO
-            'distance'      => 'exclude_unless:type,KILOMETRO|nullable|numeric|min:0',
-        ];
-
-        $messages = [
-            // 'remito_number.required'      => 'Ingresá el número de Remito.',
-            'price.required_unless'       => 'Ingresá un precio para este tipo de ítem.',
-        ];
-
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        // ADICIONAL: exigir al menos uno (percent o porcentaje)
-        $validator->after(function ($v) use ($request) {
-            if ($request->type === 'ADICIONAL'
-                && !$request->filled('percent')
-                && !$request->filled('porcentaje')) {
-                $v->errors()->add('percent', 'Ingresá el porcentaje para el Adicional.');
-            }
-        });
-
-        // DESCUENTO: exigir price si es monto fijo, o discount_percent si es porcentaje
-        $validator->after(function ($v) use ($request) {
-            if ($request->type === 'DESCUENTO') {
-                $mode = $request->input('discount_mode', 'amount');
-                if ($mode === 'percent') {
-                    if (!$request->filled('discount_percent')) {
-                        $v->errors()->add('discount_percent', 'Ingresá el porcentaje de descuento.');
-                    }
-                } else { // amount (monto fijo) por defecto
-                    if (!$request->filled('price')) {
-                        $v->errors()->add('price', 'Ingresá el monto del descuento.');
-                    }
-                }
-            }
-        });
-
-        // Si falla validación → registrar y volver
-        if ($validator->fails()) {
-            Log::error('storeTravelItem VALIDATION FAILED', $validator->errors()->toArray());
-            return back()->withErrors($validator)->withInput();
-        }
-        // =====================================================================
 
         // Reglas de negocio adicionales para DESCUENTO
+        // esta validacion tiene sentido. la 1ra la 2da ya no
         if ($request->input('type') === 'DESCUENTO') {
             // 1) ¿Hay base gravada?
             $hayBaseGravada = $travelCertificate->travelItems()
@@ -101,7 +39,7 @@ class TravelItemController extends Controller
                     ])
                     ->withInput();
             }
-
+            
             // 2) ¿Está intentando “descontar peajes”? (por descripción)
             $desc = mb_strtolower((string)$request->input('description', ''));
             if (str_contains($desc, 'peaje') || str_contains($desc, 'peajes')) {

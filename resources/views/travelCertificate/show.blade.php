@@ -2,13 +2,6 @@
 
 @section('title', 'Constancias de Viaje')
 
-{{-- REFACTORIZACIÓN (UI de ítems):
-   - Mostrar montos calculados:
-     * DESCUENTO: usar $travelItem->computed_price (negativo; rojo)
-     * ADICIONAL: usar $travelItem->display_price (% de FIJO)
-     * Resto: price normal
-   - Descripción inteligente para DESCUENTO: $travelItem->computed_description
-   (PDF: replicar misma lógica para mantener consistencia) --}}
 
 @section('content_header')
     <div class="row">
@@ -60,7 +53,7 @@
         @include('travelItem.modals.store')
         @include('travelCertificate.modals.update')
 
-        {{-- MODAL NUEVO (10/2025): carga múltiple de remitos. POST a travelItems.storeMultipleRemitos --}}
+        
         <div class="modal fade" id="remitosMultipleModal" tabindex="-1" aria-labelledby="remitosMultipleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <form method="POST" action="{{ route('travelItems.storeMultipleRemitos', $travelCertificate->id) }}" class="modal-content">
@@ -93,7 +86,6 @@
             </form>
           </div>
         </div>
-        {{-- /MODAL NUEVO --}}
 @stop
 
 @section('content')

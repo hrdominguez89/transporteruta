@@ -27,6 +27,27 @@
             <option value="DESCUENTO">Descuento</option>
           </select>
 
+          {{-- las opciones las vamos a traer de la BD  --}}
+          {{-- <label for="type">Tipo:<span class="text-danger"> *</span></label> --}}
+          {{-- <select id="type" name="type" class="form-control mb-2" required>
+            @foreach ($items_type as $items )
+              <option value="{{ $items->type }}">{{ $items->label }}</option>
+            @endforeach
+          </select> --}}
+          {{-- Todos tienen descripcion --}}
+          {{-- queda fijo  --}}
+          {{-- Algunos tienen unidades y un precio por unidad --}}
+          {{-- @if 'selected item'tiene unidad unidad y precio por unidad.{{  }} 
+            la dificultad aca es como tomar el value seleccionado 
+            seguramente deba tomarlo con un javascript --}}
+          {{-- Otros tienen porcentaje , otros fijo y otros ambas --}}
+          {{-- devuelta tomar la opcion y luego validar los 3 casos  --}}
+          {{-- Algunos tienen IVA otros NO --}}
+          {{-- {{ esto no se si se valida aca sino en el controllador }} --}}
+          {{-- Los label pueden trarse de la BD y con validaciones puedo mostrar los campos que requiera. --}}
+          {{-- el item se trae se usa el campo label para mostrarlo --}}
+          
+
           {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
           <div id="description_div">
             <label for="description">Descripción:</label>
@@ -189,19 +210,6 @@
     const type = typeSel ? typeSel.value : "";
 
     switch (type) {
-      case "REMITO": // <-- NUEVO
-        show("remito_div");     req("remito_number");
-        hide("description_div");
-        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
-        hide("distance_div");   unreq("distance");
-        hide("price_div");      unreq("price");
-        hide("porcentaje_div"); unreq("porcentaje");
-        // Ocultar controles de descuento si venían visibles
-        hide("discount_mode_div");    unreq("discount_mode");
-        hide("discount_percent_div"); unreq("discount_percent");
-        text("textoPrecio", ""); text("calculoPorcentaje", ""); text("preview_descuento", "");
-        break;
-
       case "HORA":
         hide("remito_div");     unreq("remito_number");
         show("description_div");
