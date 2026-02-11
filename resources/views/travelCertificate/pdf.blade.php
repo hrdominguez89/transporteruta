@@ -50,7 +50,7 @@
                 <p style="font-size: 8.5px;">Teléfono 4745-1515/4744-7999 / Wpp. 1154033940;</p>
             </div>
             <div style="display: inline-block; width: 48%; vertical-align: top;">
-                <h5>CONSTANCIA DE VIAJE N° {{ number_format($travelCertificate->number, 0, ',', '.') }}</h5>
+                <h5>CONSTANCIA DE VIAJE N° {{ $travelCertificate->number ? $travelCertificate->number : $travelCertificate->id }}</h5>
                 <p>Documento no válido como factura.</p>
                 <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</p>
                 <img  class="header-img" src="data:image/png;base64,{{ base64_encode(file_get_contents(resource_path('img/logo_camion.png'))) }}">

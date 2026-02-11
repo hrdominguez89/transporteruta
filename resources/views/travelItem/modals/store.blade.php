@@ -25,6 +25,10 @@
             <option value="MULTIDESTINO">Multidestino</option>
             <option value="DESCARGA">Carga/Descarga</option>
             <option value="DESCUENTO">Descuento</option>
+            <option value="ESTACIONAMIENTO">Estacionamiento</option>
+            <option value="PALLET">Pallet</option>
+            <option value="BULTO">Bulto</option>
+            <option value="ESTADIA">Estadia</option>
           </select>
 
           {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
@@ -74,6 +78,12 @@
                    placeholder="Ingrese la distancia">
           </div>
 
+          <div style="display: none;" id="unidad_div">
+            <label for="unidad">Unidades:<span class="text-danger"> *</span></label>
+            <input id="unidad" type="number" step="1" min="0" name="unidad" class="form-control mb-2"
+                   placeholder="Ingrese la unidad">
+          </div>
+
           <div style="display: none;" id="price_div">
             <label for="price">Precio:<span class="text-danger"> * </span><small id="textoPrecio"
                   class="text-danger"></small></label>
@@ -113,7 +123,6 @@
   const typeSel = $("type");
 
   function hideAll() {
-    hide("remito_div");       unreq("remito_number");     // <-- NUEVO
     show("description_div");                                 // por defecto visible
     hide("totalTime_div");    unreq("totalHours"); unreq("totalMinutes");
     hide("distance_div");     unreq("distance");
@@ -189,21 +198,7 @@
     const type = typeSel ? typeSel.value : "";
 
     switch (type) {
-      case "REMITO": // <-- NUEVO
-        show("remito_div");     req("remito_number");
-        hide("description_div");
-        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
-        hide("distance_div");   unreq("distance");
-        hide("price_div");      unreq("price");
-        hide("porcentaje_div"); unreq("porcentaje");
-        // Ocultar controles de descuento si venían visibles
-        hide("discount_mode_div");    unreq("discount_mode");
-        hide("discount_percent_div"); unreq("discount_percent");
-        text("textoPrecio", ""); text("calculoPorcentaje", ""); text("preview_descuento", "");
-        break;
-
       case "HORA":
-        hide("remito_div");     unreq("remito_number");
         show("description_div");
         show("totalTime_div");  req("totalHours"); req("totalMinutes");
         show("price_div");      req("price");
@@ -217,7 +212,6 @@
         break;
 
       case "KILOMETRO":
-        hide("remito_div");     unreq("remito_number");
         show("description_div");
         show("distance_div");   req("distance");
         show("price_div");      req("price");
@@ -231,7 +225,6 @@
         break;
 
       case "ADICIONAL":
-        hide("remito_div");     unreq("remito_number");
         show("description_div");
         show("porcentaje_div"); req("porcentaje");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
@@ -246,24 +239,58 @@
         break;
 
       case "DESCUENTO":
-        hide("remito_div");     unreq("remito_number");
         show("description_div");
-        // NUEVO: mostramos el selector de modo y ajustamos UI según la elección
         show("discount_mode_div"); req("discount_mode");
         updateDiscountModeUI();
-
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("distance_div");   unreq("distance");
         hide("porcentaje_div"); unreq("porcentaje"); // (este es el de ADICIONAL)
         text("calculoPorcentaje", "");
         break;
-
+      case 'PALLET':
+        show("price_div");      req("price");
+        show("unidad_div");      req("unidad");
+        hide("description_div");
+        hide("distance_div");   unreq("distance");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("porcentaje_div"); unreq("porcentaje");
+        // Ocultar controles de descuento si venían visibles
+        hide("discount_mode_div");    unreq("discount_mode");
+        hide("discount_percent_div"); unreq("discount_percent");
+        text("textoPrecio", "Precio por Kilometro");
+        text("calculoPorcentaje", ""); text("preview_descuento", "");
+        break;
+      case 'BULTO':
+        show("price_div");      req("price");
+        show("unidad_div");      req("unidad");
+        hide("description_div");
+        hide("distance_div");   unreq("distance");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("porcentaje_div"); unreq("porcentaje");
+        // Ocultar controles de descuento si venían visibles
+        hide("discount_mode_div");    unreq("discount_mode");
+        hide("discount_percent_div"); unreq("discount_percent");
+        text("textoPrecio", "Precio por Kilometro");
+        text("calculoPorcentaje", ""); text("preview_descuento", "");
+        break;
+        case 'ESTADIA':
+        show("price_div");      req("price");
+        show("unidad_div");      req("unidad");
+        hide("description_div");
+        hide("distance_div");   unreq("distance");
+        hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
+        hide("porcentaje_div"); unreq("porcentaje");
+        // Ocultar controles de descuento si venían visibles
+        hide("discount_mode_div");    unreq("discount_mode");
+        hide("discount_percent_div"); unreq("discount_percent");
+        text("textoPrecio", "Precio por Kilometro");
+        text("calculoPorcentaje", ""); text("preview_descuento", "");
+        break;
       case "": // opción vacía
         hideAll();
         break;
 
-      default: // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc.
-        hide("remito_div");     unreq("remito_number");
+      default: // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc. ESTACIONAMIENTO
         show("description_div");
         show("price_div");      req("price");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");

@@ -16,47 +16,46 @@ class TravelItemController extends Controller
     public function store(Request $request, $travelCertificateId)
     {
         $travelCertificate = TravelCertificate::findOrFail($travelCertificateId);
-        
         if($travelCertificate->invoiced =='SI')
-        {
-            return redirect()->route('showTravelCertificate', $travelCertificate->id)
-            ->with('error', 'Ya esta facturada.');
-        }
-
-        // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
-        $rules = [
-            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO',
-            'description'   => 'nullable|string|max:255',
-
-            // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
-            'percent'       => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-            'porcentaje'    => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-
-            // DESCUENTO → modo y, según el modo, price o discount_percent
-            'discount_mode'    => 'exclude_unless:type,DESCUENTO|nullable|in:amount,percent',
-            'discount_percent' => 'exclude_unless:discount_mode,percent|nullable|numeric|min:0|max:100',
-
-            // price: NO exigir en ADICIONAL/REMITO ni cuando el descuento es por %
-            // (el requerido se fuerza en un after() según el modo)
-            'price'         => 'exclude_if:type,ADICIONAL|exclude_if:type,REMITO|exclude_if:discount_mode,percent|nullable|numeric|min:0',
-
-            // HORA
-            'totalHours'    => 'exclude_unless:type,HORA|nullable|integer|min:0',
-            'totalMinutes'  => 'exclude_unless:type,HORA|nullable|integer|in:0,15,30,45',
-
-            // KILOMETRO
-            'distance'      => 'exclude_unless:type,KILOMETRO|nullable|numeric|min:0',
-        ];
-
-        $messages = [
-            // 'remito_number.required'      => 'Ingresá el número de Remito.',
+            {
+                return redirect()->route('showTravelCertificate', $travelCertificate->id)
+                ->with('error', 'Ya esta facturada.');
+                }
+                
+                // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
+                $rules = [
+                    'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA',
+                    'description'   => 'nullable|string|max:255',
+                    
+                    // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
+                    'percent'       => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
+                    'porcentaje'    => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
+                    
+                    // DESCUENTO → modo y, según el modo, price o discount_percent
+                    'discount_mode'    => 'exclude_unless:type,DESCUENTO|nullable|in:amount,percent',
+                    'discount_percent' => 'exclude_unless:discount_mode,percent|nullable|numeric|min:0|max:100',
+                    
+                    // price: NO exigir en ADICIONAL/REMITO ni cuando el descuento es por %
+                    // (el requerido se fuerza en un after() según el modo)
+                    'price'         => 'exclude_if:type,ADICIONAL|exclude_if:discount_mode,percent|nullable|numeric|min:0',
+                    
+                    // HORA
+                    'totalHours'    => 'exclude_unless:type,HORA|nullable|integer|min:0',
+                    'totalMinutes'  => 'exclude_unless:type,HORA|nullable|integer|in:0,15,30,45',
+                    
+                    // KILOMETRO
+                    'distance'      => 'exclude_unless:type,KILOMETRO|nullable|numeric|min:0',
+                    ];
+                    
+            $messages = [
+                // 'remito_number.required'      => 'Ingresá el número de Remito.',
             'price.required_unless'       => 'Ingresá un precio para este tipo de ítem.',
-        ];
-
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        // ADICIONAL: exigir al menos uno (percent o porcentaje)
-        $validator->after(function ($v) use ($request) {
+            ];
+            
+            $validator = Validator::make($request->all(), $rules, $messages);
+            
+            // ADICIONAL: exigir al menos uno (percent o porcentaje)
+            $validator->after(function ($v) use ($request) {
             if ($request->type === 'ADICIONAL'
                 && !$request->filled('percent')
                 && !$request->filled('porcentaje')) {
@@ -123,6 +122,8 @@ class TravelItemController extends Controller
         switch ($type) {
             case 'ADICIONAL':
                 // Guardamos % en 'percent' y price=0. El monto se calcula en el modelo/vistas.
+                // ACA VALIDAMOS QUE VENGA FIJO 
+                // EN CERTIFICADO DE VIAJE DEBE HACER LA MISMA VALIDACION. 
                 $rawPercent    = $request->input('percent', $request->input('porcentaje', 0));
                 $item->percent = (float) str_replace(',', '.', $rawPercent);
                 $item->price   = 0.0;
@@ -180,7 +181,36 @@ class TravelItemController extends Controller
                     }
                 }
                 break;
+                case 'PALLET':
+                    $dist = (float) $request->input('unidad', 0);
+                    $unit = (float) $request->input('price', 0);
 
+                    $item->distance = $dist;
+                    $item->price    = $dist * $unit;
+
+                    $item->description = trim(($request->input('description') ?: '') . ' (' .
+                    $dist . ' unidades x $ ' . number_format($unit, 2, ',', '.') . ')');
+                break;
+                case 'BULTO':
+                    $dist = (float) $request->input('unidad', 0);
+                    $unit = (float) $request->input('price', 0);
+
+                    $item->distance = $dist;
+                    $item->price    = $dist * $unit;
+
+                    $item->description = trim(($request->input('description') ?: '') . ' (' .
+                        $dist . ' unidades. x $ ' . number_format($unit, 2, ',', '.') . ')');
+                break;
+                 case 'ESTADIA':
+                    $dist = (float) $request->input('unidad', 0);
+                    $unit = (float) $request->input('price', 0);
+
+                    $item->distance = $dist;
+                    $item->price    = $dist * $unit;
+
+                    $item->description = trim(($request->input('description') ?: '') . ' (' .
+                        $dist . ' unidades. x $ ' . number_format($unit, 2, ',', '.') . ')');
+                break;
             default:
                 // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc.
                 $item->price = (float) $request->input('price', 0);
@@ -193,7 +223,6 @@ class TravelItemController extends Controller
         // IMPORTANTE: para que el descuento % impacte,
         // recalcTotals() debe aplicar percent de DESCUENTO sobre la base gravada (excluye PEAJE/REMITO).
         $travelCertificate->recalcTotals();
-
         return redirect()->route('showTravelCertificate', $travelCertificate->id)
             ->with('success', 'Ítem agregado correctamente.');
     }
