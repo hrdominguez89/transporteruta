@@ -69,13 +69,17 @@
     <p><strong style="font-size: 0.8rem;">CONCEPTOS:</strong></p>
     @php
         $filteredItems = $travelCertificate->travelItems->filter(fn($item) => $item->type != 'REMITO');
-        $chunks = $filteredItems->chunk(6);
-        $rows = $chunks->chunk(2);
+        if ($filteredItems->count() >= 6)  {
+            $chunks = $filteredItems->chunk(6);
+            $rows = $chunks->chunk(2);
+        } else {
+            $rows = collect([collect([$filteredItems])]);
+        }
     @endphp
     @foreach($rows as $row)
         <div style="width: 100%; overflow: hidden; margin-bottom: 20px;">
             @foreach($row as $chunk)
-                <div style="float: left; width: 48%; margin-right: 2%;">
+                <div style="float: left; width: {{ $filteredItems->count() > 6 ? '48%' : '98%' }}; {{ $filteredItems->count() > 6 ? 'margin-right: 2%;' : '' }}">
                     <table class="conceptos-table" style="width: 100%;">
                         <thead>
                             <tr>
