@@ -209,7 +209,7 @@ class TravelItemController extends Controller
                     $item->price    = $dist * $unit;
 
                     $item->description = trim(($request->input('description') ?: '') . ' (' .
-                        $dist . ' unidades. x $ ' . number_format($unit, 2, ',', '.') . ')');
+                    $dist . ($dist > 1 ? ' dia x $ ' : 'dias x $') . number_format($unit, 2, ',', '.') . ')');
                 break;
             default:
                 // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc.

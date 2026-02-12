@@ -257,7 +257,7 @@
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
-        text("textoPrecio", "Precio por Kilometro");
+        text("textoPrecio", "Precio por pallet");
         text("calculoPorcentaje", ""); text("preview_descuento", "");
         break;
       case 'BULTO':
@@ -270,7 +270,7 @@
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
-        text("textoPrecio", "Precio por Kilometro");
+        text("textoPrecio", "Precio por bulto");
         text("calculoPorcentaje", ""); text("preview_descuento", "");
         break;
         case 'ESTADIA':
@@ -283,7 +283,7 @@
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
-        text("textoPrecio", "Precio por Kilometro");
+        text("textoPrecio", "Precio por dia");
         text("calculoPorcentaje", ""); text("preview_descuento", "");
         break;
       case "": // opción vacía
