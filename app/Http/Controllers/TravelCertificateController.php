@@ -43,6 +43,8 @@ class TravelCertificateController extends Controller
             ['destiny', '=', $destiny],
             ['driverId', '=', $driverId],
             ['clientId', '=', $clientId],
+            ['horaSalida', '=', $horaSalida],
+            ['horaLlegada', '=', $horaLlegada],
         ])->first();
             
         if($TC)
