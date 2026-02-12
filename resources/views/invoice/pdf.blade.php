@@ -326,7 +326,7 @@
                     Total
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                      $&nbsp;{{ number_format($neto, 2, ',', '.') }}
+                      $&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}
                 </th>
             </tr>
         </table>
