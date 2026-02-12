@@ -326,7 +326,7 @@
                     Total
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                      $&nbsp;{{ number_format($invoice->getTotalWithIvaAttribute() - $totalPeajes, 2, ',', '.') }}
+                      $&nbsp;{{ number_format($invoice->getTotalWithIvaAttribute() - $totalPeajes - $estacionamiento, 2, ',', '.') }}
                 </th>
             </tr>
         </table>
