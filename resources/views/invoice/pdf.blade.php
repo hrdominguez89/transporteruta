@@ -247,6 +247,7 @@
                         // REFACT (por fila): usamos accessors del modelo para que el cálculo
                         // coincida con la constancia (descuentos/adicionales/peajes)
                         $neto   = (($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable) + $travelCertificate->monto_adicional);
+                        
                         $iva    = $esExento ? 0 : $travelCertificate->iva_calculado;
                         $peajes = $travelCertificate->total_peajes;
                     @endphp
@@ -262,10 +263,10 @@
 
                         {{-- REFACT: Importe Neto / IVA / Peajes por fila usando accessors --}}
                         <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($neto, 2, ',', '.') }}
+                            $&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($iva, 2, ',', '.') }}
+                            $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
                             $&nbsp;{{ number_format($peajes, 2, ',', '.') }}
@@ -283,7 +284,7 @@
                     Subtotal
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($travelCertificate->total , 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
@@ -291,7 +292,7 @@
                     I.V.A.
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalIva, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
@@ -311,7 +312,7 @@
                     Total
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($totalConIva, 2, ',', '.') }}
+                      $&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}
                 </th>
             </tr>
         </table>
