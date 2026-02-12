@@ -226,6 +226,7 @@
             $totalIva    = (float) $items->sum(fn ($tc) => $esExento ? 0 : $tc->iva_calculado);
             $totalPeajes = (float) $items->sum(fn ($tc) => $tc->total_peajes);
             $totalConIva = $totalNeto + $totalIva + $totalPeajes;
+            $estacionamiento =(float) $items->sum(fn ($tc) => $tc->total_estacionamiento);
         @endphp
         {{-- ===================== /REFACT (totales de factura) ============================ --}}
 
@@ -285,6 +286,14 @@
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
                     $&nbsp;{{ number_format($travelCertificate->total , 2, ',', '.') }}
+                </th>
+            </tr>
+            <tr style="background-color:#FFFFFF">
+                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
+                    Estacionamientos
+                </th>
+                <th style="padding: 2px 8px;text-align:right">
+                    $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
