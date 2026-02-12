@@ -228,8 +228,6 @@
             $totalConIva = $totalNeto + $totalIva + $totalPeajes;
             $estacionamiento =(float) $items->sum(fn ($tc) => $tc->total_estacionamiento);
         @endphp
-        {{-- ===================== /REFACT (totales de factura) ============================ --}}
-
         <hr>
         <table class="conceptos">
             <thead>
@@ -265,7 +263,7 @@
 
                         {{-- REFACT: Importe Neto / IVA / Peajes por fila usando accessors --}}
                         <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($travelCertificate->total - $peajes - $estacionamiento , 2, ',', '.') }}
+                            $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->total_peajes - $travelCertificate->total_estacionamiento , 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
                             $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
@@ -274,7 +272,7 @@
                             $&nbsp;{{ number_format($peajes, 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
+                            $&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach
@@ -289,7 +287,7 @@
                     Subtotal
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($travelCertificate->total - $estacionamiento - $totalPeajes , 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalNeto - $estacionamiento - $totalPeajes , 2, ',', '.') }}
                 </th>
             </tr>
             
