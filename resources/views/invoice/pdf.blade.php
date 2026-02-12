@@ -264,7 +264,7 @@
 
                         {{-- REFACT: Importe Neto / IVA / Peajes por fila usando accessors --}}
                         <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}
+                            $&nbsp;{{ number_format($travelCertificate->total - $peajes - $estacionamiento , 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
                             $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
@@ -305,14 +305,16 @@
                     $&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}
                 </th>
             </tr>
-            <tr style="background-color:#FFFFFF">
-                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
-                    Estacionamientos
-                </th>
-                <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
-                </th>
-            </tr>
+            @if ($estacionamiento > 0)
+                <tr style="background-color:#FFFFFF">
+                    <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
+                        Estacionamientos
+                    </th>
+                    <th style="padding: 2px 8px;text-align:right">
+                        $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
+                    </th>
+                </tr>
+            @endif
             <tr style="background-color:#FFFFFF">
                 <th style="width:90%;text-align:center">
                     ___________________________________<br>
