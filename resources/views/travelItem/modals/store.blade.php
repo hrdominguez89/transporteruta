@@ -42,7 +42,8 @@
           <div id="discount_mode_div" style="display:none;">
             <label for="discount_mode">Modo de descuento:<span class="text-danger"> *</span></label>
             <select id="discount_mode" name="discount_mode" class="form-control mb-2">
-              <option value="amount" selected>Monto fijo</option>
+              <option value="" selected>Seleccione una opcion</option>
+              <option value="amount" >Monto fijo</option>
               <option value="percent">Porcentaje</option>
             </select>
           </div>
@@ -55,6 +56,16 @@
             <small id="preview_descuento"></small>
           </div>
           {{-- ⬆⬆⬆ FIN NUEVO: soporte a Descuento por % ⬆⬆⬆ --}}
+          
+          {{-- Selector de ADICIONAL--}}
+          <div id="adicional_mode_div" style="display:none;">
+            <label for="adicional_mode">Modo adicional:<span class="text-danger"> *</span></label>
+            <select id="adicional_mode" name="adicional_mode" class="form-control mb-2">
+              <option value="" selected>Selecciione un tipo</option>
+              <option value="amount" >Monto fijo</option>
+              <option value="percent">Porcentaje</option>
+            </select>
+          </div>
 
           <div style="display: none;" id="totalTime_div">
             <label for="totalHours">Tiempo Total: <span class="text-danger"> *</span></label>
@@ -161,7 +172,25 @@
       }
     });
   }
+  function updateAdicionalModeUI() {
+  const modeSel = $("adicional_mode");
+  const mode = modeSel ? modeSel.value : "";
 
+  if (mode === "") {
+    hide("porcentaje_div");    unreq("porcentaje");
+    hide("price_div");         unreq("price");
+    return;
+  }
+
+  if (mode === "percent") {
+    show("porcentaje_div");    req("porcentaje");
+    hide("price_div");         unreq("price");
+  } else {
+    hide("porcentaje_div");    unreq("porcentaje");
+    show("price_div");         req("price");
+    text("textoPrecio", "Monto fijo del adicional");
+  }
+}
   // ──────────────────────
   // NUEVO: lógica de "Descuento por %"
   // ──────────────────────
@@ -226,7 +255,9 @@
 
       case "ADICIONAL":
         show("description_div");
-        show("porcentaje_div"); req("porcentaje");
+        show("adicional_mode_div"); req("adicional_mode");
+        updateAdicionalModeUI();
+        text("calculoPorcentaje", "");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("distance_div");   unreq("distance");
         hide("price_div");      unreq("price");
@@ -307,7 +338,7 @@
   // Listeners
   typeSel && typeSel.addEventListener("change", updateUI);
   $("discount_mode") && $("discount_mode").addEventListener("change", updateDiscountModeUI);
-
+  $("adicional_mode") && $("adicional_mode").addEventListener("change", updateAdicionalModeUI);
   updateUI(); // estado inicial
 })();
 </script>

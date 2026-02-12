@@ -50,18 +50,6 @@
 @stop
 
 @section('content')
-
-    {{-- ===================== REFACT (encabezado): Totales con modelo =====================
-         La factura toma importes CALCULADOS de cada constancia para reflejar:
-         - Descuentos (%) y montos (sin afectar Peajes)
-         - Adicionales (% sobre FIJO)
-         - Peajes separados
-         Base de cálculo por constancia:
-         NETO = (subtotal_sin_peajes - descuento_aplicable) + monto_adicional
-         IVA  = iva_calculado (0 si cliente EXENTO)
-         PEJ  = total_peajes
-         TOTAL = NETO + IVA + PEJ
-    ================================================================================ --}}
     @php
         $items = $invoice->travelCertificates ?? collect();
 
@@ -86,14 +74,9 @@
 
         // Total con IVA
         $totalConIva = $totalNeto + $totalIva + $totalPeajes;
+        $estacionamiento =(float) $items->sum(fn ($tc) => $tc->total_estacionamiento);
+
     @endphp
-    {{-- ===================== /REFACT (encabezado) ====================================== --}}
-
-    {{-- ======================= LEGACY (solo referencia, NO usar en cálculo) ============
-        Se deja documentado pero comentado para evitar confusiones de Blade.
-        La fuente de verdad son los campos calculados por constancia.
-    ================================================================================ --}}
-
     <table class="table table-bordered text-center">
         <thead class="bg-danger">
             <tr>
@@ -103,6 +86,7 @@
                 <th>Total (Sin IVA)</th>
                 <th>IVA</th>
                 <th>Peajes</th>
+                <th>Estacionamiento</th>
                 <th>Balance</th>
                 <th>Facturado</th>
                 <th>Total (Con IVA)</th>
@@ -124,7 +108,8 @@
 
                 {{-- Peajes (sumatoria por constancias) --}}
                 <td>$&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}</td>
-
+                <td>$&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}</td>
+                
                 <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
                 <td>{{ $invoice->invoiced }}</td>
 
@@ -198,6 +183,7 @@
                 <th>Precio Neto</th>
                 <th>I.V.A.</th>
                 <th>Peajes</th>
+                <th>Estacionamientos</th>
                 <th>Total</th>
                 <th>Acciones</th>
             </tr>
@@ -246,6 +232,7 @@
                     <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
                     <td data-order="{{ $ivaFila }}">$&nbsp;{{ number_format($ivaFila, 2, ',', '.') }}</td>
                     <td data-order="{{ $peajesFila }}">$&nbsp;{{ number_format($peajesFila, 2, ',', '.') }}</td>
+                    <td data-order="{{ $travelCertificate->total_estacionamiento }}">$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
                     <td data-order="{{ $totalFila }}">$&nbsp;{{ number_format($totalFila, 2, ',', '.') }}</td>
 
                     <td>
@@ -291,6 +278,7 @@
                     <th>Precio Neto</th>
                     <th>I.V.A.</th>
                     <th>Peajes</th>
+                    <th>Estacionamientos</th>
                     <th>Total</th>
                     <th>Acciones</th>
                 </tr>
@@ -328,6 +316,7 @@
                             <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
                             <td data-order="{{ $ivaFila }}">$&nbsp;{{ number_format($ivaFila, 2, ',', '.') }}</td>
                             <td data-order="{{ $peajesFila }}">$&nbsp;{{ number_format($peajesFila, 2, ',', '.') }}</td>
+                            <td data-order="{{ $travelCertificate->total_estacionamiento }}">$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
                             <td data-order="{{ $totalFila }}">$&nbsp;{{ number_format($totalFila, 2, ',', '.') }}</td>
 
                             <td>

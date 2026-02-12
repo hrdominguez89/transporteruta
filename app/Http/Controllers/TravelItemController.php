@@ -55,13 +55,13 @@ class TravelItemController extends Controller
             $validator = Validator::make($request->all(), $rules, $messages);
             
             // ADICIONAL: exigir al menos uno (percent o porcentaje)
-            $validator->after(function ($v) use ($request) {
-            if ($request->type === 'ADICIONAL'
-                && !$request->filled('percent')
-                && !$request->filled('porcentaje')) {
-                $v->errors()->add('percent', 'Ingresá el porcentaje para el Adicional.');
-            }
-        });
+            // $validator->after(function ($v) use ($request) {
+            // if ($request->type === 'ADICIONAL'
+            //     && !$request->filled('percent')
+            //     && !$request->filled('porcentaje')) {
+            //     $v->errors()->add('percent', 'Ingresá el porcentaje para el Adicional.');
+            // }
+        // });
 
         // DESCUENTO: exigir price si es monto fijo, o discount_percent si es porcentaje
         $validator->after(function ($v) use ($request) {
@@ -121,14 +121,22 @@ class TravelItemController extends Controller
 
         switch ($type) {
             case 'ADICIONAL':
-                // Guardamos % en 'percent' y price=0. El monto se calcula en el modelo/vistas.
-                // ACA VALIDAMOS QUE VENGA FIJO 
-                // EN CERTIFICADO DE VIAJE DEBE HACER LA MISMA VALIDACION. 
-                $rawPercent    = $request->input('percent', $request->input('porcentaje', 0));
-                $item->percent = (float) str_replace(',', '.', $rawPercent);
-                $item->price   = 0.0;
-                if (empty($item->description)) {
-                    $item->description = 'Adicional ' . rtrim(rtrim(number_format($item->percent, 2, ',', '.'), '0'), ',') . '%';
+               $rawPercent = $request->input('percent', $request->input('porcentaje', 0));
+                if($rawPercent == null)
+                {
+                    $item->percent = null;
+                    $item->price = (float) str_replace(',', '.', $request->input('price', 0));
+                    if (empty($item->description)) {
+                        $item->description = 'Adicional fijo $' . number_format($item->price, 2, ',', '.');
+                    }
+                }
+                else
+                {
+                    $item->percent = (float) str_replace(',', '.', $rawPercent);
+                    $item->price = 0.0;
+                    if (empty($item->description)) {
+                        $item->description = 'Adicional ' . rtrim(rtrim(number_format($item->percent, 2, ',', '.'), '0'), ',') . '%';
+                    }
                 }
                 break;
             case 'HORA':

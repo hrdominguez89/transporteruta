@@ -93,7 +93,9 @@ class TravelCertificate extends Model
             ->where('type', 'ADICIONAL')
             ->get()
             ->sum(function ($item) use ($tarifaFija) {
-                return $item->percent != null ? ((float) $item->percent / 100.0) * $tarifaFija  : (float) $item->price;
+                return $item->percent != null 
+                    ? ((float) $item->percent / 100.0) * $tarifaFija 
+                    : (float) $item->price;
             });
     }
 

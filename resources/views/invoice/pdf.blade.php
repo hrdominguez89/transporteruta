@@ -240,6 +240,7 @@
                     <td style="text-align:center;width:30%">Importe Neto</td>
                     <td style="text-align:center;width:30%">I.V.A.</td>
                     <td style="text-align:center;width:30%">Peajes</td>
+                    <td style="text-align:center;width:30%">Estacionamientos</td>
                 </tr>
             </thead>
             <tbody>
@@ -271,6 +272,9 @@
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
                             $&nbsp;{{ number_format($peajes, 2, ',', '.') }}
+                        </td>
+                        <td style="padding: 2px 8px;text-align:right">
+                            $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach

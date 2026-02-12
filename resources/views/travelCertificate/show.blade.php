@@ -130,6 +130,7 @@
                 <th>Precio (Sin IVA)</th>
                 <th>IVA</th>
                 <th>Precio Total (Con IVA)</th>
+                <th>Estacionamiento</th>
                 <th>Facturado</th>
             </tr>
         </thead>
@@ -139,6 +140,7 @@
                 <td>$&nbsp;{{ number_format($travelCertificate->total, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($travelCertificate->total + $travelCertificate->iva, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
                 <td>{{ $travelCertificate->invoiced }}</td>
             </tr>
         </tbody>
