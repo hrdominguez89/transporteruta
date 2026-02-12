@@ -285,7 +285,7 @@
                     Subtotal
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($travelCertificate->total - $estacionamiento , 2, ',', '.') }}
+                    $&nbsp;{{ number_format($travelCertificate->total - $estacionamiento - $totalPeajes , 2, ',', '.') }}
                 </th>
             </tr>
             
