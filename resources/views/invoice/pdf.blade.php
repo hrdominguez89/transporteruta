@@ -296,7 +296,7 @@
                     I.V.A.
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
+                    $&nbsp;{{ number_format($totalIva, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
