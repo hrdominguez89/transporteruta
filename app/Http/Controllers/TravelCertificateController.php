@@ -115,9 +115,10 @@ class TravelCertificateController extends Controller
             $travelCertificate->clientId = $request->clientId;
             $travelCertificate->driverId = $request->driverId;
             $travelCertificate->commission_type = $request->commission_type;
-            $travelCertificate->vehicleId = $request->vehicleId;
+            $travelCertificate->vehicleId =  $request->vehicleId;
             $travelCertificate->horaLLegada = $request->horaLlegada;
             $travelCertificate->horaSalida = $request->horaSalida;
+
             // Lógica para establecer el tip= o de comisn
             if ($request->commission_type == "porcentaje pactado") {
                 // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`

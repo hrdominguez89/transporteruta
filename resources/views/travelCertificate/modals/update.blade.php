@@ -86,7 +86,7 @@
                     <div id="vehiculo_div">
                         <label for="vehicleId" >Vehículo:</label>
                         <select class="form-control mb-2" type="text" name="vehicleId">
-                            <option value="{{ $travelCertificate->vehicle ?? "" }}">{{ $travelCertificate->vehicle->name ?? "Seleccione un Vehículo" }}</option>
+                            <option value="{{ $travelCertificate->vehicle->id ?? "" }}">{{ $travelCertificate->vehicle->name ?? "Seleccione un Vehículo" }}</option>
                             @foreach ($vehicles as $vehicle)
                                 <option value="{{ $vehicle->id }}">{{ $vehicle->name }} </option>
                             @endforeach
