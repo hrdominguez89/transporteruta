@@ -285,17 +285,10 @@
                     Subtotal
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($travelCertificate->total , 2, ',', '.') }}
+                    $&nbsp;{{ number_format($travelCertificate->total - $estacionamiento , 2, ',', '.') }}
                 </th>
             </tr>
-            <tr style="background-color:#FFFFFF">
-                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
-                    Estacionamientos
-                </th>
-                <th style="padding: 2px 8px;text-align:right">
-                    $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
-                </th>
-            </tr>
+            
             <tr style="background-color:#FFFFFF">
                 <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
                     I.V.A.
@@ -310,6 +303,14 @@
                 </th>
                 <th style="padding: 2px 8px;text-align:right">
                     $&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}
+                </th>
+            </tr>
+            <tr style="background-color:#FFFFFF">
+                <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
+                    Estacionamientos
+                </th>
+                <th style="padding: 2px 8px;text-align:right">
+                    $&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}
                 </th>
             </tr>
             <tr style="background-color:#FFFFFF">
