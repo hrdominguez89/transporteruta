@@ -9,16 +9,19 @@
         </div>
     @endif
     <div class="row">
-
         <div class="col-12">
             <a href="{{ Route('invoices') }}" class="btn btn-sm btn-secondary">Volver</a>
         </div>
         <div class="col-12 mt-3">
-            <h1>Factura N°
-                <strong>{{ number_format($invoice->number, 0, ',', '.') }}-{{ sprintf('%05d', $invoice->pointOfSale) }}</strong>
+            <h1>Factura N°:
+                <strong>{{  sprintf('%08d',$invoice->number) }}</strong>
             </h1>
         </div>
-
+        <div class="col-12 mt-2">
+            <h3>Punto de venta:
+                <strong>{{ sprintf('%05d', $invoice->pointOfSale) }}</strong>
+            </h3>
+        </div>
         @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
             <div class="col-12 text-right mb-2">
                 <button class="btn btn-sm btn-danger col-1 mr-1" data-toggle="modal" data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
@@ -120,7 +123,6 @@
     </table>
 
     <br>
-
     <h4>Notas de Credito</h4>
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
@@ -143,7 +145,6 @@
             @endforeach
         </tbody>
     </table>
-
     <h4>Notas de Debito</h4>
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
@@ -166,7 +167,6 @@
             @endforeach
         </tbody>
     </table>
-
     <br>
 
     <h4>Constancias de Viaje Agregadas</h4>
@@ -254,7 +254,6 @@
             @endforeach
         </tbody>
     </table>
-
     @if ($invoice->invoiced == 'NO')
         <div class="mb-2">
             <button id="bulk-remove-btn" class="btn btn-sm btn-warning btn-submit-once" disabled>
@@ -262,9 +261,7 @@
             </button>
         </div>
     @endif
-
     <br>
-
     @if ($invoice->invoiced == 'NO')
         <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
         <table class="table table-sm table-bordered text-center data-table">

@@ -127,18 +127,10 @@
                     <table style="width: 100%;">
                         <tr>
                             <th class="text-right" style="width: 90%;font-size:18px">
-                                Resumen de factura Nro:
+                                <strong>Factura</strong>
                             </th>
-                            <td style="width: 10%;font-size:18px;text-align:left">
-                                {{ number_format($invoice->number, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="text-right" style="width: 90%;">
-                                Punto de venta:
-                            </th>
-                            <td style="width:10%;">
-                                {{ str_pad($invoice->pointOfSale, 5, '0', STR_PAD_LEFT) }}
+                            <td style="width: 90%;font-size:17px;text-align:left">
+                               <strong>{{ sprintf('%05d', $invoice->pointOfSale) }}-{{  sprintf('%08d',$invoice->number) }}</strong>
                             </td>
                         </tr>
                         <tr>
