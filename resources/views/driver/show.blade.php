@@ -9,9 +9,27 @@
         <button class="btn btn-sm btn-success col-2" data-toggle="modal" data-target="#updateModal{{ $driver->id }}">Actualizar
             Chofer</button>
         @include('driver.modals.update')
+       @if($errors->any())
+    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Corregí los siguientes errores:</strong>
+        <ul class="mb-0 mt-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <script>
+        setTimeout(function () {
+            $('#errorAlert').alert('close');
+        }, 5000);
+    </script>
+@endif
     </div>
 @stop
-
 @section('content')
     <h4>Datos del Chofer</h4>
     <table class="table table-bordered text-center">
@@ -22,6 +40,7 @@
                 <th>Ciudad</th>
                 <th>Telefono</th>
                 <th>Tipo</th>
+                <th>Sub tipo</th>
                 <th>Vehiculo</th>
             </tr>
         </thead>
@@ -32,6 +51,7 @@
                 <td>{{ $driver->city }}</td>
                 <td>{{ $driver->phone }}</td>
                 <td>{{ $driver->type }}</td>
+                <td>{{ $driver->subtipo }}</td>
                 <td>{{ $driver->vehicle ? $driver->vehicle->name : "" }}</td>
             </tr>
         </tbody>

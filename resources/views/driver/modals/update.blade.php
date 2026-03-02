@@ -38,14 +38,22 @@
                   placeholder="Ingrese el porcentaje de la agencia..." 
                   value="{{ $driver->percent }}" 
                   {{ $driver->type == 'TERCERO' ? 'required' : '' }}>
-              </div>
+            </div>
+            <div id="hab_eve_div" style="display: {{ $driver->type == 'TERCERO' ? 'block' : 'none' }}">
+            <label for="hab_ev">Habitual / Eventual<span class="text-danger"> *</span></label>
+            <select id="hab_ev" name="hab_ev" class="form-control">
+                <option value="" disabled selected>Seleccione una opcion</option>
+                <option value="HABITUAL">Habitual</option>
+                <option value="EVENTUAL">Eventual</option>
+            </select>
+            </div>
                 <label for="vehicleId">Vehiculo:<span class="text-danger"> *</span></label>
                 <select name="vehicleId" class="form-control mb-2">
                     @foreach($vehicles as $vehicle)
                         <option value="{{ $vehicle->id }}" {{$vehicle->id == $driver->vehicleId ?'selected':'' }}>{{ $vehicle->name }}</option>
                     @endforeach
-            </select>
-      </div>
+              </select>
+            </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-sm btn-success">Actualizar</button>
@@ -62,10 +70,14 @@
           // Mostrar campo de porcentaje y ocultar monto fijo
           document.getElementById("porcentaje_div").style.display = "block";
           document.getElementById("porcentaje").setAttribute("required", "required");
+          document.getElementById("hab_eve_div").style.display = "block";
+          document.getElementById("hab_ev").setAttribute("required", "required");
       } else {
           // Si no se selecciona ninguna opción, ocultar ambos campos
           document.getElementById("porcentaje_div").style.display = "none";
           document.getElementById("porcentaje").removeAttribute("required");
+          document.getElementById("hab_eve_div").style.display = "none";
+          document.getElementById("hab_ev").removeAttribute("required");
       }
   });
 </script>

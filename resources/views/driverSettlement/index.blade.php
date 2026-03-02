@@ -11,13 +11,47 @@
 @stop
 
 @section('content')
-    <table class="table table-sm table-bordered text-center data-table">
+   <form method="GET" action="{{ route('driverSettlements') }}">
+        <div class="container-fluid mb-3" >
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label for="driver_id">Chofer</label>
+                    <select name="driver_id" id="driver_id" class="form-control">
+                        <option value="">-- Todos --</option>
+                        @foreach($drivers as $driver)
+                            <option value="{{ $driver->id }}" {{ request('driver_id') == $driver->id ? 'selected' : '' }}>
+                                {{ $driver->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="desde">Desde</label>
+                    <input type="date" name="desde" id="desde" class="form-control" value="{{ request('desde') }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="hasta">Hasta</label>
+                    <input type="date" name="hasta" id="hasta" class="form-control" value="{{ request('hasta') }}">
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+    <table class="table table-sm table-bordered text-center data-table" >
         <thead class="bg-danger">
             <tr>
                 <th>Número<br>Nuevo</th>
-                <th>Número<br>Antiguo</th>
                 <th>Chofer</th>
-                <th>Fecha</th>
+                <th>Fecha de emision</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+                <th>Tipo</th>
                 <th>Total</th>
                 <th>Medio de Pago</th>
                 <th>Liquidado</th>
@@ -29,10 +63,11 @@
                 <tr>
                     <td>{{ number_format($driverSettlement->id, 0, ',', '.') }}
                     </td>
-                    <td> {{ $driverSettlement->number ? number_format($driverSettlement->number, 0, ',', '.') : ' - ' }}
-                    </td>
                     <td>{{ $driverSettlement->driver->name }}</td>
-                    <td>{{ $driverSettlement->date ? $driverSettlement->date : 'Sin fecha' }}</td>
+                    <td>{{ $driverSettlement->date ?? 'Sin fecha' }}</td>
+                    <td>{{ $driverSettlement->dateFrom }}</td>
+                    <td>{{ $driverSettlement->dateTo }}</td>
+                    <td>{{ $driverSettlement->tipo ?? "sin asignar"}}</td>
                     <td data-order="{{ $driverSettlement->total }}" class="text-right">
                         $&nbsp;{{ number_format($driverSettlement->total, 2, ',', '.') }}</td>
                     <td>

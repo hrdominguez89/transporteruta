@@ -30,6 +30,7 @@ class UpdateDriverRequest extends FormRequest
             'type'      => ['required', Rule::in(['PROPIO','TERCERO'])],
             'percent'   => ['nullable','numeric','between:0,100','required_if:type,TERCERO'],
             'vehicleId' => ['nullable','integer','exists:vehicles,id'],
+            'subtipo' => [],
         ];
     }
 
@@ -55,6 +56,7 @@ class UpdateDriverRequest extends FormRequest
             'type'      => 'tipo',
             'percent'   => 'porcentaje de la agencia',
             'vehicleId' => 'vehículo',
+            'hab_ev'  => 'habitual/eventual',
         ];
     }
 }

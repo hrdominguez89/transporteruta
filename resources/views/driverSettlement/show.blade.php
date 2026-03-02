@@ -9,15 +9,15 @@
         </div>
         <div class="col-12 mt-3">
             <h1>Liquidación N° <strong><span data-bs-toggle="tooltip" data-bs-placement="top"
-                        title="Numeración sistema nuevo">{{ number_format($driverSettlement->id, 0, ',', '.') }}</span> /
-                    <span data-bs-toggle="tooltip" data-bs-placement="top"
-                        title="Numeración sistema antiguo">{{ $driverSettlement->number ? number_format($driverSettlement->number, 0, ',', '.') : ' - ' }}</span></strong>
+                        title="Numero de la liquidacion">{{ number_format($driverSettlement->id, 0, ',', '.') }}</span> 
+                    </strong>
             </h1>
         </div>
         <div class="col-12 text-right mb-2">
             @if ($driverSettlement->liquidated == 'NO')
-                <button class="btn btn-sm btn-primary col-3" data-toggle="modal"
+                <button class="btn btn-sm btn-primary col-1" data-toggle="modal"
                     data-target="#liquidatedModal{{ $driverSettlement->id }}">Liquidar</button>
+                <button class="btn btn-sm btn-secondary col-1" data-toggle="modal" data-target="#liquidatedEditModal">Editar</button>
             @else
                 <button class="btn btn-sm btn-danger mr-2" data-toggle="modal"
                     data-target="#cancelModal{{ $driverSettlement->id }}">Anular
@@ -29,6 +29,7 @@
         </div>
         @include('driverSettlement.modals.liquidated')
         @include('driverSettlement.modals.cancel')
+        @include('driverSettlement.modals.edit')
     @stop
 
     @section('content')
@@ -38,6 +39,7 @@
                     <th>Fecha</th>
                     <th>Período</th>
                     <th>Chofer</th>
+                    <th>Tipo</th>
                     <th>Total</th>
                     <th>Liquidado</th>
                 </tr>
@@ -47,6 +49,7 @@
                     <td>{{ \Carbon\Carbon::parse($driverSettlement->date)->format('d/m/Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($driverSettlement->dateFrom)->format('d/m/Y') }} -
                         {{ \Carbon\Carbon::parse($driverSettlement->dateTo)->format('d/m/Y') }}</td>
+                    <td>{{ $driverSettlement->tipo ?? 'sin asginar' }}</td>
                     <td>
                         <a target="_blank"
                             href="{{ Route('showDriver', $driverSettlement->driver->id) }}">{{ $driverSettlement->driver->name }}</a>
@@ -376,7 +379,6 @@
                     return;
                 }
                 
-                // OPCIÓN 1: Enviar con AJAX (RECOMENDADO)
                 fetch('{{ route("addMultipleToDriverSettlement") }}', {
                     method: 'POST',
                     headers: {
@@ -390,7 +392,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    window.location.href = data.redirect; // o recargar página
+                    window.location.href = data.redirect; 
                 });
             }
         </script>

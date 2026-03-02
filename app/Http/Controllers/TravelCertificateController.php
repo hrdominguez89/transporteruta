@@ -38,7 +38,6 @@ class TravelCertificateController extends Controller
         $horaSalida = $request->horaSalida;
         $horaLlegada = $request->horaLlegada;
         $TC = TravelCertificate::where([
-            ['number', '=', $number],
             ['date', '=', $date],
             ['destiny', '=', $destiny],
             ['driverId', '=', $driverId],

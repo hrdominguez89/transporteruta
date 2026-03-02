@@ -37,6 +37,14 @@
                         <input id="porcentaje" type="number" step="0.01" name="percent" class="form-control mb-2"
                             placeholder="Ingrese el porcentaje de la agencia..." required>
                     </div>
+                    <div id="hab_eve_div" style="display: none">
+                        <label for="hab_ev">Habitual / Eventual<span class="text-danger"> *</span></label>
+                        <select id="hab_ev" name="hab_ev" class="form-control">
+                            <option>Seleccione una opcion</option>
+                            <option value="HABITUAL">Habitual</option>
+                            <option value="EVENTUAL">Eventual</option>
+                        </select>
+                    </div>
 
                      {{-- Nueva refactorizacion si no se ingresa ninguna opcion --}}
                     <label for="vehicleId">Vehículo:</label>
@@ -66,9 +74,11 @@
   document.getElementById("type").addEventListener("change", function() {
       var type = this.value;
       if (type === "TERCERO") {
-          // Mostrar campo de porcentaje y ocultar monto fijo
-          document.getElementById("porcentaje_div").style.display = "block";
-          document.getElementById("porcentaje").setAttribute("required", "required");
+        // Mostrar campo de porcentaje y ocultar monto fijo
+        document.getElementById("porcentaje_div").style.display = "block";
+        document.getElementById("porcentaje").setAttribute("required", "required");
+        document.getElementById("hab_eve_div").style.display = "block";
+        document.getElementById("hab_ev").setAttribute("required", "required");
       } else {
           // Si no se selecciona ninguna opción, ocultar ambos campos
           document.getElementById("porcentaje_div").style.display = "none";

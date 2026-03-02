@@ -111,25 +111,43 @@
         </div>
     @endforeach
     </div>
-    <div class="table-bordered text-left mt-3 mb-3 p-2">
-             <table>
-            <thead>
-                <tr>
-                    <th style="font-size: 0.8rem;">Remitos</th>
-                </tr>
-            </thead>
-            @php
-                $remitos = $travelCertificate->travelItems->where('type', 'REMITO');
-            @endphp
-            <tbody>
-                @foreach ($remitos as $item)
-                <tr>
-                    <td style="font-size: 0.7rem;">{{ $item->description }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+    
+   @php
+    $remitos = $travelCertificate->travelItems->where('type', 'REMITO');
+    if ($remitos->count() >= 4)  {
+        $chunks = $remitos->chunk(4);
+        $rowsb = $chunks->chunk(2);
+    } else {
+        $rowsb = collect([collect([$remitos])]);
+    }
+@endphp
+
+<div class="table-bordered text-left mt-3 mb-3 p-2">
+    @foreach($rowsb as $row)
+        <div style="overflow: hidden; margin-bottom: 4px;">
+            @foreach($row as $chunk)
+                <div style="float: left; width: {{ $remitos->count() > 4 ? '15%' : '98%' }}; {{ $remitos->count() > 4 ? 'margin-right: 2%;' : '' }}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="font-size: 0.8rem;">Remitos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($chunk as $item)
+                                <tr>
+                                    <td style="font-size: 0.7rem;">{{ $item->description }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endforeach
+            <div style="clear: both;"></div>
+        </div>
+    @endforeach
+</div>
+
     @php
         // Peajes: si el controller pasó $totalTolls lo usamos, sino calculamos acá.
         $peajes = isset($totalTolls)

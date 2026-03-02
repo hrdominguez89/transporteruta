@@ -26,8 +26,17 @@ class DriverController extends Controller
         $driver->city        = $request->city;
         $driver->phone       = $request->phone;
         $driver->type        = $request->type;
-        // si es TERCERO pedimos porcentaje, si es PROPIO lo dejamos NULL (o 0 si queremos)
-        $driver->percent     = $request->type === 'TERCERO' ? (float) $request->percent : null;
+        if( $driver->type == 'TERCERO')
+        {
+            $driver->percent = $request->percent;
+            $driver->subtipo = $request->hab_ev;
+        }
+        else
+        {
+            $driver->percent = null;
+            $driver->subtipo = null;
+        }
+        
         // si no selecciona vehículo, guardamos NULL para no romper la FK
         $driver->vehicleId   = $request->filled('vehicleId') ? (int) $request->vehicleId : null;
 
@@ -43,7 +52,7 @@ class DriverController extends Controller
         return view('driver.show', ['driver' => $driver, 'vehicles' => $vehicles]);
     }
 
-    // refactorizacion nueva método update()
+    
     public function update(\App\Http\Requests\UpdateDriverRequest $request, $id)
     {
     $driver = \App\Models\Driver::findOrFail($id);
@@ -54,8 +63,16 @@ class DriverController extends Controller
     $driver->city    = $request->city;
     $driver->phone   = $request->phone;
     $driver->type    = $request->type;
-    
-    $driver->percent   = $request->type === 'TERCERO' ? (float)$request->percent : null;
+    if( $driver->type == 'TERCERO')
+    {
+        $driver->percent = $request->percent;
+        $driver->subtipo = $request->hab_ev;
+    }
+    else
+    {
+        $driver->percent = null;
+        $driver->subtipo = null;
+    }
     $driver->vehicleId = $request->filled('vehicleId') ? (int)$request->vehicleId : null;
 
     $driver->save();

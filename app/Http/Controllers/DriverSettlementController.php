@@ -10,15 +10,20 @@ use App\Http\Requests\UpdateDriverSettlementRequest;
 use App\Models\TravelItem;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\DB;
 
 class DriverSettlementController extends Controller
 {
-    public function driverSettlements()
+    public function driverSettlements(Request $request)
     {
-        $data['driverSettlements'] = DriverSettlement::all();
+        $query = DriverSettlement::query();
+        if($request->filled('driver_id')) $query->where("driverId",$request->driver_id);
+        if($request->filled('desde')) $query->where('dateFrom', '>=', $request->desde);
+        if($request->filled('hasta')) $query->where('dateTo', '<=', $request->hasta);
+
+        $data['driverSettlements'] = $query->paginate(20)->withQueryString();
         $data['drivers'] = Driver::orderBy('name', 'asc')->get();
-        $data['paymentMethods'] = PaymentMethod::all();
         return view('driverSettlement.index', $data);
     }
 
@@ -33,6 +38,7 @@ class DriverSettlementController extends Controller
         $newDriverSettlement->paymentMethodId = 0;
         $newDriverSettlement->dateFrom = $request->dateFrom;
         $newDriverSettlement->dateTo = $request->dateTo;
+        if($request->filled('tipo')) $newDriverSettlement->tipo = $request->tipo;
         $newDriverSettlement->save();
         return redirect(route('showDriverSettlement', $newDriverSettlement->id));
     }
@@ -108,6 +114,16 @@ class DriverSettlementController extends Controller
         return $pdf->stream('Liquidacion Nro ' . $data['driverSettlement']->id . ' - ' . $data['driverSettlement']->driver->name . '.pdf');
     }
 
+    public function edit(Request $request)
+    {
+        $DS = DriverSettlement::find($request->id);
+
+        if($request->filled('tipo')) $DS->tipo = $request->tipo;
+        if($request->filled('desde'))$DS->dateFrom = $request->desde;
+        if($request->filled('hasta')) $DS->dateTo= $request->hasta;
+        $DS->save();
+        return $this->show($DS->id);
+    }
 
     public function liquidated(UpdateDriverSettlementRequest $request, $id)
     {

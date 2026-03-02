@@ -16,6 +16,8 @@
             <tr>
                 <th>Nombre</th>
                 <th>DNI/CUIT</th>
+                <th>Tipo</th>
+                <th>Sub tipo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -24,6 +26,8 @@
                 <tr>
                     <td>{{ $driver->name }}</td>
                     <td>{{ $driver->dni }}</td>
+                    <td>{{ $driver->type }}</td>
+                    <td>{{ $driver->subtipo }}</td>
                     <td>
                         <a href="{{ Route('showDriver', $driver->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>

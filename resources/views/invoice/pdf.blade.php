@@ -230,16 +230,12 @@
                     <td style="text-align:center;width:30%">Importe Neto</td>
                     <td style="text-align:center;width:30%">I.V.A.</td>
                     <td style="text-align:center;width:30%">Peajes</td>
-                    <td style="text-align:center;width:30%">Estacionamientos</td>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($invoice->travelCertificates as $travelCertificate)
                     @php
-                        // REFACT (por fila): usamos accessors del modelo para que el cálculo
-                        // coincida con la constancia (descuentos/adicionales/peajes)
                         $neto   = (($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable) + $travelCertificate->monto_adicional);
-                        
                         $iva    = $esExento ? 0 : $travelCertificate->iva_calculado;
                         $peajes = $travelCertificate->total_peajes;
                     @endphp
@@ -253,7 +249,6 @@
                         </td>
                         <td style="padding: 2px 8px;text-align:left">{{ $travelCertificate->destiny }}</td>
 
-                        {{-- REFACT: Importe Neto / IVA / Peajes por fila usando accessors --}}
                         <td style="padding: 2px 8px;text-align:right">
                             $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->total_peajes - $travelCertificate->total_estacionamiento , 2, ',', '.') }}
                         </td>
@@ -261,11 +256,13 @@
                             $&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
                         </td>
                         <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($peajes, 2, ',', '.') }}
+                            $&nbsp;{{ number_format($travelCertificate->total_peajes, 2, ',', '.') }}
                         </td>
-                        <td style="padding: 2px 8px;text-align:right">
-                            $&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}
-                        </td>
+                        @if ($estacionamiento > 0)
+                            <td style="padding: 2px 8px;text-align:right">
+                                $&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>
@@ -273,7 +270,6 @@
 
         <hr>
         <table>
-            {{-- REFACT: totales finales usando $totalNeto / $totalIva / $totalPeajes del bloque superior --}}
             <tr style="background-color:#FFFFFF">
                 <th colspan="2" style="width:10%;padding: 2px 8px;text-align:right">
                     Subtotal

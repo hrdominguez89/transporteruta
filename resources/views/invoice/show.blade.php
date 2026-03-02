@@ -122,222 +122,236 @@
         </tbody>
     </table>
 
-    <br>
-    <h4>Notas de Credito</h4>
-    <table class="table table-sm table-bordered text-center data-table">
-        <thead class="bg-danger">
-            <tr>
-                <th>Numero</th>
-                <th>Fecha</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($invoice->credits as $credit)
-                <tr>
-                    <td>
-                        <a target="_blank" href="{{ Route('showCredit', $credit->id) }}">{{ $credit->number }}</a>
-                    </td>
-                    <td data-order="{{ \Carbon\Carbon::parse($credit->date)->timestamp }}">
-                        {{ \Carbon\Carbon::parse($credit->date)->format('d/m/Y') }}</td>
-                    <td data-order="{{ $credit->total }}">$&nbsp;{{ number_format($credit->total, 2, ',', '.') }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-    <h4>Notas de Debito</h4>
-    <table class="table table-sm table-bordered text-center data-table">
-        <thead class="bg-danger">
-            <tr>
-                <th>Numero</th>
-                <th>Fecha</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($invoice->debits as $debit)
-                <tr>
-                    <td>
-                        <a target="_blank" href="{{ Route('debitshow', $debit->id) }}">{{ $debit->referenceNumber }}</a>
-                    </td>
-                    <td data-order="{{ \Carbon\Carbon::parse($debit->emission_date)->timestamp }}">
-                        {{ \Carbon\Carbon::parse($debit->date)->format('d/m/Y') }}</td>
-                    <td data-order="{{ $debit->balance }}">$&nbsp;{{ number_format($debit->balance, 2, ',', '.') }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-    <br>
-
-    <h4>Constancias de Viaje Agregadas</h4>
-    <table class="table table-sm table-bordered text-center data-table">
-        <thead class="bg-danger">
-            <tr>
-                @if ($invoice->invoiced == 'NO')
-                    <th>Seleccionar</th>
-                @endif
-                <th>Nro. Nuevo</th>
-                <th>Nro. Antiguo</th>
-                <th>Fecha de emision</th>
-                <th>Chofer</th>
-                <th>Precio Neto</th>
-                <th>I.V.A.</th>
-                <th>Peajes</th>
-                <th>Estacionamientos</th>
-                <th>Total</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {{-- REFACT (por fila): cálculo por constancia usando campos del modelo --}}
-            @foreach ($invoice->travelCertificates as $travelCertificate)
-                @php
-                    // Neto sin IVA ni peajes: (subtotal - descuento) + adicional
-                    $netoFila   = ($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable)
-                                + $travelCertificate->monto_adicional;
-
-                    // IVA: 0 si el cliente es EXENTO
-                    $ivaFila    = $esExento ? 0 : ($travelCertificate->iva_calculado ?? 0);
-
-                    // Peajes informados en la constancia
-                    $peajesFila = $travelCertificate->total_peajes ?? 0;
-
-                    // Total de la fila
-                    $totalFila  = $netoFila + $ivaFila + $peajesFila;
-                @endphp
-
-                <tr>
-                    @if ($invoice->invoiced == 'NO')
-                        <td>
-                            <input type="checkbox" class="bulk-select bulk-select-added"
-                                   data-id="{{ $travelCertificate->id }}">
-                        </td>
-                    @endif
-
-                    <td data-order="{{ $travelCertificate->id }}">
-                        <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
-                            {{ number_format($travelCertificate->id, 0, ',', '.') }}
-                        </a>
-                    </td>
-                    <td data-order="{{ $travelCertificate->number }}">
-                        <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
-                            {{ number_format($travelCertificate->number, 0, ',', '.') }}
-                        </a>
-                    </td>
-                    <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
-                    <td>{{ $travelCertificate->driver->name }}</td>
-
-                    {{-- Importes calculados (refactor) --}}
-                    <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
-                    <td data-order="{{ $ivaFila }}">$&nbsp;{{ number_format($ivaFila, 2, ',', '.') }}</td>
-                    <td data-order="{{ $peajesFila }}">$&nbsp;{{ number_format($peajesFila, 2, ',', '.') }}</td>
-                    <td data-order="{{ $travelCertificate->total_estacionamiento }}">$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
-                    <td data-order="{{ $totalFila }}">$&nbsp;{{ number_format($totalFila, 2, ',', '.') }}</td>
-
-                    <td>
-                        @if ($invoice->invoiced == 'NO')
-                            <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST"
-                                  class="prevent-double-submit">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                <button type="submit" class="btn btn-sm btn-warning btn-submit-once">
-                                    Quitar de la Factura
-                                </button>
-                            </form>
-                        @else
-                            <strong class="text-danger">¡No se pueden realizar cambios!</strong>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @if ($invoice->invoiced == 'NO')
-        <div class="mb-2">
-            <button id="bulk-remove-btn" class="btn btn-sm btn-warning btn-submit-once" disabled>
-                Quitar seleccionados de la Factura
-            </button>
+    <div id="miCarrusel" class="carousel slide" data-bs-ride="carousel"  >
+        <div class="carousel-indicators">
+            <button type="button" class="btn btn-primary active"data-bs-target="#miCarrusel" data-bs-slide-to="0">1</button>
+            <button type="button" class="btn btn-primary "data-bs-target="#miCarrusel" data-bs-slide-to="1">2</button>
         </div>
-    @endif
-    <br>
-    @if ($invoice->invoiced == 'NO')
-        <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
-        <table class="table table-sm table-bordered text-center data-table">
-            <thead class="bg-danger">
-                <tr>
-                    <th>Seleccionar</th>
-                    <th>Nro. Nuevo</th>
-                    <th>Nro. Antiguo</th>
-                    <th>Fecha de emision</th>
-                    <th>Chofer</th>
-                    <th>Precio Neto</th>
-                    <th>I.V.A.</th>
-                    <th>Peajes</th>
-                    <th>Estacionamientos</th>
-                    <th>Total</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($clients->travelCertificates as $travelCertificate)
-                    @if ($travelCertificate->invoiceId != $invoice->id && $travelCertificate->invoiced == 'NO')
-                        @php
-                            // REFACT (por fila disponible): mismo cálculo que arriba
-                            $netoFila   = (($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable)
-                                          + $travelCertificate->monto_adicional);
-                            $ivaFila    = $esExento ? 0 : ($travelCertificate->iva_calculado ?? 0);
-                            $peajesFila = $travelCertificate->total_peajes ?? 0;
-                            $totalFila  = $netoFila + $ivaFila + $peajesFila;
-                        @endphp
+        <div class="carousel-inner">
+            <div class="carousel-item active" style="transition: 0.3s">
+                <br>
+                <h4>Notas de Credito</h4>
+                <table class="table table-sm table-bordered text-center data-table">
+                    <thead class="bg-danger">
                         <tr>
-                            <td>
-                                <input type="checkbox" class="bulk-select bulk-select-available"
-                                       data-id="{{ $travelCertificate->id }}">
-                            </td>
-                            <td data-order="{{ $travelCertificate->id }}">
-                                <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
-                                    {{ number_format($travelCertificate->id, 0, ',', '.') }}
-                                </a>
-                            </td>
-                            <td data-order="{{ $travelCertificate->number }}">
-                                <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
-                                    {{ number_format($travelCertificate->number, 0, ',', '.') }}
-                                </a>
-                            </td>
-                            <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
-                            <td>{{ $travelCertificate->driver->name }}</td>
-
-                            {{-- Importes calculados (refactor) --}}
-                            <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
-                            <td data-order="{{ $ivaFila }}">$&nbsp;{{ number_format($ivaFila, 2, ',', '.') }}</td>
-                            <td data-order="{{ $peajesFila }}">$&nbsp;{{ number_format($peajesFila, 2, ',', '.') }}</td>
-                            <td data-order="{{ $travelCertificate->total_estacionamiento }}">$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
-                            <td data-order="{{ $totalFila }}">$&nbsp;{{ number_format($totalFila, 2, ',', '.') }}</td>
-
-                            <td>
-                                <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST"
-                                      class="prevent-double-submit">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
-                                    <button type="submit" class="btn btn-sm btn-success btn-submit-once">
-                                        Agregar a la Factura
-                                    </button>
-                                </form>
-                            </td>
+                            <th>Numero</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
                         </tr>
-                    @endif
-                @endforeach
-            </tbody>
-        </table>
-        <div class="mb-2">
-            <button id="bulk-add-btn" class="btn btn-sm btn-success btn-submit-once" disabled>
-                Agregar seleccionados a la Factura
-            </button>
+                    </thead>
+                    <tbody>
+                        @foreach ($invoice->credits as $credit)
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="{{ Route('showCredit', $credit->id) }}">{{ $credit->number }}</a>
+                                </td>
+                                <td data-order="{{ \Carbon\Carbon::parse($credit->date)->timestamp }}">
+                                    {{ \Carbon\Carbon::parse($credit->date)->format('d/m/Y') }}</td>
+                                <td data-order="{{ $credit->total }}">$&nbsp;{{ number_format($credit->total, 2, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <h4>Notas de Debito</h4>
+                <table class="table table-sm table-bordered text-center data-table">
+                    <thead class="bg-danger">
+                        <tr>
+                            <th>Numero</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($invoice->debits as $debit)
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="{{ Route('debitshow', $debit->id) }}">{{ $debit->referenceNumber }}</a>
+                                </td>
+                                <td data-order="{{ \Carbon\Carbon::parse($debit->emission_date)->timestamp }}">
+                                    {{ \Carbon\Carbon::parse($debit->date)->format('d/m/Y') }}</td>
+                                <td data-order="{{ $debit->balance }}">$&nbsp;{{ number_format($debit->balance, 2, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <br>
+            </div>
+            <div class="carousel-item"style="transition: 0.3s">
+                <h4>Constancias de Viaje Agregadas</h4>
+                <table class="table table-sm table-bordered text-center data-table">
+                    <thead class="bg-danger">
+                        <tr>
+                            @if ($invoice->invoiced == 'NO')
+                                <th>Seleccionar</th>
+                            @endif
+                            <th>Nro. Nuevo</th>
+                            <th>Nro. Antiguo</th>
+                            <th>Fecha de emision</th>
+                            <th>Chofer</th>
+                            <th>Precio Neto</th>
+                            <th>I.V.A.</th>
+                            <th>Peajes</th>
+                            <th>Estacionamientos</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {{-- REFACT (por fila): cálculo por constancia usando campos del modelo --}}
+                        @foreach ($invoice->travelCertificates as $travelCertificate)
+                            @php
+                                // Neto sin IVA ni peajes: (subtotal - descuento) + adicional
+                                $netoFila   = ($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable)
+                                            + $travelCertificate->monto_adicional;
+
+                                // IVA: 0 si el cliente es EXENTO
+                                $ivaFila    = $esExento ? 0 : ($travelCertificate->iva_calculado ?? 0);
+
+                                // Peajes informados en la constancia
+                                $peajesFila = $travelCertificate->total_peajes ?? 0;
+
+                                // Total de la fila
+                                $totalFila  = $netoFila + $ivaFila + $peajesFila;
+                            @endphp
+
+                            <tr>
+                                @if ($invoice->invoiced == 'NO')
+                                    <td>
+                                        <input type="checkbox" class="bulk-select bulk-select-added"
+                                            data-id="{{ $travelCertificate->id }}">
+                                    </td>
+                                @endif
+
+                                <td data-order="{{ $travelCertificate->id }}">
+                                    <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
+                                        {{ number_format($travelCertificate->id, 0, ',', '.') }}
+                                    </a>
+                                </td>
+                                <td data-order="{{ $travelCertificate->number }}">
+                                    <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
+                                        {{ number_format($travelCertificate->number, 0, ',', '.') }}
+                                    </a>
+                                </td>
+                                <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
+                                <td>{{ $travelCertificate->driver->name }}</td>
+
+                                {{-- Importes calculados (refactor) --}}
+                                <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
+                                <td data-order="{{ $ivaFila }}">$&nbsp;{{ number_format($ivaFila, 2, ',', '.') }}</td>
+                                <td data-order="{{ $peajesFila }}">$&nbsp;{{ number_format($peajesFila, 2, ',', '.') }}</td>
+                                <td data-order="{{ $travelCertificate->total_estacionamiento }}">$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
+                                <td data-order="{{ $totalFila }}">$&nbsp;{{ number_format($totalFila, 2, ',', '.') }}</td>
+
+                                <td>
+                                    @if ($invoice->invoiced == 'NO')
+                                        <form action="{{ Route('removeFromInvoice', $travelCertificate->id) }}" method="POST"
+                                            class="prevent-double-submit">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
+                                            <button type="submit" class="btn btn-sm btn-warning btn-submit-once">
+                                                Quitar de la Factura
+                                            </button>
+                                        </form>
+                                    @else
+                                        <strong class="text-danger">¡No se pueden realizar cambios!</strong>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @if ($invoice->invoiced == 'NO')
+                    <div class="mb-2">
+                        <button id="bulk-remove-btn" class="btn btn-sm btn-warning btn-submit-once" disabled>
+                            Quitar seleccionados de la Factura
+                        </button>
+                    </div>
+                @endif
+                <br>
+                @if ($invoice->invoiced == 'NO')
+                    <h4>Constancias de Viaje del Cliente sin Liquidar</h4>
+                    <table class="table table-sm table-bordered text-center data-table">
+                        <thead class="bg-danger">
+                            <tr>
+                                <th>Seleccionar</th>
+                                <th>Nro. Nuevo</th>
+                                <th>Nro. Antiguo</th>
+                                <th>Fecha de emision</th>
+                                <th>Chofer</th>
+                                <th>Precio Neto</th>
+                                <th>I.V.A.</th>
+                                <th>Peajes</th>
+                                <th>Estacionamientos</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($clients->travelCertificates as $travelCertificate)
+                                @if ($travelCertificate->invoiceId != $invoice->id && $travelCertificate->invoiced == 'NO')
+                                    @php
+                                        // REFACT (por fila disponible): mismo cálculo que arriba
+                                        $netoFila   = (($travelCertificate->subtotal_sin_peajes - $travelCertificate->descuento_aplicable)
+                                                    + $travelCertificate->monto_adicional);
+                                        $ivaFila    = $esExento ? 0 : ($travelCertificate->iva_calculado ?? 0);
+                                        $peajesFila = $travelCertificate->total_peajes ?? 0;
+                                        $totalFila  = $netoFila + $ivaFila + $peajesFila;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="bulk-select bulk-select-available"
+                                                data-id="{{ $travelCertificate->id }}">
+                                        </td>
+                                        <td data-order="{{ $travelCertificate->id }}">
+                                            <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
+                                                {{ number_format($travelCertificate->id, 0, ',', '.') }}
+                                            </a>
+                                        </td>
+                                        <td data-order="{{ $travelCertificate->number }}">
+                                            <a target="_blank" href="{{ Route('showTravelCertificate', $travelCertificate->id) }}">
+                                                {{ number_format($travelCertificate->number, 0, ',', '.') }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $travelCertificate->date ? $travelCertificate->date->format('Y/m/d') : 'Sin fecha' }}</td>
+                                        <td>{{ $travelCertificate->driver->name }}</td>
+
+                                        {{-- Importes calculados (refactor) --}}
+                                        <td data-order="{{ $netoFila }}">$&nbsp;{{ number_format($netoFila, 2, ',', '.') }}</td>
+                                        <td data-order="{{ $ivaFila }}">$&nbsp;{{ number_format($ivaFila, 2, ',', '.') }}</td>
+                                        <td data-order="{{ $peajesFila }}">$&nbsp;{{ number_format($peajesFila, 2, ',', '.') }}</td>
+                                        <td data-order="{{ $travelCertificate->total_estacionamiento }}">$&nbsp;{{ number_format($travelCertificate->total_estacionamiento, 2, ',', '.') }}</td>
+                                        <td data-order="{{ $totalFila }}">$&nbsp;{{ number_format($totalFila, 2, ',', '.') }}</td>
+
+                                        <td>
+                                            <form action="{{ Route('addToInvoice', $travelCertificate->id) }}" method="POST"
+                                                class="prevent-double-submit">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="invoiceId" value="{{ $invoice->id }}">
+                                                <button type="submit" class="btn btn-sm btn-success btn-submit-once">
+                                                    Agregar a la Factura
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div class="mb-2">
+                        <button id="bulk-add-btn" class="btn btn-sm btn-success btn-submit-once" disabled>
+                            Agregar seleccionados a la Factura
+                        </button>
+                    </div>
+                @endif
+            </div>
+
         </div>
-    @endif
+    </div>
+
+
     <div class="modal fade" id="editReferenceModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
