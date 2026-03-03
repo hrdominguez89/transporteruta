@@ -85,8 +85,7 @@
             <table class="table-cabecera" style="width:100%; border: 1px solid #000;">
                 <tr>
                     <td style=" width:40%; padding:10px">
-                        <img style="width: 100%;"
-                            src="https://media.licdn.com/dms/image/C4D1BAQF9AP8K9M-0WQ/company-background_10000/0/1625358131993/transportes_ruta_s_r_l_cover?e=2147483647&v=beta&t=DMcRvoePh7phfXc3qOGVvqPwkBOIDx37opmL1OcJizM">
+                        <img style="width: 100%;"  class="header-img" src="data:image/png;base64,{{ base64_encode(file_get_contents(resource_path('img/transportes_ruta_s_r_l_cover.jpg'))) }}">
                     </td>
                     <td width="20%">
                         <table class="text-center" width="100%">
