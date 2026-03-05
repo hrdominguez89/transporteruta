@@ -17,13 +17,40 @@ class PaymentsController extends Controller
             'payments' => $payments , 
             'clients' => $clients]);
     }
-    public function show(Request $request)
-    {
-
-    }
     public function generate(Request $request)
     {
-        
+        if($request->filled('clientId')) $client = $request->clientId;
+        if($request->filled('metodo'))  $metodo = $request->metodo;
+        if($request->filled('tipodecheque'))  $tipodecheque = $request->tipodecheque;
+        if($request->filled('fechaderecepcion'))  $fechaderecepcion = $request->fechaderecepcion;
+        if($request->filled('banco'))  $banco = $request->banco;
+        if($request->filled('monto'))  $monto = $request->monto;
+        if($request->filled('comentario'))  $comentario = $request->comentario;
+        $comentario ="";
+        $pago = new Payments();
+        $pago->clientId = $client;
+        $pago->method = $metodo;
+        if( $metodo == 'CHEQUE')
+        {
+            $pago->cheq_type = $tipodecheque;
+        }
+        if( $metodo == 'TRANSFERENCIA' )
+        {
+            $pago->acreditation_date = $fechaderecepcion;
+            $pago->banco = $banco;
+        }
+        $pago->note = $comentario;
+        $pago->total = $monto;
+        $pago->balance = $monto;
+
+        $pago->save();
+        return view('payments.show',[ "pago" => $pago ]);
+    }
+    public function show(Request $request,$id)
+    {
+        $pago = Payments::find($id);
+        return view('payments.show',[ "pago" => $pago ]);
+
     }
     public function edit(Request $request)
     {

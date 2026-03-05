@@ -7,7 +7,9 @@
         <h1 class="col-10">Pagos</h1>
         <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Ingresar Pagos</button>
     </div>
-    @include('receipt.modals.generate')
+    @include('payments.modals.generate')
+    @include('payments.modals.edit')
+    @include('payments.modals.delete')
 @stop
 
 @section('content')
@@ -26,12 +28,12 @@
             @foreach ($payments as $payment)
                 <tr>
                     <td>{{ number_format($payment->id, 0, ',', '.') }}</td>
-                    <td>{{ $payment->client->name }}</td>
+                    <td>{{ $payment->client?->name }}</td>
                     <td>$&nbsp;{{ number_format($payment->total, 2, ',', '.') }}</td>
                     <td>$&nbsp;{{ number_format($payment->taxTotal, 2, ',', '.') }}</td>
                     <td>$&nbsp;{{ number_format($payment->balance , 2, ',', '.') }}</td>
                     <td>
-                        <a href="{{ Route('showReceipt', $payment->id) }}" class="btn btn-sm btn-info">Ver</a>
+                        <a href="{{ Route('showPayment', $payment->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
                 </tr>
             @endforeach

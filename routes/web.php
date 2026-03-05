@@ -144,5 +144,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('nota-D/showd/{id}',[DebitController::class , 'show'])->name('debitshow');
 
     // Payments
-    Route::get('pagos',[PaymentsController::class , 'index'])->name('pagos');
+    Route::get('pagos',[PaymentsController::class , 'index' ])->name('pagos');
+    Route::post('pagos/generar',[PaymentsController::class , 'generate' ])->name('generatePayment');
+    Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');
 });

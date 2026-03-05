@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->float('total')->nullable();
-            $table->float('balance')->nullable();
+            $table->decimal('total',15,2)->nullable();
+            $table->decimal('balance',15,2)->nullable();
             $table->foreignId('clientId')->nullable()->references('id')->on('clients');
             $table->dateTime('acreditation_date')->nullable();
             $table->string('method')->nullable();
