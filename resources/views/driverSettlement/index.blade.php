@@ -14,7 +14,7 @@
    <form method="GET" action="{{ route('driverSettlements') }}">
         <div class="container-fluid mb-3" >
             <div class="row align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <label for="driver_id">Chofer</label>
                     <select name="driver_id" id="driver_id" class="form-control">
                         <option value="">-- Todos --</option>
@@ -25,18 +25,31 @@
                         @endforeach
                     </select>
                 </div>
-
-                <div class="col-md-3">
+                {{-- <div class="col-md-2">
+                    <label for="tipo">Tipo</label>
+                    <select name="tipo" id="tipo" class="form-control">
+                        <option {{ request('tipo') == 'Tercero' ? 'selected' : '' }}>Tercero</option>
+                        <option {{ request('tipo') == 'Propio' ? 'selected' : '' }}>Propio</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="subtipo">Sub tipo</label>
+                    <select name="subtipo" id="subtipo" class="form-control">
+                        <option value="EVENTUAL" {{ request('subtipo') == 'EVENTUAL' ? 'selected' : '' }}>Eventual</option>
+                        <option value="HABITUAL" {{ request('subtipo') == 'HABITUAL' ? 'selected' : '' }}>Habitual</option>
+                    </select>
+                </div> --}}
+                <div class="col-md-2">
                     <label for="desde">Desde</label>
                     <input type="date" name="desde" id="desde" class="form-control" value="{{ request('desde') }}">
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="hasta">Hasta</label>
                     <input type="date" name="hasta" id="hasta" class="form-control" value="{{ request('hasta') }}">
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
                 </div>
 

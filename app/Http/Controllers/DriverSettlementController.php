@@ -18,11 +18,14 @@ class DriverSettlementController extends Controller
     public function driverSettlements(Request $request)
     {
         $query = DriverSettlement::query();
+        
         if($request->filled('driver_id')) $query->where("driverId",$request->driver_id);
         if($request->filled('desde')) $query->where('dateFrom', '>=', $request->desde);
         if($request->filled('hasta')) $query->where('dateTo', '<=', $request->hasta);
-
-        $data['driverSettlements'] = $query->paginate(20)->withQueryString();
+        if($request->filled('tipo'))    $query->whereHas('driver', fn($q) => $q->where('type', $request->tipo));
+        if($request->filled('subtipo')) $query->whereHas('driver', fn($q) => $q->where('subtipo', $request->subtipo));
+        
+        $data['driverSettlements'] = $query->get();
         $data['drivers'] = Driver::orderBy('name', 'asc')->get();
         return view('driverSettlement.index', $data);
     }

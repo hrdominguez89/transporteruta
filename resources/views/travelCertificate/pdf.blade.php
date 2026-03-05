@@ -41,13 +41,13 @@
         <div>
             <div style="display: inline-block; width: 48%; vertical-align: top; margin-right: 2%;">
                 <img  class="header-img" src="data:image/png;base64,{{ base64_encode(file_get_contents(resource_path('img/Logo_de_TR.png'))) }}">
-                <p style="font-size: 8.5px;">CUIT:30-70908352-5</p>
-                <p style="font-size: 8.5px;">Ing. Brutos C.M.: 902-829006-8</p>
-                <p style="font-size: 8.5px;">Inicio de actividades: 01-04-05</p>
-                <p style="font-size: 8.5px;">Santa Maria de Oro 1020</p>
-                <p style="font-size: 8.5px;">B1646AZB San Fernando-PCIA. Bs. As.</p>
-                <p style="font-size: 8.5px;">info@transportesruta.com.ar</p>
-                <p style="font-size: 8.5px;">Teléfono 4745-1515/4744-7999 / Wpp. 1154033940;</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">CUIT:30-70908352-5</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">Ing. Brutos C.M.: 902-829006-8</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">Inicio de actividades: 01-04-05</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">Santa Maria de Oro 1020</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">B1646AZB San Fernando-PCIA. Bs. As.</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">info@transportesruta.com.ar</p>
+                <p style="font-size: 8px;margin-bottom: 1%;">Teléfono 4745-1515/4744-7999 / Wpp. 1154033940;</p>
             </div>
             <div style="display: inline-block; width: 48%; vertical-align: top;">
                 <h5>CONSTANCIA DE VIAJE N° {{ $travelCertificate->number ? $travelCertificate->number : $travelCertificate->id }}</h5>
@@ -57,7 +57,7 @@
             </div>
         </div>
     </div>
-    <div class="table-bordered text-left mt-3 mb-3 p-2" style="font-size: 0.8rem;">
+    <div class="table-bordered text-left mt-3 mb-3 p-2" style="font-size: 9.7px;">
         <p class="kv"><strong>Cliente:</strong> <span>{{ $travelCertificate->client->name }}</span></p>
         <p class="kv"><strong>Chofer:</strong> <span>{{ $travelCertificate->driver->name }}</span></p>
         <p class="kv"><strong>Vehículo:</strong> <span>{{ $travelCertificate->vehicle->name ?? $travelCertificate->driver->vehicle->name ?? ''  }}</span></p>
@@ -82,10 +82,10 @@
                 <div style="float: left; width: {{ $filteredItems->count() > 6 ? '48%' : '98%' }}; {{ $filteredItems->count() > 6 ? 'margin-right: 2%;' : '' }}">
                     <table class="conceptos-table" style="width: 100%;">
                         <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Descripción</th>
-                                <th style="text-align:right;">Total</th>
+                            <tr >
+                                <th style="font-size: 10px;">Tipo</th>
+                                <th style="font-size: 10px;">Descripción</th>
+                                <th style="text-align:right;font-size: 10px;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -95,10 +95,10 @@
                                     $desc  = $travelItem->computed_description ?? $travelItem->description;
                                     $isNeg = $monto < 0;
                                 @endphp
-                                <tr>
-                                    <td>{{ $travelItem->type }}</td>
-                                    <td>{{ $desc }}</td>
-                                    <td style="text-align:right; {{ $isNeg ? 'color:#c00' : '' }}">
+                                <tr style="font-size: 18.5px;">
+                                    <td style="font-size: 9px;">{{ $travelItem->type }}</td>
+                                    <td style="font-size: 9px;">{{ $desc }}</td>
+                                    <td style="font-size: 9px;text-align:right; {{ $isNeg ? 'color:#c00' : '' }}">
                                         $&nbsp;{{ number_format($monto, 2, ',', '.') }}
                                     </td>
                                 </tr>
@@ -130,13 +130,13 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="font-size: 0.8rem;">Remitos</th>
+                                <th style="font-size: 9.5px;">Remitos</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($chunk as $item)
                                 <tr>
-                                    <td style="font-size: 0.7rem;">{{ $item->description }}</td>
+                                    <td style="font-size: 9px;">{{ $item->description }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -181,11 +181,11 @@
             <span>$&nbsp;{{ number_format($totalFinal, 2, ',', '.') }}</span>
         </p>
     </div>
-    <div class="table-bordered" style="font-size: 0.87rem;">
+    <div class="table-bordered" style="font-size: 7.5px;">
         <p>LA MERCADERÍA VIAJA POR CUENTA Y RIESGO DEL CLIENTE.</p>
         <P>NOTA: El horario rige desde que el vehículo sale de la agencia hasta que regresa a la misma.</P>
     </div>
-    <div class =" text-center table-bordered" style="font-size: 0.87rem;">
+    <div class =" text-center table-bordered" style="font-size: 8.5px;">
         <p>La presente no tiene valor como recibo oficial. Se emitirá la factura correspondiente por la suma de los valores de los viajes devengados en las constancias de viaje.</p>
         <p>Conforme:</p>
         <p>________________________</p>

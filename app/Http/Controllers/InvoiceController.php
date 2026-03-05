@@ -155,7 +155,7 @@ class InvoiceController extends Controller
 
         $pdf->getDomPDF()->setOptions($options);
 
-        return $pdf->stream('Factura-N°-' . $data['invoice']->number . 'pdf');
+        return $pdf->stream('Resumen de factura: ' . $data['invoice']->number . 'pdf');
     }
 
     public function invoiced($id)
