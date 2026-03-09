@@ -104,7 +104,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('ver/recibo/{id}', [ReceiptController::class, 'show'])->name('showReceipt');
     Route::get('imprimir/recibo/{id}', [ReceiptController::class, 'generateReceiptPdf'])->name('receiptPdf');
     Route::get('pagar/{id}', [ReceiptController::class, 'paid'])->name('paidReceipt');
-    Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');
+    Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');//
+    Route::post('agregar/pago/{id}', [ReceiptController::class, 'addPaymentToReceipt'])->name('addPaymentToReceipt');//
+    Route::post('cancelar/pago/{id}', [ReceiptController::class, 'quitPaymentToReceipt'])->name('quitPaymentToReceipt');//
+    Route::post('editar/pago/{id}', [ReceiptController::class, 'editPaymentFromReceipt'])->name('editPaymentFromReceipt');//
+    
 
     // PaymentMethod
     Route::get('medios-de-pago', [PaymentMethodController::class, 'paymentMethods'])->name('paymentMethods');
@@ -146,5 +150,6 @@ Route::group(['middleware' => 'auth'], function () {
     // Payments
     Route::get('pagos',[PaymentsController::class , 'index' ])->name('pagos');
     Route::post('pagos/generar',[PaymentsController::class , 'generate' ])->name('generatePayment');
-    Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');
+    Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
+    Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//editPayment
 });

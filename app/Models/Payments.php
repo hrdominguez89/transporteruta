@@ -12,4 +12,13 @@ class Payments extends Model
     {
         return $this->belongsTo(Client::class, 'clientId');
     }
+    public function obtenerRecibos()
+    {
+        
+        return $this->belongsToMany(Receipt::class, 'payment_recipe_pivot', 'paymentId', 'recipeId')
+            ->withPivot('total');
+    }
+    public function agregadoAlRecibo($id){
+         return $this->obtenerRecibos()->wherePivot('recipeId', $id)->exists();
+    }
 }

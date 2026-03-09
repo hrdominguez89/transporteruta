@@ -22,7 +22,7 @@ class PaymentsController extends Controller
         if($request->filled('clientId')) $client = $request->clientId;
         if($request->filled('metodo'))  $metodo = $request->metodo;
         if($request->filled('tipodecheque'))  $tipodecheque = $request->tipodecheque;
-        if($request->filled('fechaderecepcion'))  $fechaderecepcion = $request->fechaderecepcion;
+        if($request->filled('fecharecepcion'))  $fechaderecepcion = $request->fecharecepcion;
         if($request->filled('banco'))  $banco = $request->banco;
         if($request->filled('monto'))  $monto = $request->monto;
         if($request->filled('comentario'))  $comentario = $request->comentario;
@@ -52,9 +52,10 @@ class PaymentsController extends Controller
         return view('payments.show',[ "pago" => $pago ]);
 
     }
-    public function edit(Request $request)
+    public function edit(Request $request,$id)
     {
-
+         $pago = Payments::find($id);
+        return view('payments.show',[ "pago" => $pago ]);
     }
     public function delete(Request $request)
     {
