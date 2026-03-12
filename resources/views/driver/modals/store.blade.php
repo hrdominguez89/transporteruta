@@ -13,18 +13,18 @@
                     <label for="name">Nombre:<span class="text-danger"> *</span></label>
                     <input id="name" type="text" name="name" class="form-control mb-2"
                         placeholder="Ingrese el nombre..." required>
-                    <label for="dni">DNI/CUIT:<span class="text-danger"> *</span></label>
+                    <label for="dni">DNI/CUIT:</label>
                     <input id="dni" type="text" name="dni" class="form-control mb-2"
-                        placeholder="Ingrese el DNI/CUIT..." required>
-                    <label for="address">Direccion:<span class="text-danger"> *</span></label>
+                        placeholder="Ingrese el DNI/CUIT..." >
+                    <label for="address">Direccion:</label>
                     <input id="address" type="text" name="address" class="form-control mb-2"
-                        placeholder="Ingrese la direccion..." required>
-                    <label for="city">Ciudad:<span class="text-danger"> *</span></label>
+                        placeholder="Ingrese la direccion..." >
+                    <label for="city">Ciudad:</label>
                     <input id="city" type="text" name="city" class="form-control mb-2"
-                        placeholder="Ingrese la ciudad..." required>
-                    <label for="phone">Telefono:<span class="text-danger"> *</span></label>
+                        placeholder="Ingrese la ciudad..." >
+                    <label for="phone">Telefono:</label>
                     <input id="phone" type="text" name="phone" class="form-control mb-2"
-                        placeholder="Ingrese el telefono..." required>
+                        placeholder="Ingrese el telefono..." >
                     <label for="type">Tipo:</label>
                     <select id="type" name="type" class="form-control mb-2" required>
                         <option value="">---- Seleccione una opcion ----</option>

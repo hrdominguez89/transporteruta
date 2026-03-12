@@ -17,7 +17,7 @@ class DriverController extends Controller
     }
 
 
- public function store(StoreDriverRequest $request) // 👈 usa la request tipada
+ public function store(StoreDriverRequest $request)
     {
         $driver              = new Driver();
         $driver->name        = $request->name;

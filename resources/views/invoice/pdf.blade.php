@@ -126,7 +126,7 @@
                     <table style="width: 100%;">
                         <tr>
                             <th class="text-right" style="width: 90%;font-size:18px">
-                                <strong>Factura</strong>
+                                <strong>Resumen de factura</strong>
                             </th>
                             <td style="width: 90%;font-size:17px;text-align:left">
                                <strong>{{ sprintf('%05d', $invoice->pointOfSale) }}-{{  sprintf('%08d',$invoice->number) }}</strong>
@@ -229,6 +229,9 @@
                     <td style="text-align:center;width:30%">Importe Neto</td>
                     <td style="text-align:center;width:30%">I.V.A.</td>
                     <td style="text-align:center;width:30%">Peajes</td>
+                    @if ($estacionamiento > 0)
+                    <td style="text-align:center;width:30%">Estacionamientos</td>
+                    @endif
                 </tr>
             </thead>
             <tbody>

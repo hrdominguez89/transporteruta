@@ -32,12 +32,12 @@ class StoreDriverRequest extends FormRequest
    public function rules(): array
     {
     return [
-        'name'      => ['required','string','max:191'],
-        'dni'       => ['required','string','max:191'],
-        'address'   => ['required','string','max:191'],
-        'city'      => ['required','string','max:191'],
-        'phone'     => ['required','string','max:191'],
-        'type'      => ['required', Rule::in(['PROPIO','TERCERO'])],
+        'name'      => ['nullable','required','string','max:191'],
+        'dni'       => ['nullable','string','max:10'],
+        'address'   => ['nullable','string','max:191'],
+        'city'      => ['nullable','string','max:191'],
+        'phone'     => ['nullable','string','max:191'],
+        'type'      => [ Rule::in(['PROPIO','TERCERO'])],
 
         // 👇 Solo permitido en TERCERO; si el tipo es PROPIO, se prohíbe que venga rellenado
         'percent'   => ['nullable','numeric','between:0,100','required_if:type,TERCERO','prohibited_unless:type,TERCERO'],

@@ -8,6 +8,20 @@
         <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Chofer</button>
     </div>
     @include('driver.modals.store')
+    @if($errors->any())
+    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show">
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    <script>
+        setTimeout(function () {
+            $('#errorAlert').alert('close');
+        }, 5000);
+    </script>
+    @endif
 @stop
 
 @section('content')
