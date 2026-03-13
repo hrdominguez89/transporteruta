@@ -23,6 +23,14 @@
     @endif
     @include('receipt.modals.paid')
     @include('receipt.modals.cancel')
+    @if ($errors->has('mensaje'))
+        <div class="alert alert-danger" id="errorMensaje">
+            {{ $errors->first('mensaje') }}
+        </div>
+        <script>
+            setTimeout(() => document.getElementById('errorMensaje').remove(), 3000);
+        </script>
+    @endif
 @stop
 
 @section('content')
@@ -33,8 +41,9 @@
                 <th>Cliente</th>
                 <th>Pagado</th>
                 <th>Retenciones</th>
-                <th>Saldo total recibido</th>
+                <th>Saldo disponible</th>
                 <th>Total</th>
+                <th>Total (retenciones)</th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +54,8 @@
                 </td>
                 <td>{{ $receipt->paid }}</td>
                 <td>$&nbsp;{{ number_format($receipt->taxTotal, 2, ',', '.') }}</td>
-                <td>$&nbsp;{{ number_format($receipt->total, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($receipt->available_balance, 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($receipt->total , 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($receipt->total + $receipt->taxTotal, 2, ',', '.') }}</td>
             </tr>
         </tbody>
@@ -197,7 +207,78 @@
             </tbody>
         </table>
     @endif
-@stop
+
+    <h4>Pagos agregados</h4>
+    <table class="table table-sm table-bordered text-center data-table">
+        <thead class="bg-danger">
+            <tr>
+                <th>Fecha</th>
+                <th>Metodo</th>
+                <th>Saldo total</th>
+                <th>Saldo disponible</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ( $pagos as $pago )
+                @if ($pago->agregadoAlRecibo($receipt->id))
+                    <tr>
+                        <td>{{ $pago->date }}</td>
+                        <td>{{ $pago->method }}</td>
+                        <td>$&nbsp;{{ number_format( $pago->total, 2, ',', '.') }}</td>
+                        <td>$&nbsp;{{ number_format( $pago->balance, 2, ',', '.') }}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalQuitPayment">
+                                Quitar
+                            </button>
+                              <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editPaymentFromReceipt">
+                                Editar
+                            </button>
+                            
+                        </td>
+                    </tr>
+                    @include('receipt.modals.quitPayment')
+                    @include('receipt.modals.editPaymentFromReceipt')
+                @endif
+            @endforeach
+        </tbody>
+    </table>
+    
+    <h4>Pagos disponibles</h4>
+    <table class="table table-sm table-bordered text-center data-table">
+        <thead class="bg-danger">
+            <tr>
+                <th>Fecha</th>
+                <th>Metodo</th>
+                <th>Saldo total</th>
+                <th>Saldo disponible</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ( $pagos as $pago )
+                @if (!$pago->agregadoAlRecibo($receipt->id))
+                    <tr>
+                        <td>{{ $pago->date }}</td>
+                        <td>{{ $pago->method }}</td>
+                        <td>$&nbsp;{{ number_format( $pago->total, 2, ',', '.') }}</td>
+                        <td>$&nbsp;{{ number_format( $pago->balance, 2, ',', '.') }}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addPayment{{ $pago->id }}">
+                                Cargar
+                            </button>
+                        </td>
+                        @include('receipt.modals.addPayment')
+                    </tr>
+                @endif
+            @endforeach
+        </tbody>
+    </table>
+
+
+
+
+    @stop
 @section('js')
     <script>
         $(document).ready(function() {
@@ -275,4 +356,18 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.fill-balance-check').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    if (input) {
+                        input.value = this.checked ? parseFloat(this.getAttribute('data-value')) : '';
+                        input.dispatchEvent(new Event('input'));
+                    }
+                });
+            });
+        });
+    </script>
 @stop

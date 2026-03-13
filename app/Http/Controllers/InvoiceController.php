@@ -327,6 +327,7 @@ class InvoiceController extends Controller
         $receipt = Receipt::find($receiptId);
         $invoice->receipts()->attach($receiptId, ['paymentMethodId' => $request->paymentMethodId, 'total' => $balanceToPay]);
         $invoice->balance -= $balanceToPay;
+        $receipt->available_balance -= $balanceToPay;
         $receipt->total += $balanceToPay;
         $invoice->save();
         $receipt->save();
@@ -396,7 +397,7 @@ class InvoiceController extends Controller
         // Sumar nuevamente el total de la factura al balance
         $invoice->balance += $invoiceReceipt->total;
         $receipt->total -= $invoiceReceipt->total;
-
+        $receipt->available_balance += $invoiceReceipt->total;
         // Revertir todas las retenciones (InvoiceReceiptTax) asociadas
         foreach ($invoiceReceipt->taxes as $tax) {
             $invoice->balance += $tax->taxAmount;

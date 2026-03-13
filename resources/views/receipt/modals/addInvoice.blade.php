@@ -13,16 +13,14 @@
                     @csrf
                     <p>Saldo Restante: <strong>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</strong></p>
                     <input type="hidden" name="receiptId" value="{{ $receipt->id }}">
+                    <div class="form-check mb-1">
+                        <input type="checkbox" class="form-check-input fill-balance-check" id="fillBalance_invoice_{{ $invoice->id }}"
+                            data-target="balanceToPay_invoice_{{ $invoice->id }}" data-value="{{ $invoice->balance }}">
+                        <label class="form-check-label" for="fillBalance_invoice_{{ $invoice->id }}">Pagar saldo completo</label>
+                    </div>
                     <label for="balanceToPay_invoice_{{ $invoice->id }}">Saldo a Pagar:<span class="saldo_restante" id="saldo_restante_invoice_{{ $invoice->id }}" data-id="saldo_restante_invoice_{{ $invoice->id }}"></span></label>
                     <input type="number" step="0.01" id="balanceToPay_invoice_{{ $invoice->id }}" name="balanceToPay" data-id="balanceToPay_invoice_{{ $invoice->id }}" class="form-control mb-2 balanceToPay"
                         required>
-                    <label for="paymentMethodId">Medio de Pago:</label>
-                    <select name="paymentMethodId" class="form-control mb-2" required>
-                        <option value="">---- Seleccione una opcion ----</option>
-                        @foreach ($paymentMethods as $paymentMethod)
-                            <option value="{{ $paymentMethod->id }}">{{ $paymentMethod->name }}</option>
-                        @endforeach
-                    </select>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

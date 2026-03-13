@@ -12,6 +12,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\DebitController;
+use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\UserController;
@@ -103,7 +104,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('ver/recibo/{id}', [ReceiptController::class, 'show'])->name('showReceipt');
     Route::get('imprimir/recibo/{id}', [ReceiptController::class, 'generateReceiptPdf'])->name('receiptPdf');
     Route::get('pagar/{id}', [ReceiptController::class, 'paid'])->name('paidReceipt');
-    Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');
+    Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');//
+    Route::post('agregar/pago/{id}', [ReceiptController::class, 'addPaymentToReceipt'])->name('addPaymentToReceipt');//
+    Route::post('cancelar/pago/{id}', [ReceiptController::class, 'quitPaymentToReceipt'])->name('quitPaymentToReceipt');//
+    Route::post('editar/pago/{id}', [ReceiptController::class, 'editPaymentFromReceipt'])->name('editPaymentFromReceipt');//
+    
 
     // PaymentMethod
     Route::get('medios-de-pago', [PaymentMethodController::class, 'paymentMethods'])->name('paymentMethods');
@@ -133,6 +138,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
     Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
 
+    // Debits
     Route::get('notas-de-debito',[DebitController::class , 'index'])->name('debitos');
     Route::post('nota-D/generar',[DebitController::class , 'generate'])->name('generateDebit');
     Route::post('nota-D/add/{id}',[DebitController::class , 'addToInvoice'])->name('addInvoiceToDebit');
@@ -140,4 +146,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('nota-D/remove/{id}',[DebitController::class , 'remove'])->name('removeInvoiceFromDebit');
     Route::get('nota-D/delete/{id}',[DebitController::class , 'delete'])->name('deleteDebit');
     Route::get('nota-D/showd/{id}',[DebitController::class , 'show'])->name('debitshow');
+
+    // Payments
+    Route::get('pagos',[PaymentsController::class , 'index' ])->name('pagos');
+    Route::post('pagos/generar',[PaymentsController::class , 'generate' ])->name('generatePayment');
+    Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
+    Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//
+    Route::post('pagos/delete',[PaymentsController::class , 'delete' ])->name('deletePayment');//deletePayment
 });

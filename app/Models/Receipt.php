@@ -24,4 +24,10 @@ class Receipt extends Model
     {
         return $this->belongsToMany(Invoice::class)->withPivot('paymentMethodId', 'taxId', 'total', 'taxAmount');
     }
+
+    public function paymentspivot()
+    {
+        return $this->belongsToMany(Payments::class, 'payment_recipe_pivot', 'recipeId', 'paymentId')
+            ->withPivot('total');
+    }
 }

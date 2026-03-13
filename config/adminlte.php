@@ -346,7 +346,11 @@ return [
             'text' => 'Notas de Debito',
             'url'  => 'notas-de-debito',
             'icon' => 'far fa-dot-circle'
-
+        ],
+        [
+            'text' => 'Pagos',
+            'url' =>'pagos',
+            'icon' =>'fas fa-cash-register',
         ],
         [
             'text' => 'Recibos',
