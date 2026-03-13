@@ -151,5 +151,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('pagos',[PaymentsController::class , 'index' ])->name('pagos');
     Route::post('pagos/generar',[PaymentsController::class , 'generate' ])->name('generatePayment');
     Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
-    Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//editPayment
+    Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//
+    Route::post('pagos/delete',[PaymentsController::class , 'delete' ])->name('deletePayment');//deletePayment
 });

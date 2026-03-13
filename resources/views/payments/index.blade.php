@@ -8,8 +8,18 @@
         <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Ingresar Pagos</button>
     </div>
     @include('payments.modals.generate')
-    @include('payments.modals.edit')
-    @include('payments.modals.delete')
+    @if(session('success'))
+        <div id="flash-msg" class="alert alert-success alert-dismissible fade show col-6" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div id="flash-msg" class="alert alert-danger alert-dismissible fade show col-6" role="alert">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
 @stop
 
 @section('content')
@@ -34,8 +44,10 @@
                     <td>$&nbsp;{{ number_format($payment->balance , 2, ',', '.') }}</td>
                     <td>
                         <a href="{{ Route('showPayment', $payment->id) }}" class="btn btn-sm btn-info">Ver</a>
+                        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ $payment->id }}">Eliminar</button>
                     </td>
                 </tr>
+                @include('payments.modals.delete')
             @endforeach
         </tbody>
     </table>
@@ -51,5 +63,6 @@
             }
         });
         $('.select2').select2();
+        setTimeout(function() { $('#flash-msg').fadeOut('slow'); }, 3000);
     </script>
 @stop

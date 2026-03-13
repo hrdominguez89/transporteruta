@@ -54,12 +54,25 @@ class PaymentsController extends Controller
     }
     public function edit(Request $request,$id)
     {
-         $pago = Payments::find($id);
+        $pago = Payments::find($id);
         return view('payments.show',[ "pago" => $pago ]);
     }
     public function delete(Request $request)
     {
+        $id  = $request->payment;
+        $pago = Payments::find($id);
 
+        if (!$pago) {
+            return redirect()->route('pagos')->with('error', 'Pago no encontrado.');
+        }
+
+        // Si el pago está asignado a algún recibo, no se permite eliminar
+        if ($pago->obtenerRecibos()->exists()) {
+            return redirect()->route('pagos')->with('error', 'No se puede eliminar el pago porque está asignado a un recibo.');
+        }
+
+        $pago->delete();
+        return redirect()->route('pagos')->with('success', 'Pago eliminado correctamente.');
     }
     public function pdf(Request $request)
     {

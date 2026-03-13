@@ -37,6 +37,7 @@ class ReceiptController extends Controller
 
     public function show($id)
     {
+        
         $receipt = Receipt::findOrFail($id);
         $paymentMethods = PaymentMethod::all();
         $taxes = Tax::all();
@@ -64,25 +65,38 @@ class ReceiptController extends Controller
     public function generateReceiptPdf($id)
     {
         $receipt = Receipt::findOrFail($id);
-        $paymentMethods = PaymentMethod::all();
-        $taxes = Tax::all();
-
-        $invoicesToAdd = $receipt->client->invoices()
-            ->where('paid', 'NO')
-            ->where('invoiced', 'SI')
-            ->get();
-
+        
         $receiptInvoices = InvoiceReceipt::where('receipt_id', $id)
-            ->with('invoice') // opcional, para mostrar datos de la factura
-            ->orderByDesc('id') // orden descendente por ID
+            ->with('invoice')
+            ->orderByDesc('id')
             ->get();
-        $pdf = Pdf::loadView('receipt.pdf', ['receipt' => $receipt, 'paymentMethods' => $paymentMethods, 'taxes' => $taxes, 'invoicesToAdd' => $invoicesToAdd, 'receiptInvoices' => $receiptInvoices]);
-        $pdf->setPaper('A4', 'landscape');
-        return $pdf->stream('Recibo-' . $receipt->client->name . '-(' . $receipt->date . ').pdf');
+
+        if ($receipt->paymentspivot()->exists())
+        {
+            $pagos = $receipt->paymentspivot()->get();
+            $pdf = Pdf::loadView('receipt.newpdf', ['receipt' => $receipt, 'receiptInvoices' => $receiptInvoices, 'pagos' => $pagos]);
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->stream('Recibo-' . $receipt->client->name . '-(' . $receipt->date . ').pdf');
+        }
+        else
+        {
+            $taxes = Tax::all();
+            $paymentMethods = PaymentMethod::all();
+
+            $invoicesToAdd = $receipt->client->invoices()
+                ->where('paid', 'NO')
+                ->where('invoiced', 'SI')
+                ->get();
+
+            $pdf = Pdf::loadView('receipt.pdf', ['receipt' => $receipt, 'paymentMethods' => $paymentMethods, 'taxes' => $taxes, 'invoicesToAdd' => $invoicesToAdd, 'receiptInvoices' => $receiptInvoices]);
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->stream('Recibo-' . $receipt->client->name . '-(' . $receipt->date . ').pdf');
+        }
     }
 
     public function paid($id)
     {
+        //primero validar que tenga asignada una factura al momento de poder marcar como pagada. 
         $receipt = Receipt::find($id);
         if($receipt->paid == 'SI')
         {
