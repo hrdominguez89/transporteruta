@@ -23,6 +23,7 @@ class PaymentsController extends Controller
         if($request->filled('metodo'))  $metodo = $request->metodo;
         if($request->filled('tipodecheque'))  $tipodecheque = $request->tipodecheque;
         if($request->filled('fecharecepcion'))  $fechaderecepcion = $request->fecharecepcion;
+        if($request->filled('fechadeacreditacion'))  $fechadeacreditacion = $request->fechadeacreditacion;
         if($request->filled('banco'))  $banco = $request->banco;
         if($request->filled('monto'))  $monto = $request->monto;
         if($request->filled('comentario'))  $comentario = $request->comentario;
@@ -34,9 +35,13 @@ class PaymentsController extends Controller
         {
             $pago->cheq_type = $tipodecheque;
         }
+         if( $metodo == 'EFECTIVO')
+        {
+            $pago->received_date = $fechaderecepcion;
+        }
         if( $metodo == 'TRANSFERENCIA' )
         {
-            $pago->acreditation_date = $fechaderecepcion;
+            $pago->acreditation_date = $fechadeacreditacion;
             $pago->banco = $banco;
         }
         $pago->note = $comentario;

@@ -128,8 +128,13 @@ class ReceiptController extends Controller
     {
         $receipt = Receipt::find($id);
         $payment = Payments::find($request->payment_id);
-        $monto = $request->monto;
+        if($receipt->paid == 'SI')
+        {
+            return back()->withErrors(['mensaje' => 'El recibo no puede agregar pagos si esta marcado como pagado.']);
+        }
 
+        $monto = $request->monto;
+        
         if ($monto > $payment->total) {
             return back()->withErrors(['mensaje' => 'El monto no puede ser mayor al total del pago.']);
         }
