@@ -144,7 +144,7 @@ class TravelCertificateController extends Controller
         return redirect(route('showTravelCertificate', $travelCertificate->id));
     }
 
-    public function generateTravelCertificatePdf($id)
+    public function generateTravelCertificatePdf($id,$flag=false)
     {
         $travelCertificate = TravelCertificate::find($id);
         $tolls = TravelItem::where('type', 'PEAJE')->where('travelCertificateId', $id);
@@ -172,7 +172,14 @@ class TravelCertificateController extends Controller
         $fondoBase64 = base64_encode($imageData);
     
         $pdf = Pdf::loadView('travelCertificate.pdf', ['travelCertificate' => $travelCertificate, 'totalTolls' => $totalTolls,'fondoBase64' =>$fondoBase64]);
-
+        if($flag)
+            {
+                return view('travelCertificate.pdf', [
+                    'travelCertificate' => $travelCertificate,
+                    'totalTolls'        => $totalTolls,
+                    'fondoBase64'       => $fondoBase64
+                ])->render();
+            }
         return $pdf->stream('Constancia-' . $travelCertificate->client->name . 'pdf');
     }
 

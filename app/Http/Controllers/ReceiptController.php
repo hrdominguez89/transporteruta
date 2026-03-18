@@ -74,7 +74,10 @@ class ReceiptController extends Controller
         if ($receipt->paymentspivot()->exists())
         {
             $pagos = $receipt->paymentspivot()->get();
-            $pdf = Pdf::loadView('receipt.newpdf', ['receipt' => $receipt, 'receiptInvoices' => $receiptInvoices, 'pagos' => $pagos]);
+            $pdf = Pdf::loadView('receipt.newpdf', [
+                'receipt' => $receipt,
+                'receiptInvoices' => $receiptInvoices,
+                'pagos' => $pagos]);
             $pdf->setPaper('A4', 'landscape');
             return $pdf->stream('Recibo-' . $receipt->client->name . '-(' . $receipt->date . ').pdf');
         }
@@ -88,7 +91,13 @@ class ReceiptController extends Controller
                 ->where('invoiced', 'SI')
                 ->get();
 
-            $pdf = Pdf::loadView('receipt.pdf', ['receipt' => $receipt, 'paymentMethods' => $paymentMethods, 'taxes' => $taxes, 'invoicesToAdd' => $invoicesToAdd, 'receiptInvoices' => $receiptInvoices]);
+            $pdf = Pdf::loadView('receipt.pdf', [
+                'receipt' => $receipt, 
+                'receiptInvoices' => $receiptInvoices,
+                'paymentMethods' => $paymentMethods, 
+                'taxes' => $taxes, 
+                'invoicesToAdd' => $invoicesToAdd, 
+                ]);
             $pdf->setPaper('A4', 'landscape');
             return $pdf->stream('Recibo-' . $receipt->client->name . '-(' . $receipt->date . ').pdf');
         }

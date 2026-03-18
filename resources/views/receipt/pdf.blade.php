@@ -121,6 +121,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                
                                 @foreach ($receiptInvoice->taxes as $rit)
                                     <tr>
                                         <td class="text-lefth">

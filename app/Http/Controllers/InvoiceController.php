@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema; // TEAM: agregado para detectar nombre real de tabla/columnas pivot
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use App\Http\Controllers\TravelCertificateController;
+
 
 class InvoiceController extends Controller
 {
@@ -117,10 +119,10 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function generateInvoicePdf($id)
+    public function generateInvoicePdf(Request $request,$id)
     {
         $data['invoice'] = Invoice::find($id);
-
+        $ch = $request->has('constancias'); 
         $data['invoice']->travelCertificates = $data['invoice']->travelCertificates
             ->sortBy([
                 ['date', 'asc'],   // Ordenar por fecha (ascendente)
@@ -131,6 +133,8 @@ class InvoiceController extends Controller
         $data['totalImporteNeto'] = 0;
 
         // Calculamos el total de agency y sumamos los peajes
+        $TC = new TravelCertificateController();
+        $tcPDFs=[];
         foreach ($data['invoice']->travelCertificates as $travelCertificate) {
             // Agregar el total de peajes a cada travelCertificate
             $travelCertificate->totalTolls = TravelItem::where('type', 'PEAJE')
@@ -140,6 +144,10 @@ class InvoiceController extends Controller
             $data['totalImporteNeto'] += $travelCertificate->total - $travelCertificate->totalTolls;
 
             $data['totalTolls'] += $travelCertificate->totalTolls;
+            if($ch)
+            {
+                $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id,true);
+            }
         }
 
         $pdf = Pdf::loadView('invoice.pdf', $data);
@@ -154,7 +162,14 @@ class InvoiceController extends Controller
         $options->set('isRemoteEnabled', true);
 
         $pdf->getDomPDF()->setOptions($options);
-
+        if($ch)
+        {
+            $invoiceHtml = view('invoice.pdf', $data)->render();
+            $separator = '<div style="page-break-before: always; margin: 0; padding: 0;"></div>';
+            $allHtml = $invoiceHtml  . implode( $tcPDFs);
+            $pdfb = Pdf::loadHTML($allHtml);
+            return $pdfb->stream('Resumen de factura: ' . $data['invoice']->number . '.pdf');
+        }
         return $pdf->stream('Resumen de factura: ' . $data['invoice']->number . 'pdf');
     }
 

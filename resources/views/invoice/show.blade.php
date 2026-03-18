@@ -37,13 +37,13 @@
         @endif
         @if ($invoice->paid == 'SI')
             <div class="col-12 text-right mb-2">
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-4">Generar
-                    PDF</a>
+              <form action="{{ Route('invoicePdf', $invoice->id) }}" method="GET" target="_blank">
+                <button type="submit" class="btn btn-sm btn-info">Generar PDF</button>
+                <label for="constancias" class="form-check-label">Incluir constancias</label>
+                <input type="checkbox" name="constancias" value="1">
+            </form>
             </div>
-            
-
-            <div class="col-12 text-left mb-2">
-                {{-- UX: corregimos acentos --}}
+            <div class="col-12 mb-2">
                 <h5 class="text-danger">La factura se marcó como pagada y se descontó el saldo de la cuenta corriente</h5>
             </div>
         @endif
