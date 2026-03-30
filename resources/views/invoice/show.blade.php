@@ -25,8 +25,12 @@
         @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
             <div class="col-12 text-right mb-2">
                 <button class="btn btn-sm btn-danger col-1 mr-1" data-toggle="modal" data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
-                <a target="_blank" href="{{ Route('invoicePdf', $invoice->id) }}" class="btn btn-sm btn-info col-1">Generar PDF</a>
                 <button class="btn btn-sm btn-primary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
+                <form action="{{ Route('invoicePdf', $invoice->id) }}" method="GET" target="_blank">
+                    <button type="submit" class="btn btn-sm btn-info">Generar PDF</button>
+                    <label for="constancias" class="form-check-label">Constancias</label>
+                    <input type="checkbox" name="constancias" value="1">
+                </form>
             </div>
         @elseif($invoice->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
