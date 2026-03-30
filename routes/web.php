@@ -13,6 +13,7 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\DebitController;
 use App\Http\Controllers\PaymentsController;
+use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\UserController;
@@ -86,7 +87,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
     // Eliminar factura (solo si no está facturada y no está pagada)
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
-
+    
+    Route::get('liquidaciones', [SettlementController::class, 'index'])->name('Settlements');//
+    Route::get('liquidaciones/generar', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');

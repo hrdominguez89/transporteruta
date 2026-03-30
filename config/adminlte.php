@@ -333,6 +333,11 @@ return [
             'icon' => 'fas fa-money-check-alt',
         ],
         [
+            'text' => 'Liquidaciones',
+            'url'  => 'liquidaciones',
+            'icon' => 'fas fa-money-check-alt',
+        ],
+        [
             'text' => 'Medios de Pago',
             'url'  => 'medios-de-pago',
             'icon' => 'fas fa-credit-card',
