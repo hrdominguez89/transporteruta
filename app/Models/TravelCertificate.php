@@ -62,6 +62,15 @@ class TravelCertificate extends Model
         return (float) $this->travelItems()->where('type', 'ESTACIONAMIENTO')->sum('price');
     }
 
+    public function getTotalCargaDescargaAttribute(): float
+    {
+        return (float) $this->travelItems()->where('type', 'DESCARGA')->sum('price');
+    }
+     public function getTotalNocheAttribute(): float
+    {
+        return (float) $this->travelItems()->where('type', 'NOCHE')->sum('price');
+    }
+
     // /** Suma de descuentos de monto (guardados positivos en price) */
     public function getTotalDescuentosAttribute(): float
     {

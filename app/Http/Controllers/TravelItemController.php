@@ -17,40 +17,40 @@ class TravelItemController extends Controller
     {
         $travelCertificate = TravelCertificate::findOrFail($travelCertificateId);
         if($travelCertificate->invoiced =='SI')
-            {
-                return redirect()->route('showTravelCertificate', $travelCertificate->id)
-                ->with('error', 'Ya esta facturada.');
-                }
-                
-                // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
-                $rules = [
-                    'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA',
-                    'description'   => 'nullable|string|max:255',
-                    
-                    // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
-                    'percent'       => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-                    'porcentaje'    => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
-                    
-                    // DESCUENTO → modo y, según el modo, price o discount_percent
-                    'discount_mode'    => 'exclude_unless:type,DESCUENTO|nullable|in:amount,percent',
-                    'discount_percent' => 'exclude_unless:discount_mode,percent|nullable|numeric|min:0|max:100',
-                    
-                    // price: NO exigir en ADICIONAL/REMITO ni cuando el descuento es por %
-                    // (el requerido se fuerza en un after() según el modo)
-                    'price'         => 'exclude_if:type,ADICIONAL|exclude_if:discount_mode,percent|nullable|numeric|min:0',
-                    
-                    // HORA
-                    'totalHours'    => 'exclude_unless:type,HORA|nullable|integer|min:0',
-                    'totalMinutes'  => 'exclude_unless:type,HORA|nullable|integer|in:0,15,30,45',
-                    
-                    // KILOMETRO
-                    'distance'      => 'exclude_unless:type,KILOMETRO|nullable|numeric|min:0',
-                    ];
-                    
-            $messages = [
-                // 'remito_number.required'      => 'Ingresá el número de Remito.',
-            'price.required_unless'       => 'Ingresá un precio para este tipo de ítem.',
+        {
+            return redirect()->route('showTravelCertificate', $travelCertificate->id)
+            ->with('error', 'Ya esta facturada.');
+        }
+            
+        // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
+        $rules = [
+            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA,NOCHE',
+            'description'   => 'nullable|string|max:255',
+            
+            // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
+            'percent'       => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
+            'porcentaje'    => 'exclude_unless:type,ADICIONAL|nullable|numeric|min:0',
+            
+            // DESCUENTO → modo y, según el modo, price o discount_percent
+            'discount_mode'    => 'exclude_unless:type,DESCUENTO|nullable|in:amount,percent',
+            'discount_percent' => 'exclude_unless:discount_mode,percent|nullable|numeric|min:0|max:100',
+            
+            // price: NO exigir en ADICIONAL/REMITO ni cuando el descuento es por %
+            // (el requerido se fuerza en un after() según el modo)
+            'price'         => 'exclude_if:type,ADICIONAL|exclude_if:discount_mode,percent|nullable|numeric|min:0',
+            
+            // HORA
+            'totalHours'    => 'exclude_unless:type,HORA|nullable|integer|min:0',
+            'totalMinutes'  => 'exclude_unless:type,HORA|nullable|integer|in:0,15,30,45',
+            
+            // KILOMETRO
+            'distance'      => 'exclude_unless:type,KILOMETRO|nullable|numeric|min:0',
             ];
+                
+        $messages = [
+            // 'remito_number.required'      => 'Ingresá el número de Remito.',
+        'price.required_unless'       => 'Ingresá un precio para este tipo de ítem.',
+        ];
             
             $validator = Validator::make($request->all(), $rules, $messages);
             
@@ -200,6 +200,7 @@ class TravelItemController extends Controller
                     $dist . ' unidades x $ ' . number_format($unit, 2, ',', '.') . ')');
                 break;
                 case 'BULTO':
+                case 'NOCHE':
                     $dist = (float) $request->input('unidad', 0);
                     $unit = (float) $request->input('price', 0);
 

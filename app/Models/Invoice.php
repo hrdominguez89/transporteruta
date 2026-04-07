@@ -130,5 +130,9 @@ class Invoice extends Model
     {
         return $this->hasMany(Credit::class, 'invoiceId');
     }
+    public function misrecibos()
+    {
+          return $this->belongsToMany(Receipt::class, 'invoice_receipt', 'invoice_id', 'receipt_id')->withPivot('paymentMethodId', 'total', 'taxAmount');
+    }
 }
 
