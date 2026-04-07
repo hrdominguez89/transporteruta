@@ -32,20 +32,21 @@
                 <table class="table table-bordered"
                        style="border-radius:5px; border: 2px solid #dc3546; margin-bottom: 50px;">
                     <tr style="background-color: #dc3546; color: white;">
-                        <th colspan="3" class="text-center">Cliente</th>
+                        <th colspan="2" class="text-center">Cliente</th>
                         <th class="text-center">DNI/CUIT</th>
                         <th class="text-center">Saldo</th>
+                        <th class="text-center">Saldo a favor</th>
                     </tr>
 
                     <tr>
-                        <th colspan="3" class="text-center">{{ $client->name }}</th>
+                        <th colspan="2" class="text-center">{{ $client->name }}</th>
                         <th class="text-center">{{ $client->dni }}</th>
                          {{$balance = 0}}
                             @foreach ($client->invoices->where('paid', 'NO')->sortBy('date') as $invoice)
                             {{ $balance +=  $invoice->balance  }}
                             @endforeach
                         <th class="text-right">$&nbsp;{{ number_format($balance, 2, ',', '.') }}</th>
-                        {{-- <th class="text-right">$&nbsp;{{ number_format($client->balance, 2, ',', '.') }}</th> --}}
+                        <th class="text-right">${{ $client->saldoAFavor() }}</th>
                     </tr>
                     <tr>
                         <th colspan="4" style="width: 100%;" class="text-center">Facturas</th>
@@ -91,6 +92,48 @@
                             </tr>
                         @endif
                     @endforeach
+                    @php
+                        $flag = false;
+                        foreach ( $recibos as $recibo )
+                        {
+                            if($recibo['clientId'] == $client->id)
+                            {
+                                    $flag = true;
+                                    break;
+                                }
+                            }
+                    @endphp
+                    @if($flag)
+                    <tr>
+                        <th colspan="5" style="width: 100%;" class="text-center">Pagos parciales</th>
+                    </tr>
+                    <tr style="background-color: #dc3546; color: white;">
+                        <th class="text-center" style="width:25%">Numero</th>
+                        <th class="text-center" style="width:25%">Fecha</th>
+                        <th class="text-center" style="width:25%">Factura</th>
+                        <th class="text-center" style="width:25%" colspan="5">Total</th>
+                    </tr>
+                    @foreach ( $recibos as $recibo )
+                        @if($recibo['clientId'] == $client->id)
+                        <tr>
+                            <td class="text-center">
+                                {{ $recibo['number'] }}
+                            </td>
+                            <td class="text-center">
+                                {{\Carbon\Carbon::parse($recibo['date'])->format('d/m/y') }}
+                            </td>
+                            <td class="text-center">
+                                {{ $recibo['invoice']["number"] }}
+                            </td>
+                            <td class="text-center" colspan="5">
+                                $&nbsp;{{ number_format($recibo['total'], 2, ',', '.') }}
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+                    @endif
+                    @php $flag = collect($debitos)->contains('clientId', $client->id); @endphp
+                    @if($flag)
                     <tr>
                         <th colspan="5" style="width: 100%;" class="text-center">Notas de credito</th>
                     </tr>
@@ -117,7 +160,10 @@
                             </td>
                         </tr>
                         @endif
-                    @endforeach
+                        @endforeach
+                    @endif
+                    @php $flag = collect($debitos)->contains('clientId', $client->id); @endphp
+                    @if($flag)
                      <tr>
                         <th colspan="5" style="width: 100%;" class="text-center">Notas de debito</th>
                     </tr>
@@ -144,7 +190,8 @@
                             </td>
                         </tr>
                         @endif
-                    @endforeach
+                        @endforeach
+                    @endif  
                 </table>
             </div>
         @endforeach

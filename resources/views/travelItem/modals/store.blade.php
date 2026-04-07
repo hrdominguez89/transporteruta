@@ -29,6 +29,7 @@
             <option value="PALLET">Pallet</option>
             <option value="BULTO">Bulto</option>
             <option value="ESTADIA">Estadia</option>
+            <option value="NOCHE">Noche</option>
           </select>
 
           {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
@@ -292,6 +293,7 @@
         text("calculoPorcentaje", ""); text("preview_descuento", "");
         break;
       case 'BULTO':
+      case 'NOCHE':
         show("price_div");      req("price");
         show("unidad_div");      req("unidad");
         hide("description_div");
@@ -304,6 +306,7 @@
         text("textoPrecio", "Precio por bulto");
         text("calculoPorcentaje", ""); text("preview_descuento", "");
         break;
+        
         case 'ESTADIA':
         show("price_div");      req("price");
         show("unidad_div");      req("unidad");

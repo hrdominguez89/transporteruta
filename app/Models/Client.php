@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\TravelCertificate;
 use App\Models\Invoice;
 use App\Models\Credit;
+use PhpParser\Node\Expr\Cast\Double;
 
 class Client extends Model
 {
@@ -36,5 +37,10 @@ class Client extends Model
     public function debits()
     {
         return $this->hasMany(Debit::class, 'clientId');
+    }
+    public function saldoAFavor():float
+    {
+        $saldo =  Payments::where('clientId',$this->id)->where('balance','>',0)->sum('balance');
+        return $saldo;
     }
 }

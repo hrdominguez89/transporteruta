@@ -7,6 +7,8 @@ use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\Credit;
 use App\Models\Debit;
+use App\Models\Payments;
+use App\Models\Receipt;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClientController extends Controller
@@ -56,6 +58,7 @@ class ClientController extends Controller
         $saldos = [];
         $creditos= [];
         $debitos= [];
+        $recibos = [];
         foreach ($clients as $client) {
             $saldos[$client->id] = 0;
             foreach ($client->invoices as $invoice) {
@@ -69,6 +72,12 @@ class ClientController extends Controller
                     ->where('clientId',$client->id)
                     ->with('invoice')->get();
                     $debitos = array_merge($debitos, $debits->toArray());
+                    $receipts = $invoice->misrecibos;
+                    foreach ($receipts as $receipt) {
+                        $receiptArray = $receipt->toArray();
+                        $receiptArray['invoice'] = ['number' => $invoice->number];
+                        $recibos[] = $receiptArray;
+                    }
                 }
             }
         }
@@ -80,7 +89,10 @@ class ClientController extends Controller
             'date'    => $date,
             'saldos'  => $saldos,
             'creditos'=>$creditos,
-            'debitos' =>$debitos]);
+            'debitos' =>$debitos,
+            'recibos' => $recibos
+
+        ]);
         $pdf->setPaper('A4', 'portrait');
 
         return $pdf->stream('Reporte-cuenta-corriente-general.pdf');
