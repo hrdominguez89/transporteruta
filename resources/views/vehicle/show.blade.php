@@ -60,12 +60,18 @@
         <thead class="bg-danger">
             <tr>
                 <th>Recaudacion</th>
+                <th>Porcentaje correspondiente al peaje</th>
                 <th>Peajes</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>{{ $recaudacion ?? "-" }}</td>
+                <td>
+                    @if($peajes > 0)
+                        {{ round((100 * $peajes) / $recaudacion, 2) }} %
+                    @endif
+                </td>
                 <td>{{ $peajes ?? "-" }}</td>
             </tr>
         </tbody>
