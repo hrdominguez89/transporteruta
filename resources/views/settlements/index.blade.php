@@ -219,7 +219,10 @@
                 a.click();
                 URL.revokeObjectURL(url);
             })
-            .catch(err => alert(err.message));
+            .catch(err => {
+    console.error(err.message); // ver en consola el detalle real
+    alert('Error: ' + err.message);
+});
         });
     </script>
 @stop
