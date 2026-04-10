@@ -79,6 +79,7 @@
                             <th>Cliente</th>
                             <th>Chofer porcentaje</th>
                             <th>Importe neto</th>
+                            <th>Recaudacion</th>
                             <th>Peajes</th>
                             <th>Carg/Des(B)</th>
                             <th>Carg/Des(N)</th>
@@ -96,6 +97,7 @@
                                 <td>{{ $tc['client']['name'] }}</td>
                                 <td>{{ number_format($tc['driver']['percent'], 2, ',', '.') }}%</td>
                                 <td>{{ $tc['subtotal_sin_peajes'] }}</td>
+                                <td>{{ $tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] -$tc['totalNocheB'] }}</td>
                                 <td>{{ $tc['total_peajes'] }}</td>
                                 <td>
                                     <input
@@ -142,7 +144,7 @@
                                     >
                                 </td>
                                 <td>{{ ($tc['driver']['percent'] / 100) * $tc['subtotal_sin_peajes'] }}</td>
-                                <td>{{ ($tc['subtotal_sin_peajes'] * 0.25) - (($tc['driver']['percent'] / 100) * $tc['subtotal_sin_peajes']) }}</td>
+                                <td>{{ ( ($tc['subtotal_sin_peajes'] - $tc['cargaDescargaNocheB'])* 0.25) - (($tc['driver']['percent'] / 100) * $tc['subtotal_sin_peajes']) }}</td>
                             </tr>
                         @endforeach
                     </tbody>

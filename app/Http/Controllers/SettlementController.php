@@ -248,7 +248,8 @@ class SettlementController extends Controller
             'totalcargadescargaB' => $tc->total_carga_descarga,
             'totalcargadescargaN' => 0,
             'totalNocheB'         => $tc->total_noche,
-            'totalNocheN'         => 0
+            'totalNocheN'         => 0,
+            'cargaDescargaNocheB' => $tc->total_noche + $tc->total_carga_descarga,
         ])->all()
     )->all();
 }
