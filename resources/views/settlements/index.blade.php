@@ -79,24 +79,45 @@
                             <th>Cliente</th>
                             <th>Chofer porcentaje</th>
                             <th>Importe neto</th>
+                            <th>Recaudacion</th>
                             <th>Peajes</th>
-                            <th>Carg/Des(B)</th>
-                            <th>Carg/Des(N)</th>
-                            <th>Noche(B)</th>
-                            <th>Noche(N)</th>
+                            <th>Carga (B)</th>
+                            <th>Noche (B)</th>
+                            <th>Noche (N)</th>
+                            <th>Carga (N)</th>
+                            <th>Chofer carg/Des(B)</th>
+                            <th>Chofer carg/Des(N)</th>
+                            <th>Chofer noche(B)</th>
+                            <th>Chofer noche(N)</th>
                             <th>Chofer(total)</th>
                             <th>Diferencia</th>
+                            <th>Comentarios</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($semanas[$s] ?? [] as $tc)
                             <tr>
                                 <td>{{ $tc['date'] }}</td>
-                                <td>{{ $tc['number'] }}</td>
+                                <td>
+                                    <a href="{{ Route('showTravelCertificate', $tc['id'] ) }}">
+                                    {{  $tc['id']}}
+                                    </a>
+                                </td>
                                 <td>{{ $tc['client']['name'] }}</td>
-                                <td>{{ number_format($tc['driver']['percent'], 2, ',', '.') }}%</td>
+                                <td>
+                                    @if($driver->type == 'PROPIO')
+                                    25 %
+                                    @else
+                                    20 %
+                                    @endif
+                                </td>
                                 <td>{{ $tc['subtotal_sin_peajes'] }}</td>
+                                <td>{{ $tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] -$tc['totalNocheB'] }}</td>
                                 <td>{{ $tc['total_peajes'] }}</td>
+                                <td>{{ $tc['totalcargadescargaB'] }}</td>
+                                <td>{{ $tc['totalNocheB'] }}</td>
+                                <td>{{ $tc['totalNocheB'] }}</td>
+                                <td>{{ $tc['totalcargadescargaB'] }}</td>
                                 <td>
                                     <input
                                         type="number"
@@ -142,7 +163,17 @@
                                     >
                                 </td>
                                 <td>{{ ($tc['driver']['percent'] / 100) * $tc['subtotal_sin_peajes'] }}</td>
-                                <td>{{ ($tc['subtotal_sin_peajes'] * 0.25) - (($tc['driver']['percent'] / 100) * $tc['subtotal_sin_peajes']) }}</td>
+                                <td>{{ ( ($tc['subtotal_sin_peajes'] - $tc['cargaDescargaNocheB'])* 0.25) - (0.25) *  ($tc['subtotal_sin_peajes'] - $tc['cargaDescargaNocheB']) }}</td>
+                              <td>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-sm input-editable"
+                                    data-field="comentarios"
+                                    data-semana="{{ $s }}"
+                                    data-id="{{ $tc['id'] }}"
+                                    value="{{ $tc['comentarios'] ?? '' }}"
+                                >
+                            </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -167,7 +198,8 @@
         $(document).on('change', '.input-editable', function () {
             const id    = $(this).data('id');
             const field = $(this).data('field');
-            const valor = parseFloat($(this).val()) || 0;
+            const raw   = $(this).val();
+            const valor = $(this).attr('type') === 'text' ? raw : (parseFloat(raw) || 0);
 
             if (estado[id] !== undefined) {
                 estado[id][field] = valor;
@@ -176,6 +208,7 @@
 
         $(document).ready(function () {
             $('.data-table').DataTable({
+                'scrollX': true ,
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json' }
             });
         });
@@ -217,7 +250,10 @@
                 a.click();
                 URL.revokeObjectURL(url);
             })
-            .catch(err => alert(err.message));
+            .catch(err => {
+                console.error(err.message); // ver en consola el detalle real
+                alert('Error: ' + err.message);
+            });
         });
     </script>
 @stop

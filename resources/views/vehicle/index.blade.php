@@ -24,6 +24,7 @@
                     <td>{{ $vehicle->name }}</td>
                     <td>
                         <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#updateModal{{ $vehicle->id }}">Editar</button>
+                        <a class="btn btn-sm btn-info" href="{{ Route('showVehicle',$vehicle->id) }}">Ver</a>
                     </td>
                 </tr>
                 @include('vehicle.modals.update')

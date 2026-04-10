@@ -79,6 +79,7 @@ class SettlementController extends Controller
                                 'Carg/Desc(B)',
                                 'Carg/Desc(N)',
                                 'Diferencia',
+                                'Comentarios'
                             ];
                         }
 
@@ -102,6 +103,7 @@ class SettlementController extends Controller
                                     $tc['totalcargadescargaB'],
                                     $tc['totalcargadescargaN'],
                                     $diferencia,
+                                    $tc['comentarios']
                                 ];
                             }
                             return $rows;
@@ -109,7 +111,7 @@ class SettlementController extends Controller
 
                         public function styles(Worksheet $sheet): void
                         {
-                            $sheet->getStyle('A1:J1')->applyFromArray([
+                            $sheet->getStyle('A1:K1')->applyFromArray([
                                 'fill' => [
                                     'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                     'startColor' => ['rgb' => 'FFCCCC'],
@@ -140,10 +142,15 @@ class SettlementController extends Controller
                             'Constancias',
                             'Peajes',
                             'Diferencia',
-                            'Carg/desc(B)',
-                            'Carg/desc(N)',
-                            'Noche(B)',
-                            'Noche(N)'
+                            'Chofer  Carg/desc(B)',
+                            'Chofer Carg/desc(N)',
+                            'Chofer  Noche(B)',
+                            'Chofer Noche(N)',
+                            "Noche N",
+                            "Noche B",
+                            "Carga N",
+                            "Carga B"
+
                         ];
                     }
 
@@ -160,9 +167,9 @@ class SettlementController extends Controller
 
                         foreach ($this->semanas as $viajes) {
                             foreach ($viajes as $tc) {
-                                $subtotal         = $tc['subtotal_sin_peajes'];
-                                $pct              = $tc['driver']['percent'] / 100;
-                                $choferTotal      = round($pct * $subtotal, 2);
+                                $subtotal         = $tc['subtotal_sin_peajes'] - $tc['cargaDescargaNocheB'];
+                                // $pct              = $tc['driver']['percent'] / 100;
+                                $choferTotal      = round(0.25 * $subtotal, 2);
 
                                 $totalConstancias += $subtotal;
                                 $totalPeajes      += $tc['total_peajes'];
@@ -183,13 +190,17 @@ class SettlementController extends Controller
                             $totalCargDesB,
                             $totalCargDesN,
                             $totalNocheB,    
-                            $totalNocheN  
+                            $totalNocheN,
+                            $totalNocheN,
+                            $totalNocheB,
+                            $totalCargDesN,
+                            $totalCargDesB
                         ]];
                     }
 
                     public function styles(Worksheet $sheet): void
                     {
-                        $sheet->getStyle('A1:H1')->applyFromArray([
+                        $sheet->getStyle('A1:L1')->applyFromArray([
                             'fill' => [
                                 'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FFCCCC'],
@@ -248,7 +259,10 @@ class SettlementController extends Controller
             'totalcargadescargaB' => $tc->total_carga_descarga,
             'totalcargadescargaN' => 0,
             'totalNocheB'         => $tc->total_noche,
-            'totalNocheN'         => 0
+            'totalNocheN'         => 0,
+            'cargaDescargaNocheB' => $tc->total_noche + $tc->total_carga_descarga,
+            'comentarios'         => $tc->comentarios ?? '',
+
         ])->all()
     )->all();
 }
