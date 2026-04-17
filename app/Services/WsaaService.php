@@ -20,7 +20,6 @@ class WsaaService
         $this->certPath = base_path(config('afip.cert_path'));
         $this->keyPath  = base_path(config('afip.key_path'));
         $this->wsdl     = config('afip.wsaa_wsdl');
-        // $this->service  = 'wsfe';
         $this->cuit     = (int) config('afip.cuit');
     }
 
@@ -57,43 +56,37 @@ class WsaaService
 
     private function signTra(string $tra): string
     {
-        $traFile  = tempnam(sys_get_temp_dir(), 'tra');
-        $cmsFile  = tempnam(sys_get_temp_dir(), 'cms');
+        $traFile = tempnam(sys_get_temp_dir(), 'tra');
+        $cmsFile = tempnam(sys_get_temp_dir(), 'cms');
 
         file_put_contents($traFile, $tra);
 
-        $signed = openssl_pkcs7_sign(
-            $traFile,
-            $cmsFile,
-            'file://' . $this->certPath,
-            ['file://' . $this->keyPath, ''],
-            [],
-            PKCS7_BINARY | PKCS7_NOCERTS
-        );
-
-        if (!$signed) {
-            unlink($traFile);
-            unlink($cmsFile);
-            throw new Exception('Error al firmar el TRA: ' . openssl_error_string());
-        }
-
+        // $signed = openssl_pkcs7_sign(
+        //     $traFile,
+        //     $cmsFile,
+        //     'file://' . $this->certPath,
+        //     ['file://' . $this->keyPath, ''],
+        //     [],
+        //         PKCS7_BINARY
+        // );
         $cms = file_get_contents($cmsFile);
 
         unlink($traFile);
         unlink($cmsFile);
 
-        // El SoapClient necesita solo el bloque base64, sin headers MIME
-        $parts = explode("\n\n", $cms);
-        return trim(end($parts));
+        $cms   = str_replace("\r\n", "\n", $cms);
+        $parts = array_filter(explode("\n\n", $cms));
+        $base64 = trim(end($parts));
+        
+        return str_replace("\n", "", $base64);
     }
-
     private function callWsaa(string $cms): string
     {
         try {
             $client = new SoapClient($this->wsdl, [
                 'soap_version' => SOAP_1_1,
                 'exceptions'   => true,
-                'trace'        => config('app.debug'),
+                'trace'        => true,
             ]);
 
             $result = $client->loginCms(['in0' => $cms]);
@@ -104,7 +97,6 @@ class WsaaService
             throw new Exception('Error SOAP al llamar al WSAA: ' . $e->getMessage());
         }
     }
-
     private function parseResponse(string $xml): array
     {
         $ta = simplexml_load_string($xml);
