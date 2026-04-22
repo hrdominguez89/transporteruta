@@ -333,7 +333,7 @@ return [
             'icon' => 'fas fa-money-check-alt',
         ],
         [
-            'text' => 'Liquidaciones',
+            'text' => 'Liquidacion de sueldo',
             'url'  => 'liquidaciones',
             'icon' => 'fas fa-money-check-alt',
         ],
