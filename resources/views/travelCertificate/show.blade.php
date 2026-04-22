@@ -25,20 +25,18 @@
 
         @if ($travelCertificate->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-danger col-2 mr-2" data-toggle="modal" data-target="#storeModal">
+                <button class="btn btn-sm btn-danger col-1 mr-2" data-toggle="modal" data-target="#storeModal">
                     Agregar Nuevo Item
                 </button>
-
-                {{-- NUEVO (10/2025): botón para carga MÚLTIPLE de remitos (no afectan importes) --}}
-                <button class="btn btn-sm btn-primary col-2 mr-2" data-toggle="modal" data-target="#remitosMultipleModal">
+                
+                <button class="btn btn-sm btn-primary col-1 mr-2" data-toggle="modal" data-target="#remitosMultipleModal">
                     Cargar Remitos
                 </button>
-
-                <button class="btn btn-sm btn-success col-2" data-toggle="modal"
+                <button class="btn btn-sm btn-success col-1" data-toggle="modal"
                     data-target="#updateModal{{ $travelCertificate->id }}">Actualizar Constancia</button>
             </div>
             <div class="col-12 text-right mb-2">
-                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">
+                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-2">
                     Generar PDF
                 </a>
             </div>

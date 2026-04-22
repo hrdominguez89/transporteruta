@@ -4,12 +4,12 @@
 
 @section('content_header')
     <div class="row">
-        <h1 class="col-10">Liquidaciones</h1>
+        <h1 class="col-10">Liquidacion de sueldo</h1>
     </div>
 @stop
 
 @section('content')
-    <form method="GET" action="{{ route('Settlements') }}">
+    <form method="GET" action="{{ route('Settlements') }}" id="formId">
         <div class="container-fluid mb-3">
             <div class="row align-items-end">
                 <div class="col-md-2">
@@ -71,7 +71,7 @@
             <div class="carousel-item {{ $s === 1 ? 'active' : '' }}" style="transition: 0.3s">
                 <br>
                 <h4>Semana {{ $s }}</h4>
-                <table class="table table-sm table-bordered text-center data-table">
+                <table class="table table-sm table-bordered text-center data-table" >
                     <thead>
                         <tr>
                             <th>Fecha</th>
@@ -79,15 +79,16 @@
                             <th>Cliente</th>
                             <th>Chofer porcentaje</th>
                             <th>Importe neto</th>
-                            <th>Recaudacion</th>
+                            <th>Base recaudacion</th>
                             <th>Peajes</th>
-                            <th>Carga (B)</th>
+                            <th>Estacionamiento</th>
+                            <th>Carg/Des (B)</th>
                             <th>Noche (B)</th>
                             <th>Noche (N)</th>
                             <th>Carga (N)</th>
-                            <th>Chofer carg/Des(B)</th>
+                            {{-- <th>Chofer carg/Des(B)</th> --}}
                             <th>Chofer carg/Des(N)</th>
-                            <th>Chofer noche(B)</th>
+                            {{-- <th>Chofer noche(B)</th> --}}
                             <th>Chofer noche(N)</th>
                             <th>Chofer(total)</th>
                             <th>Diferencia</th>
@@ -97,60 +98,68 @@
                     <tbody>
                         @foreach ($semanas[$s] ?? [] as $tc)
                             <tr>
+                                {{-- Fecha --}}
                                 <td>{{ $tc['date'] }}</td>
+                                {{-- N° constancia --}}
                                 <td>
                                     <a href="{{ Route('showTravelCertificate', $tc['id'] ) }}">
                                     {{  $tc['id']}}
                                     </a>
                                 </td>
+                                {{-- Cliente --}}
                                 <td>{{ $tc['client']['name'] }}</td>
-                                <td>
-                                    @if($driver->type == 'PROPIO')
-                                    25 %
-                                    @else
-                                    20 %
-                                    @endif
-                                </td>
-                                <td>{{ $tc['subtotal_sin_peajes'] }}</td>
-                                <td>{{ $tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] -$tc['totalNocheB'] }}</td>
-                                <td>{{ $tc['total_peajes'] }}</td>
-                                <td>{{ $tc['totalcargadescargaB'] }}</td>
-                                <td>{{ $tc['totalNocheB'] }}</td>
-                                <td>{{ $tc['totalNocheB'] }}</td>
-                                <td>{{ $tc['totalcargadescargaB'] }}</td>
+                                {{-- Chofer porcentaje --}}
                                 <td>
                                     <input
-                                        type="number"
+                                        id="driverpercent-{{ $tc['id'] }}"
                                         step="0.01"
                                         class="form-control form-control-sm input-editable"
-                                        data-field="totalcargadescargaB"
+                                        data-field="driverpercent"
                                         data-semana="{{ $s }}"
-                                        data-id="{{ $tc['id'] }}"
-                                        value="{{ $tc['totalcargadescargaB'] }}"
+                                        data-id="{{ $tc["id"] }}"
+                                        value="{{ number_format($tc["driver"]["percent"],2) }}"
                                     >
                                 </td>
+                                {{-- Importe neto --}}
+                                <td>{{ $tc['subtotal_sin_peajes'] }}</td>
+                                
+                                {{-- Base recaudacion --}}
                                 <td>
                                     <input
-                                        type="number"
+                                        id="baseRecaudacion-{{ $tc['id'] }}"
                                         step="0.01"
+                                        class="form-control form-control-sm input-editable"
+                                        data-field="baseRecaudacion"
+                                        data-semana="{{ $s }}"
+                                        data-id="{{ $tc["id"] }}"
+                                        value="{{  $tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] -$tc['totalNocheB'] }}"
+                                    >
+                                </td>
+                                {{-- Peajes --}}
+                                <td>{{ $tc['total_peajes'] }}</td>
+                                {{-- -estacionamiento --}}
+                                <td>{{ $tc['estacionamiento'] }}</td>
+                                {{-- Carg/Des (B) --}}
+                                <td>{{ $tc['totalcargadescargaB'] }}</td>
+                                {{-- Noche (B) --}}
+                                <td>{{ $tc['totalNocheB'] }}</td>
+                                {{-- Noche (N) --}}
+                                <td>{{ $tc['totalNocheN'] }}</td>
+                                {{-- Carga (N) --}}
+                                <td>{{ $tc['totalcargadescargaN'] }}</td>
+                                {{-- Chofer carg/Des(N) --}}
+                                <td>
+                                    <input
+                                        
+                                        type="number"
                                         class="form-control form-control-sm input-editable"
                                         data-field="totalcargadescargaN"
                                         data-semana="{{ $s }}"
                                         data-id="{{ $tc['id'] }}"
-                                        value="{{ $tc['totalcargadescargaN'] }}"
+                                        value="{{ $tc['totalcargadescargaN']  * 0.75}}"
                                     >
                                 </td>
-                                <td>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        class="form-control form-control-sm input-editable"
-                                        data-field="totalNocheB"
-                                        data-semana="{{ $s }}"
-                                        data-id="{{ $tc['id'] }}"
-                                        value="{{ $tc['totalNocheB'] }}"
-                                    >
-                                </td>
+                                {{-- Chofer noche(N) --}}
                                 <td>
                                     <input
                                         type="number"
@@ -159,21 +168,24 @@
                                         data-field="totalNocheN"
                                         data-semana="{{ $s }}"
                                         data-id="{{ $tc['id'] }}"
-                                        value="{{ $tc['totalNocheN'] }}"
+                                        value="{{ $tc['totalNocheN'] * 0.75}}"
                                     >
                                 </td>
-                                <td>{{ ($tc['driver']['percent'] / 100) * $tc['subtotal_sin_peajes'] }}</td>
-                                <td>{{ ( ($tc['subtotal_sin_peajes'] - $tc['cargaDescargaNocheB'])* 0.25) - (0.25) *  ($tc['subtotal_sin_peajes'] - $tc['cargaDescargaNocheB']) }}</td>
-                              <td>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm input-editable"
-                                    data-field="comentarios"
-                                    data-semana="{{ $s }}"
-                                    data-id="{{ $tc['id'] }}"
-                                    value="{{ $tc['comentarios'] ?? '' }}"
-                                >
-                            </td>
+                                {{-- Chofer(total) --}}
+                                <td data-cell="choferTotal">{{ number_format(($tc['driver']['percent'] / 100) * ($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB']), 2) }}</td>
+                                {{-- Diferencia --}}
+                                <td data-cell="diferencia">{{ number_format((($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB']) * 0.25) - (($tc['driver']['percent'] / 100) * ($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB'])), 2) }}</td>
+                                {{-- Comentarios --}}
+                                <td>
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-sm input-editable"
+                                        data-field="comentarios"
+                                        data-semana="{{ $s }}"
+                                        data-id="{{ $tc['id'] }}"
+                                        value="{{ $tc['comentarios'] ?? '' }}"
+                                    >
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -185,9 +197,65 @@
 @stop
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
     <script>
-        const estadoOriginal = @json($semanas);
+        $('#miCarrusel').on('slid.bs.carousel', function () {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+        document.addEventListener('input', function (e) {
+            if (!e.target.matches('.input-editable[data-field="driverpercent"], .input-editable[data-field="baseRecaudacion"]')) return;
 
+            const row     = e.target.closest('tr');
+            const percent = parseFloat(row.querySelector('[data-field="driverpercent"]').value) || 0;
+            const base    = parseFloat(row.querySelector('[data-field="baseRecaudacion"]').value) || 0;
+
+            const choferTotal = base * (percent / 100);
+            const diferencia  = (base * 0.25) - choferTotal;
+
+            const fmt = n => n.toFixed(2);
+
+            row.querySelector('[data-cell="choferTotal"]').textContent = fmt(choferTotal);
+            row.querySelector('[data-cell="diferencia"]').textContent  = fmt(diferencia);
+        });
+        function validarMismoMesYAnio(fecha1, fecha2) {
+            const [anio1, mes1] = fecha1.split('-');
+            const [anio2, mes2] = fecha2.split('-');
+            return anio1 === anio2 && mes1 === mes2;
+        }
+        function manejarValidacionFechas() {
+            const desde = document.getElementById('desde').value;
+            const hasta = document.getElementById('hasta').value;
+            if (!desde || !hasta) {
+                return false;
+            }
+            if (!validarMismoMesYAnio(desde, hasta)) {
+                 Swal.fire({
+                    icon: 'warning',
+                    title: 'Fechas inválidas',
+                    text: 'Las fechas deben pertenecer al mismo mes y año.',
+                    confirmButtonText: 'Aceptar'
+                });
+                return false;
+            }
+            return true;
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputDesde = document.getElementById('desde');
+            const inputHasta = document.getElementById('hasta');
+            const form = document.getElementById('formId'); // <-- reemplazar por el ID real del form
+            inputDesde.addEventListener('change', manejarValidacionFechas);
+            inputHasta.addEventListener('change', manejarValidacionFechas);
+            form.addEventListener('submit', function (e) {
+                if (!manejarValidacionFechas()) {
+                    e.preventDefault();
+                }
+            });
+        });
+        const estadoOriginal = @json($semanas);
         const estado = {};
         Object.entries(estadoOriginal).forEach(([semana, viajes]) => {
             viajes.forEach(viaje => {
@@ -207,8 +275,10 @@
         });
 
         $(document).ready(function () {
-            $('.data-table').DataTable({
-                'scrollX': true ,
+           $('.data-table').DataTable({
+                'scrollX': true,
+                dom: 'Bfrtip',
+                buttons: ['colvis'],
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json' }
             });
         });
@@ -222,38 +292,89 @@
         });
         $('#desde, #hasta').prop('disabled', true);
 
+    
         $('#btn-excel').on('click', function () {
-            const payload = {};
-            Object.values(estado).forEach(viaje => {
-                const s = viaje.semana;
-                if (!payload[s]) payload[s] = [];
-                payload[s].push(viaje);
-            });
+        const payload = {};
 
-            fetch('{{ route('SettlementsExcel') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ semanas: payload })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Error al generar el Excel.');
-                return res.blob();
-            })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a   = document.createElement('a');
-                a.href    = url;
-                a.download = 'liquidacion.xlsx';
-                a.click();
-                URL.revokeObjectURL(url);
-            })
-            .catch(err => {
-                console.error(err.message); // ver en consola el detalle real
-                alert('Error: ' + err.message);
+        $.fn.dataTable.tables().forEach(function (tableNode, idx) {
+            const dt = $(tableNode).DataTable();
+            const semana = idx + 1;
+        payload[semana] = [];
+
+        dt.rows().every(function () {
+            const tr = this.node();
+
+            const getInput = field => {
+                const el = tr.querySelector(`[data-field="${field}"]`);
+                if (!el) return null;
+                return el.type === 'text' ? el.value : (parseFloat(el.value) || 0);
+            };
+            const getCell = cell => {
+                const el = tr.querySelector(`[data-cell="${cell}"]`);
+                if (!el) return 0;
+                const limpio = el.textContent.trim().replace(/\./g, '').replace(',', '.');
+                return parseFloat(limpio) || 0;
+            };
+            const getTd = i => {
+                const td = tr.children[i];
+                return td ? td.textContent.trim() : '';
+            };
+            const parseNum = txt => {
+                const limpio = String(txt).trim().replace(/\./g, '').replace(',', '.');
+                return parseFloat(limpio) || 0;
+            };
+
+            const id = tr.querySelector('[data-id]')?.dataset.id;
+            if (!id) return;
+
+            payload[semana].push({
+                id:                  parseInt(id),
+                date:                getTd(0),
+                number:              getTd(1),
+                cliente:             getTd(2),
+                driverpercent:       getInput('driverpercent'),
+                importe_neto:        parseNum(getTd(4)),
+                baseRecaudacion:     getInput('baseRecaudacion'),
+                total_peajes:        parseNum(getTd(6)),
+                estacionamiento:     parseNum(getTd(7)),
+                totalcargadescargaB: parseNum(getTd(8)),
+                totalNocheB:         parseNum(getTd(9)),
+                totalNocheN:         parseNum(getTd(10)),
+                totalcargadescargaN: parseNum(getTd(11)),
+                choferCargDescN:     getInput('totalcargadescargaN'),
+                choferNocheN:        getInput('totalNocheN'),
+                choferTotal:         getCell('choferTotal'),
+                diferencia:          getCell('diferencia'),
+                comentarios:         getInput('comentarios'),
             });
         });
+    });
+
+
+    fetch('{{ route('SettlementsExcel') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ semanas: payload })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Error al generar el Excel.');
+        return res.blob();
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href    = url;
+        a.download = 'liquidacion.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        console.error(err.message);
+        alert('Error: ' + err.message);
+    });
+});
     </script>
 @stop
