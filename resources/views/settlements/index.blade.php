@@ -86,9 +86,9 @@
                             <th>Noche (B)</th>
                             <th>Noche (N)</th>
                             <th>Carga (N)</th>
-                            {{-- <th>Chofer carg/Des(B)</th> --}}
+                            {{-- <th>Chofer recaudacion N </th> --}}
                             <th>Chofer carg/Des(N)</th>
-                            {{-- <th>Chofer noche(B)</th> --}}
+                            {{-- <th>Base de recaudacion N(B)</th> --}}
                             <th>Chofer noche(N)</th>
                             <th>Chofer(total)</th>
                             <th>Diferencia</th>
@@ -132,8 +132,8 @@
                                         data-field="baseRecaudacion"
                                         data-semana="{{ $s }}"
                                         data-id="{{ $tc["id"] }}"
-                                        value="{{  $tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] -$tc['totalNocheB'] }}"
-                                    >
+                                        value="{{  $tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] -$tc['totalNocheB'] }}" 
+                                    > {{-- aca restar las cargas en N y noches en N  --}}
                                 </td>
                                 {{-- Peajes --}}
                                 <td>{{ $tc['total_peajes'] }}</td>
@@ -173,7 +173,7 @@
                                 </td>
                                 {{-- Chofer(total) --}}
                                 <td data-cell="choferTotal">{{ number_format(($tc['driver']['percent'] / 100) * ($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB']), 2) }}</td>
-                                {{-- Diferencia --}}
+                                {{-- Diferencia se restan todas las noches y las descargas --}}
                                 <td data-cell="diferencia">{{ number_format((($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB']) * 0.25) - (($tc['driver']['percent'] / 100) * ($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB'])), 2) }}</td>
                                 {{-- Comentarios --}}
                                 <td>
