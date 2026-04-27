@@ -158,8 +158,9 @@ class SettlementController extends Controller
                                 "Noche N total",
                                 "Noche B total",
                                 "Carga N total",
-                                "Carga B total"
-
+                                "Carga B total",
+                                "Base recaudacion N",
+                                "Chofer recaudacion N"
                             ];
                         }
 
@@ -175,6 +176,8 @@ class SettlementController extends Controller
                             $nochent          = 0;
                             $cargabt          = 0;
                             $cargant          = 0;
+                            $baseRecN          = 0;
+                            $chofRecN          = 0;
 
                             foreach ($this->semanas as $viajes) {
                                 foreach ($viajes as $tc) {
@@ -189,6 +192,8 @@ class SettlementController extends Controller
                                     $nochent          += $tc['totalNocheN'];
                                     $cargabt          += $tc['totalcargadescargaB'];
                                     $cargant          += $tc['totalcargadescargaN'];
+                                    $baseRecN          += $tc['baseRecaudacionN'];
+                                    $chofRecN          += $tc['choferRecaudacion'];
                     
                                 }
                             }
@@ -204,6 +209,8 @@ class SettlementController extends Controller
                             $nochent        ,
                             $cargabt        ,
                             $cargant        ,
+                            $baseRecN       ,
+                            $chofRecN
                             ]];
                         }
 

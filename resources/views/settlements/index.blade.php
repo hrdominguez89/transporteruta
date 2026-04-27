@@ -372,6 +372,8 @@
                 choferCargDescN:     getInput('totalcargadescargaN'),
                 choferNocheN:        getInput('totalNocheN'),
                 choferTotal:         getCell('choferTotal'),
+                baseRecaudacionN:    getInput('baseRecaudacionN'),
+                choferRecaudacion:   getInput('choferRecaudacion') ,
                 diferencia:          getCell('diferencia'),
                 comentarios:         getInput('comentarios'),
             });
