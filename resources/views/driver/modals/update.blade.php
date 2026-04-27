@@ -14,7 +14,7 @@
             <label for="name">Nombre:<span class="text-danger"> *</span></label>
             <input id="name" type="text" name="name" class="form-control mb-2" placeholder="Ingrese el nombre..." value="{{ $driver->name }}" required>
             <label for="dni">DNI/CUIT:<span class="text-danger"> *</span></label>
-            <input id="dni" type="text" name="dni" class="form-control mb-2" placeholder="Ingrese el DNI/CUIT..." value="{{ $driver->dni }}" required>
+            <input id="dni" type="text" name="dni" class="form-control mb-2" placeholder="Ingrese el DNI/CUIT..." value="{{ $driver->dni }}">
             <label for="address">Direccion:<span class="text-danger"> *</span></label>
             <input id="address" type="text" name="address" class="form-control mb-2" placeholder="Ingrese la direccion..." value="{{ $driver->address }}" required>
             <label for="city">Ciudad:<span class="text-danger"> *</span></label>
@@ -26,7 +26,7 @@
                 <option value="PROPIO" {{ $driver->type == 'PROPIO' ?'selected':'' }}>Propio</option>
                 <option value="TERCERO" {{ $driver->type == 'TERCERO' ?'selected':'' }}>Tercero</option>
             </select>
-            <div id="porcentaje_div" style="display: {{ $driver->type == 'TERCERO' ?'block':'none' }}">
+            {{-- <div id="porcentaje_div" style="display: {{ $driver->type == 'TERCERO' ?'block':'none' }}"> --}}
                 <label for="porcentaje">Porcentaje de la Agencia:<span class="text-danger"> *</span></label>
                 <input id="porcentaje" 
                   type="number" 
@@ -38,7 +38,7 @@
                   placeholder="Ingrese el porcentaje de la agencia..." 
                   value="{{ $driver->percent }}" 
                   {{ $driver->type == 'TERCERO' ? 'required' : '' }}>
-            </div>
+            {{-- </div> --}}
             <div id="hab_eve_div" style="display: {{ $driver->type == 'TERCERO' ? 'block' : 'none' }}">
             <label for="hab_ev">Habitual / Eventual<span class="text-danger"> *</span></label>
             <select id="hab_ev" name="hab_ev" class="form-control">

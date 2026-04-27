@@ -84,6 +84,8 @@ class SettlementController extends Controller
                                     'Noche N',
                                     'Chofer c/d N',
                                     'Chofer n N',
+                                    'Base recaudacion N',
+                                    'Chofer N',
                                     'Diferencia',
                                     'Comentarios'
                                 ];
@@ -109,6 +111,8 @@ class SettlementController extends Controller
                                         $tc['totalNocheN'],
                                         $tc['choferCargDescN'],
                                         $tc['choferNocheN'],
+                                        $tc['baseRecaudacionN'],
+                                        $tc['choferRecaudacion'],
                                         $tc['diferencia'],
                                         $tc['comentarios']
                                     ];
@@ -154,8 +158,9 @@ class SettlementController extends Controller
                                 "Noche N total",
                                 "Noche B total",
                                 "Carga N total",
-                                "Carga B total"
-
+                                "Carga B total",
+                                "Base recaudacion N",
+                                "Chofer recaudacion N"
                             ];
                         }
 
@@ -171,6 +176,8 @@ class SettlementController extends Controller
                             $nochent          = 0;
                             $cargabt          = 0;
                             $cargant          = 0;
+                            $baseRecN          = 0;
+                            $chofRecN          = 0;
 
                             foreach ($this->semanas as $viajes) {
                                 foreach ($viajes as $tc) {
@@ -185,6 +192,8 @@ class SettlementController extends Controller
                                     $nochent          += $tc['totalNocheN'];
                                     $cargabt          += $tc['totalcargadescargaB'];
                                     $cargant          += $tc['totalcargadescargaN'];
+                                    $baseRecN          += $tc['baseRecaudacionN'];
+                                    $chofRecN          += $tc['choferRecaudacion'];
                     
                                 }
                             }
@@ -200,6 +209,8 @@ class SettlementController extends Controller
                             $nochent        ,
                             $cargabt        ,
                             $cargant        ,
+                            $baseRecN       ,
+                            $chofRecN
                             ]];
                         }
 
@@ -285,7 +296,9 @@ class SettlementController extends Controller
                 'totalNocheN'         => $flag ? 0 : $tc->total_noche,
                 'cargaDescargaNocheB' => $tc->total_noche + $tc->total_carga_descarga,
                 'comentarios'         => $tc->comentarios ?? '',
-                'estacionamiento'     => $tc->total_estacionamiento
+                'estacionamiento'     => $tc->total_estacionamiento,
+                'baseRecaudacionN'    => 0,
+                'choferRecaudacion'   => 0,
             ];
 
             if ($tc->total_carga_descarga > 0 || $tc->total_noche > 0) {
