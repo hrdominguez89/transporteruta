@@ -23,7 +23,7 @@ class UpdateDriverRequest extends FormRequest
     {
         return [
             'name'      => ['required','string','max:191'],
-            'dni'       => ['required','string','max:191'],
+            // 'dni'       => ['required','string','max:191'],
             'address'   => ['required','string','max:191'],
             'city'      => ['required','string','max:191'],
             'phone'     => ['required','string','max:191'],
