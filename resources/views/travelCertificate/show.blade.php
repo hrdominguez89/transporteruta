@@ -25,21 +25,23 @@
 
         @if ($travelCertificate->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-danger col-1 mr-2" data-toggle="modal" data-target="#storeModal">
-                    Agregar Nuevo Item
-                </button>
-                
-                <button class="btn btn-sm btn-primary col-1 mr-2" data-toggle="modal" data-target="#remitosMultipleModal">
-                    Cargar Remitos
-                </button>
-                <button class="btn btn-sm btn-success col-1" data-toggle="modal"
-                    data-target="#updateModal{{ $travelCertificate->id }}">Actualizar Constancia</button>
-            </div>
-            <div class="col-12 text-right mb-2">
-                <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-2">
-                    Generar PDF
-                </a>
-            </div>
+            <select class=" custom-select-lg bg-danger text-white border-danger"
+                onchange="
+                    if (this.value === 'pdf') {
+                        window.location.href = '{{ Route('travelCertificatePdf', $travelCertificate->id) }}';
+                    } else if (this.value) {
+                        $(this.value).modal('show');
+                    }
+                    this.selectedIndex = 0;
+                ">
+                <option value="" disabled selected>Acciones...</option>
+                <option value="#storeModal">Agregar nuevo item</option>
+                <option value="#remitosMultipleModal">Cargar remitos</option>
+                <option value="#updateModal{{ $travelCertificate->id }}">Editar constancia</option>
+                <option value="#updateTime{{ $travelCertificate->id }}">Editar horarios</option>
+                <option value="pdf">Generar PDF</option>
+            </select>
+        </div>
         @else
             <div class="col-12 text-right mb-2">
                 <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">
@@ -56,6 +58,7 @@
         @endif
 
         @include('travelItem.modals.store')
+        @include('travelCertificate.modals.update')
         @include('travelCertificate.modals.update')
 
         {{-- MODAL NUEVO (10/2025): carga múltiple de remitos. POST a travelItems.storeMultipleRemitos --}}

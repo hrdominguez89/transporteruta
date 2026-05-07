@@ -43,7 +43,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('guardar/constancia-de-viaje', [TravelCertificateController::class, 'store'])->name('storeTravelCertificate');
     Route::get('constancia-de-viaje/check-number', [TravelCertificateController::class, 'checkNumberExists'])->name('checkTravelCertificateNumber');
     Route::get('ver/constancia-de-viaje/{id}', [TravelCertificateController::class, 'show'])->name('showTravelCertificate');
-    Route::put('actualizar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'update'])->name('updateTravelCertificate');
+    Route::put('actualizar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'update'])->name('updateTravelCertificate');//
+    Route::put('actualizarTime/constancia-de-viaje/{id}', [TravelCertificateController::class, 'updateTime'])->name('updateTimeTravelCertificate');//updateTimeTravelCertificate
     Route::get('imprimir/constancia-de-viaje/{id}', [TravelCertificateController::class, 'generateTravelCertificatePdf'])->name('travelCertificatePdf');
     
     //QUITÉ ESTAS RUTAS PARA PODWER VISUALIZAR EN LAS FACTURAS DESCUENTOS Y DEMÁS

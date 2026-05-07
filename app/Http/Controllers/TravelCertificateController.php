@@ -117,8 +117,8 @@ class TravelCertificateController extends Controller
             $travelCertificate->driverId = $request->driverId;
             $travelCertificate->commission_type = $request->commission_type;
             $travelCertificate->vehicleId =  $request->vehicleId;
-            $travelCertificate->horaLLegada = $request->horaLlegada;
-            $travelCertificate->horaSalida = $request->horaSalida;
+            // $travelCertificate->horaLLegada = $request->horaLlegada;
+            // $travelCertificate->horaSalida = $request->horaSalida;
 
             // Lógica para establecer el tip= o de comisn
             if ($request->commission_type == "porcentaje pactado") {
@@ -143,7 +143,14 @@ class TravelCertificateController extends Controller
         }            
         return redirect(route('showTravelCertificate', $travelCertificate->id));
     }
-
+    public function updateTime(Request $request,$id)
+    {
+        $travelCertificate = TravelCertificate::find($id);
+        $travelCertificate->horaLLegada = $request->horaLlegada;
+        $travelCertificate->horaSalida = $request->horaSalida;
+        $travelCertificate->save();
+        return redirect(route('showTravelCertificate', $travelCertificate->id));
+    }
     public function generateTravelCertificatePdf($id,$flag=false)
     {
         $travelCertificate = TravelCertificate::find($id);

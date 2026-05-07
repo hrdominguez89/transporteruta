@@ -24,7 +24,7 @@ class TravelItemController extends Controller
             
         // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
         $rules = [
-            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA,NOCHE',
+            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA,NOCHE,DEMORA',
             'description'   => 'nullable|string|max:255',
             
             // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
@@ -51,19 +51,8 @@ class TravelItemController extends Controller
             // 'remito_number.required'      => 'Ingresá el número de Remito.',
         'price.required_unless'       => 'Ingresá un precio para este tipo de ítem.',
         ];
+        $validator = Validator::make($request->all(), $rules, $messages);
             
-            $validator = Validator::make($request->all(), $rules, $messages);
-            
-            // ADICIONAL: exigir al menos uno (percent o porcentaje)
-            // $validator->after(function ($v) use ($request) {
-            // if ($request->type === 'ADICIONAL'
-            //     && !$request->filled('percent')
-            //     && !$request->filled('porcentaje')) {
-            //     $v->errors()->add('percent', 'Ingresá el porcentaje para el Adicional.');
-            // }
-        // });
-
-        // DESCUENTO: exigir price si es monto fijo, o discount_percent si es porcentaje
         $validator->after(function ($v) use ($request) {
             if ($request->type === 'DESCUENTO') {
                 $mode = $request->input('discount_mode', 'amount');
@@ -79,7 +68,7 @@ class TravelItemController extends Controller
             }
         });
 
-        // Si falla validación → registrar y volver
+        
         if ($validator->fails()) {
             Log::error('storeTravelItem VALIDATION FAILED', $validator->errors()->toArray());
             return back()->withErrors($validator)->withInput();
@@ -201,6 +190,7 @@ class TravelItemController extends Controller
                 break;
                 case 'BULTO':
                 case 'NOCHE':
+                case 'DEMORA':
                     $dist = (float) $request->input('unidad', 0);
                     $unit = (float) $request->input('price', 0);
 
