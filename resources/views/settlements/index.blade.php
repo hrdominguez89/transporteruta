@@ -86,7 +86,7 @@
                             <th>Noche (B)</th>
                             <th>Noche (N)</th>
                             <th>Carga (N)</th>
-                            <th>Base de recaudacion N(B)</th>
+                            <th>Base de recaudacion N</th>
                             <th>Chofer recaudacion N </th>
                             <th>Chofer carg/Des(N)</th>
                             <th>Chofer noche(N)</th>
@@ -121,7 +121,7 @@
                                     >
                                 </td>
                                 {{-- Importe neto --}}
-                                <td>{{ $tc['subtotal_sin_peajes'] }}</td>
+                                <td data-cell="importeNeto">{{ $tc['importe_neto'] }}</td>
                                 
                                 {{-- Base recaudacion --}}
                                 <td>
@@ -132,7 +132,7 @@
                                         data-field="baseRecaudacion"
                                         data-semana="{{ $s }}"
                                         data-id="{{ $tc["id"] }}"
-                                        value="{{  $tc['subtotal_sin_peajes']
+                                        value="{{  $tc['importe_neto']
                                          - $tc['totalcargadescargaB'] - $tc['totalNocheB'] 
                                          - $tc['totalcargadescargaN'] -$tc['totalNocheN']}}" 
                                     > {{-- aca restar las cargas en N y noches en N  --}}
@@ -146,9 +146,9 @@
                                 {{-- Noche (B) --}}
                                 <td>{{ $tc['totalNocheB'] }}</td>
                                 {{-- Noche (N) --}}
-                                <td>{{ $tc['totalNocheN'] }}</td>
+                                <td data-cell="nocheN">{{ $tc['totalNocheN'] }}</td>
                                 {{-- Carga (N) --}}
-                                <td>{{ $tc['totalcargadescargaN'] }}</td>
+                                <td data-cell="cargaN" >{{ $tc['totalcargadescargaN'] }}</td>
                                 {{-- Base recaudacion  N  --}}
                                 <td>
                                     <input
@@ -198,11 +198,15 @@
                                     >
                                 </td>
                                 {{-- Chofer(total) --}}
-                                <td data-cell="choferTotal">{{ number_format(($tc['driver']['percent'] / 100) * ($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB']), 2) }}</td>
+                                <td data-cell="choferTotal">{{ number_format(($tc['driver']['percent'] / 100) * ($tc['importe_neto'] - $tc['totalcargadescargaB'] - $tc['totalNocheB']), 2) }}</td>
                                 {{-- Diferencia se restan todas las noches y las descargas --}}
-                                <td data-cell="diferencia">{{ number_format((($tc['subtotal_sin_peajes']
-                                         - $tc['totalcargadescargaB'] - $tc['totalNocheB'] 
-                                         - $tc['totalcargadescargaN'] -$tc['totalNocheN']) * 0.25) - (($tc['driver']['percent'] / 100) * ($tc['subtotal_sin_peajes'] - $tc['totalcargadescargaB'] - $tc['totalNocheB'])), 2) }}</td>
+                                <td data-cell="diferencia">{{ number_format((($tc['importe_neto']
+                                        - $tc['totalcargadescargaB'] - $tc['totalNocheB'] 
+                                        - $tc['totalcargadescargaN'] - $tc['totalNocheN']) * 0.25) -
+                                        ($tc['choferRecaudacion'] )-
+                                        (($tc['driver']['percent'] / 100) *
+                                        ($tc['importe_neto'] - $tc['totalcargadescargaB'] - $tc['totalNocheB'] - $tc['totalcargadescargaN'] - $tc['totalNocheN'])
+                                        ), 2) }}</td>
                                 {{-- Comentarios --}}
                                 <td>
                                     <input
@@ -235,14 +239,18 @@
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
         });
         document.addEventListener('input', function (e) {
-            if (!e.target.matches('.input-editable[data-field="driverpercent"], .input-editable[data-field="baseRecaudacion"]')) return;
+            if (!e.target.matches('.input-editable[data-field="driverpercent"], .input-editable[data-field="baseRecaudacion"], .input-editable[data-field="choferRecaudacion"]')) return;
 
             const row     = e.target.closest('tr');
             const percent = parseFloat(row.querySelector('[data-field="driverpercent"]').value) || 0;
-            const base    = parseFloat(row.querySelector('[data-field="baseRecaudacion"]').value) || 0;
+            const base       = parseFloat(row.querySelector('[data-field="baseRecaudacion"]').value) || 0;
+            const importeNeto = parseFloat(row.querySelector('[data-cell="importeNeto"]').textContent) || 0;
+            const choferN = parseFloat(row.querySelector('[data-field="choferRecaudacion"]').value) || 0;
+            const cargaN = parseFloat(row.querySelector('[data-cell="cargaN"]').textContent) || 0;
+            const nocheN = parseFloat(row.querySelector('[data-cell="nocheN"]').textContent) || 0;
 
             const choferTotal = base * (percent / 100);
-            const diferencia  = (base * 0.25) - choferTotal;
+            const diferencia  = (importeNeto * 0.25) - choferTotal - choferN - cargaN - nocheN;
 
             const fmt = n => n.toFixed(2);
 

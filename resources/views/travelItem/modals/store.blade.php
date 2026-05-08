@@ -30,6 +30,7 @@
             <option value="BULTO">Bulto</option>
             <option value="ESTADIA">Estadia</option>
             <option value="NOCHE">Noche</option>
+            <option value="DEMORA">Demora</option>
           </select>
 
           {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
@@ -83,7 +84,9 @@
               </select>
             </div>
           </div>
-
+          
+          
+          
           <div style="display: none;" id="distance_div">
             <label for="distance">Distancia:<span class="text-danger"> *</span></label>
             <input id="distance" type="number" step="1" min="0" name="distance" class="form-control mb-2"
@@ -294,6 +297,7 @@
         break;
       case 'BULTO':
       case 'NOCHE':
+      case 'DEMORA':
         show("price_div");      req("price");
         show("unidad_div");      req("unidad");
         hide("description_div");
