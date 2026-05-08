@@ -31,7 +31,12 @@ class TravelCertificate extends Model
     {
         return $this->hasMany(TravelItem::class, 'travelCertificateId');
     }
-
+    public function getImporteNetoAttribute():float
+    {
+        return (float) $this->travelItems()
+            ->whereNotIn('type', ['REMITO', 'DESCUENTO', 'PEAJE','ESTACIONAMIENTO'])
+            ->sum('price');
+    }
     /* =========================
      *  Helpers de totales
      * ========================= */
@@ -46,7 +51,7 @@ class TravelCertificate extends Model
     public function getSubtotalSinPeajesAttribute(): float
     {
         return (float) $this->travelItems()
-            ->whereNotIn('type', ['REMITO', 'DESCUENTO', 'ADICIONAL', 'PEAJE','ESTACIONAMIENTO'])// aca tengo que agregar estacionamiento
+            ->whereNotIn('type', ['REMITO', 'DESCUENTO', 'ADICIONAL', 'PEAJE','ESTACIONAMIENTO'])
             ->sum('price');
     }
 
