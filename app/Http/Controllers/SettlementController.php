@@ -28,8 +28,7 @@ class SettlementController extends Controller
         $semanas = $this->normalizeSemanas(
             $this->buildSemanas($driverId, $periodo, $desde, $hasta)
         );
-
-        return view('settlements.index', compact('drivers', 'semanas'));
+        return view('settlements.index', compact('drivers', 'semanas')); x
     }   
     public function generateExcel(Request $request)
     {

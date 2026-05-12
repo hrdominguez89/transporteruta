@@ -59,7 +59,7 @@
 
         @include('travelItem.modals.store')
         @include('travelCertificate.modals.update')
-        @include('travelCertificate.modals.update')
+        @include('travelCertificate.modals.updateTime')
 
         {{-- MODAL NUEVO (10/2025): carga múltiple de remitos. POST a travelItems.storeMultipleRemitos --}}
         <div class="modal fade" id="remitosMultipleModal" tabindex="-1" aria-labelledby="remitosMultipleModalLabel" aria-hidden="true">

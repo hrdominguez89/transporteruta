@@ -129,6 +129,8 @@ class TravelItemController extends Controller
                 }
                 break;
             case 'HORA':
+            case 'DEMORA':
+
                 $hours   = (int) $request->input('totalHours', 0);
                 $mins    = (int) $request->input('totalMinutes', 0);
                 $totalHs = round($hours + ($mins / 60), 2);
@@ -190,7 +192,6 @@ class TravelItemController extends Controller
                 break;
                 case 'BULTO':
                 case 'NOCHE':
-                case 'DEMORA':
                     $dist = (float) $request->input('unidad', 0);
                     $unit = (float) $request->input('price', 0);
 

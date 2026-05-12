@@ -3,14 +3,12 @@
     <div class="modal-content">
       <div class="modal-header bg-danger">
         <h5 class="modal-title">Agregar Item de Viaje</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> {{-- Aca lo modifique para que use B 5 pero falta buscar la causa de cambiar de version --}}
       </div>
 
+      <form action="{{ Route('storeTravelItem', $travelCertificate->id) }}" method="POST">
+      @csrf
       <div class="modal-body">
-        <form action="{{ Route('storeTravelItem', $travelCertificate->id) }}" class="form-group" method="POST">
-          @csrf
           <label for="type">Tipo:<span class="text-danger"> *</span></label>
           <select id="type" name="type" class="form-control mb-2" required>
             <option value="">---- Seleccione una opción ----</option>
@@ -117,10 +115,11 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        {{-- <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button> --}}
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
-        </form>
       </div>
+      </form>
     </div>
   </div>
 </div>
@@ -232,6 +231,7 @@
 
     switch (type) {
       case "HORA":
+      case 'DEMORA':
         show("description_div");
         show("totalTime_div");  req("totalHours"); req("totalMinutes");
         show("price_div");      req("price");
@@ -297,7 +297,6 @@
         break;
       case 'BULTO':
       case 'NOCHE':
-      case 'DEMORA':
         show("price_div");      req("price");
         show("unidad_div");      req("unidad");
         hide("description_div");
