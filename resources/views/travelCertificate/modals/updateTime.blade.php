@@ -4,9 +4,9 @@
         <div class="modal-content">
             <div class="modal-header bg-danger">
                 <h5 class="modal-title">Actualizar Constancia de Viaje</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        
+       </button>
             </div>
             <div class="modal-body">
                 <form action="{{ Route('updateTimeTravelCertificate', $travelCertificate->id) }}" class="form-group"
@@ -26,9 +26,7 @@
                     <button class="btn btn-sm btn-success">
                         Aceptar
                     </button>
-                    <button class="btn btn-sm btn-danger" data-dismiss="modal">
-                        Cancelar
-                    </button>
+                   <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </form>
             </div>
         </div>

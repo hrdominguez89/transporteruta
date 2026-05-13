@@ -3,7 +3,9 @@
     <div class="modal-content">
       <div class="modal-header bg-danger">
         <h5 class="modal-title">Agregar Item de Viaje</h5>
-       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> {{-- Aca lo modifique para que use B 5 pero falta buscar la causa de cambiar de version --}}
+       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        
+       </button> {{-- Aca lo modifique para que use B 5 pero falta buscar la causa de cambiar de version --}}
       </div>
 
       <form action="{{ Route('storeTravelItem', $travelCertificate->id) }}" method="POST">
