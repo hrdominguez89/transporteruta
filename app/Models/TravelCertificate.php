@@ -35,7 +35,7 @@ class TravelCertificate extends Model
     {
         return (float) $this->travelItems()
             ->whereNotIn('type', ['REMITO','PEAJE','ESTACIONAMIENTO'])
-            ->sum('price');
+            ->sum('price') + $this->monto_adicional ;
     }
     /* =========================
      *  Helpers de totales
