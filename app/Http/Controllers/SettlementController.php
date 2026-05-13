@@ -287,7 +287,7 @@ class SettlementController extends Controller
                     'name'    => $tc->driver->name,
                     'type'    => $tc->driver->type,
                 ],
-                'importe_neto' => $tc->importe_neto,
+                'importe_neto'        => $tc->importe_neto,
                 'total_peajes'        => $tc->total_peajes,
                 'totalcargadescargaB' => $flag ? $tc->total_carga_descarga : 0,
                 'totalcargadescargaN' => $flag ? 0 : $tc->total_carga_descarga,

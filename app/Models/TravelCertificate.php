@@ -34,7 +34,7 @@ class TravelCertificate extends Model
     public function getImporteNetoAttribute():float
     {
         return (float) $this->travelItems()
-            ->whereNotIn('type', ['REMITO', 'DESCUENTO', 'PEAJE','ESTACIONAMIENTO'])
+            ->whereNotIn('type', ['REMITO','PEAJE','ESTACIONAMIENTO'])
             ->sum('price');
     }
     /* =========================
