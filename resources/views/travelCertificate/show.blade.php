@@ -68,8 +68,8 @@
               @csrf
               <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="remitosMultipleModalLabel">Cargar Remitos (múltiples)</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
-                  <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        
                 </button>
               </div>
 
@@ -88,7 +88,7 @@
               </div>
 
               <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+               <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
               </div>
             </form>
