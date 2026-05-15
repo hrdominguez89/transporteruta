@@ -8,6 +8,7 @@ use App\Models\Driver;
 use App\Models\Client;
 use App\Models\TravelItem;
 use App\Models\Invoice;
+use App\Models\Settlement;
 
 class TravelCertificate extends Model
 {

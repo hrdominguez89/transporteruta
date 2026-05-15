@@ -90,6 +90,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
     
     Route::get('liquidaciones', [SettlementController::class, 'index'])->name('Settlements');//
+    Route::POST('liquidaciones/new', [SettlementController::class, 'generate'])->name('generateSettlement');
+    Route::get('liquidaciones/show/{id}', [SettlementController::class, 'show'])->name('ShowSettlement');
     Route::match(['GET', 'POST'], 'liquidaciones/generar', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
     
     // DriverSettlement

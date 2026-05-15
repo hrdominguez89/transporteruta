@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
+use App\Models\Settlement;
 use App\Models\TravelCertificate;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,6 +19,22 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class SettlementController extends Controller
 {
     public function index(Request $request)
+    {
+        $drivers  = Driver::all();
+        $settlements = Settlement::all();
+        return view('settlements.index', compact('drivers', 'settlements')); 
+    }
+    public function generate(Request $request)
+    {
+        $periodo  = $request->input('periodo');
+        $drivers  = Driver::all();
+
+        $driverId = $request->input('driver_id');
+        $semanas =$this->buildSemanas($driverId, $periodo);
+        return view('settlements.show', compact('drivers', 'semanas')); 
+
+    }
+    public function show(Request $request)
     {
         $drivers  = Driver::all();
         $periodo  = $request->input('periodo');
@@ -238,20 +255,23 @@ class SettlementController extends Controller
             $filename
         );
     }
-    private function buildSemanas($driverId,$periodo,$desde = null,$hasta = null): array
+    private function buildSemanas($driverId,$periodo): array
     {
         $semanas = array_fill(1, 5, []);
 
         $query = TravelCertificate::query()->where('driverId', $driverId);
-
-        if ($periodo === 'mes') {
-            $query->whereMonth('date', date('n'));
-            $inicioMes = Carbon::now()->startOfMonth();
-        } else {
-            $query->whereBetween('date', [$desde, $hasta]);
-            $inicioMes = Carbon::parse($desde)->startOfMonth();
-        }
-
+        
+        // if ($periodo === 'mes') {
+        //     $query->whereMonth('date', date('n'));
+        //     $inicioMes = Carbon::now()->startOfMonth();
+        // } else {
+        //     $query->whereBetween('date', [$desde, $hasta]);
+        //     $inicioMes = Carbon::parse($desde)->startOfMonth();
+        // }
+        $periodo = Carbon::createFromFormat('Y-m', $periodo);
+        $inicioMes = $periodo->copy()->startOfMonth();
+        $finMes = $periodo->copy()->endOfMonth();
+        $query->whereBetween('date', [$inicioMes, $finMes]);
         $semanaBase = $inicioMes->copy()->startOfWeek(Carbon::MONDAY);
 
         foreach ($query->orderBy('date')->get() as $tc) {
@@ -264,50 +284,49 @@ class SettlementController extends Controller
     }
    
     private function normalizeSemanas(array $semanas): array
-{
-    $flag = true;
-    $resultado = [];
+    {
+        $flag = true;
+        $resultado = [];
 
-    foreach ($semanas as $claveSemana => $viajes) {
-        $filas = [];
+        foreach ($semanas as $claveSemana => $viajes) {
+            $filas = [];
 
-        foreach ($viajes as $tc) {
-            if (is_array($tc)) {
-                $filas[] = $tc;
-                continue;
+            foreach ($viajes as $tc) {
+                if (is_array($tc)) {
+                    $filas[] = $tc;
+                    continue;
+                }
+                $filas[] = [
+                    'id'                  => $tc->id,
+                    'date'                => $tc->date->format('d/m/Y'),
+                    'number'              => $tc->number ?? $tc->id,
+                    'client'              => ['name' => $tc->client->name],
+                    'driver'              => [
+                        'percent' => $tc->driver->percent,
+                        'name'    => $tc->driver->name,
+                        'type'    => $tc->driver->type,
+                    ],
+                    'importe_neto'        => $tc->importe_neto,
+                    'total_peajes'        => $tc->total_peajes,
+                    'totalcargadescargaB' => $flag ? $tc->total_carga_descarga : 0,
+                    'totalcargadescargaN' => $flag ? 0 : $tc->total_carga_descarga,
+                    'totalNocheB'         => $flag ? $tc->total_noche : 0,
+                    'totalNocheN'         => $flag ? 0 : $tc->total_noche,
+                    'cargaDescargaNocheB' => $tc->total_noche + $tc->total_carga_descarga,
+                    'comentarios'         => $tc->comentarios ?? '',
+                    'estacionamiento'     => $tc->total_estacionamiento,
+                    'baseRecaudacionN'    => 0,
+                    'choferRecaudacion'   => 0,
+                ];
+
+                if ($tc->total_carga_descarga > 0 || $tc->total_noche > 0) {
+                    $flag = !$flag;
+                }
             }
 
-            $filas[] = [
-                'id'                  => $tc->id,
-                'date'                => $tc->date->format('d/m/Y'),
-                'number'              => $tc->number ?? $tc->id,
-                'client'              => ['name' => $tc->client->name],
-                'driver'              => [
-                    'percent' => $tc->driver->percent,
-                    'name'    => $tc->driver->name,
-                    'type'    => $tc->driver->type,
-                ],
-                'importe_neto'        => $tc->importe_neto,
-                'total_peajes'        => $tc->total_peajes,
-                'totalcargadescargaB' => $flag ? $tc->total_carga_descarga : 0,
-                'totalcargadescargaN' => $flag ? 0 : $tc->total_carga_descarga,
-                'totalNocheB'         => $flag ? $tc->total_noche : 0,
-                'totalNocheN'         => $flag ? 0 : $tc->total_noche,
-                'cargaDescargaNocheB' => $tc->total_noche + $tc->total_carga_descarga,
-                'comentarios'         => $tc->comentarios ?? '',
-                'estacionamiento'     => $tc->total_estacionamiento,
-                'baseRecaudacionN'    => 0,
-                'choferRecaudacion'   => 0,
-            ];
-
-            if ($tc->total_carga_descarga > 0 || $tc->total_noche > 0) {
-                $flag = !$flag;
-            }
+            $resultado[$claveSemana] = $filas;
         }
 
-        $resultado[$claveSemana] = $filas;
+        return $resultado;
     }
-
-    return $resultado;
-}
 } 
