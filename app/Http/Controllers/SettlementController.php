@@ -2,67 +2,209 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\Settlement;
+use App\Models\SettlementDetail;
 use App\Models\TravelCertificate;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Date;
-use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromArray;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Facades\Excel;
 class SettlementController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $drivers  = Driver::all();
-        $settlements = Settlement::all();
-        return view('settlements.index', compact('drivers', 'settlements')); 
+        $settlements = Settlement::with('driver')->orderByDesc('periodo')->get();
+        $drivers = Driver::orderBy('name')->get();
+
+        return view('settlements.index', compact('settlements', 'drivers'));
     }
-    public function generate(Request $request)
+
+    public function create()
     {
-        $periodo  = $request->input('periodo');
-        $drivers  = Driver::all();
+        $drivers = Driver::orderBy('name')->get();
 
-        $driverId = $request->input('driver_id');
-        $semanas =$this->buildSemanas($driverId, $periodo);
-        return view('settlements.show', compact('drivers', 'semanas')); 
-
+        return view('settlements.create', compact('drivers'));
     }
-    public function show(Request $request)
-    {
-        $drivers  = Driver::all();
-        $periodo  = $request->input('periodo');
-        $driverId = $request->input('driver_id');
-        $desde    = $periodo !== 'mes' ? $request->input('desde') : null;
-        $hasta    = $periodo !== 'mes' ? $request->input('hasta') : null;
 
-        $semanas = $this->normalizeSemanas(
-            $this->buildSemanas($driverId, $periodo, $desde, $hasta)
-        );
-        return view('settlements.index', compact('drivers', 'semanas')); 
-    }   
-    public function generateExcel(Request $request)
+    public function store(Request $request)
     {
-        if ($request->isMethod('POST')) {
-            $semanas = $request->input('semanas');
-        } else {
-            $periodo  = $request->input('periodo');
-            $driverId = $request->input('driver_id');
-            $desde    = $periodo !== 'mes' ? $request->input('desde') : null;
-            $hasta    = $periodo !== 'mes' ? $request->input('hasta') : null;
+        $data = $request->validate([
+            'driver_id' => ['required', 'exists:drivers,id'],
+            'periodo'   => ['required', 'date_format:Y-m'],
+        ]);
 
-            $semanas = $this->normalizeSemanas(
-                $this->buildSemanas($driverId, $periodo, $desde, $hasta)
-            );
+        $periodo = Carbon::createFromFormat('Y-m', $data['periodo'])->startOfMonth();
+
+        $settlement = DB::transaction(function () use ($data, $periodo) {
+            $settlement = Settlement::create([
+                'driver_id' => $data['driver_id'],
+                'periodo'   => $periodo,
+            ]);
+
+            $this->cargarSemana($settlement, 1);
+
+            return $settlement;
+        });
+
+        return redirect()
+            ->route('Settlements.show', $settlement)
+            ->with('success', 'Liquidación creada. Semana 1 cargada.');
+    }
+
+    /**
+     * Trae los TC del chofer en la semana indicada del período de la cabecera
+     * y crea los SettlementDetail correspondientes.
+     */
+    private function cargarSemana(Settlement $settlement, int $semana): int
+    {
+        $inicioMes = $settlement->periodo->copy()->startOfMonth();
+        $finMes    = $settlement->periodo->copy()->endOfMonth();
+        $semanaBase = $inicioMes->copy()->startOfWeek(Carbon::MONDAY);
+
+        $inicioSemana = $semanaBase->copy()->addWeeks($semana - 1);
+        $finSemana    = $inicioSemana->copy()->endOfWeek(Carbon::SUNDAY);
+
+        // Recortar al mes para no incluir días del mes anterior o siguiente
+        if ($inicioSemana->lt($inicioMes)) $inicioSemana = $inicioMes->copy();
+        if ($finSemana->gt($finMes))       $finSemana    = $finMes->copy();
+
+        $tcs = TravelCertificate::where('driverId', $settlement->driver_id)
+            ->whereBetween('date', [$inicioSemana, $finSemana])
+            ->orderBy('date')
+            ->get();
+
+
+        $flag = true;
+        $creados = 0;
+
+        foreach ($tcs as $tc) {
+            $cargaDescarga = $tc->total_carga_descarga;
+            $noche         = $tc->total_noche;
+
+            SettlementDetail::create([
+                'settlement_id'         => $settlement->id,
+                'semana'                => $semana,
+                'fecha'                 => $tc->date,
+                'travel_certificate_id' => $tc->id,
+                'cliente_id'            => $tc->client->id,
+                'chofer_porcentaje'     => $tc->driver->percent,
+                'importe_neto'          => $tc->importe_neto,
+                'peajes'                => $tc->total_peajes,
+                'estacionamiento'       => $tc->total_estacionamiento,
+                'carga_descarga_b'      => $flag ? $cargaDescarga : 0,
+                'carga_descarga_n'      => $flag ? 0 : $cargaDescarga,
+                'noche_b'               => $flag ? $noche : 0,
+                'noche_n'               => $flag ? 0 : $noche,
+            ]);
+
+            $creados++;
+
+            if ($cargaDescarga > 0 || $noche > 0) {
+                $flag = !$flag;
+            }
         }
-        
-        $filename = 'liquidacion_' . now()->format('Y-m-d') . '.xlsx';
+
+        return $creados;
+    }
+    public function show(Settlement $settlement)
+    {
+        $settlement->load(['driver', 'details.travelCertificate', 'details.client']);
+
+        $semanas = $settlement->details
+            ->groupBy('semana')
+            ->sortKeys()
+            ->all();
+
+        $ultimaSemanaCargada = $settlement->details->max('semana') ?? 0;
+
+        return view('settlements.show', compact('settlement', 'semanas', 'ultimaSemanaCargada'));
+    }
+
+    public function siguienteSemana(Request $request, Settlement $settlement)
+    {
+        $data = $request->validate([
+            'semana' => ['required', 'integer', 'between:1,5'],
+        ]);
+
+        $semana = (int) $data['semana'];
+
+        $yaExiste = $settlement->details()->where('semana', $semana)->exists();
+
+        if ($yaExiste) {
+            return back()->with('warning', "La semana {$semana} ya fue cargada.");
+        }
+
+        $creados = DB::transaction(
+            fn () => $this->cargarSemana($settlement, $semana)
+        );
+
+        $mensaje = $creados > 0
+            ? "Semana {$semana} cargada ({$creados} viajes)."
+            : "Semana {$semana} cargada sin viajes.";
+
+        return back()->with('success', $mensaje);
+    }
+
+    public function guardarEdicion(Request $request, Settlement $settlement)
+    {
+        $data = $request->validate([
+            'detalles'                        => ['required', 'array'],
+            'detalles.*.id'                   => ['required', 'exists:settlement_details,id'],
+            'detalles.*.chofer_porcentaje'    => ['nullable', 'numeric'],
+            'detalles.*.base_recaudacion'     => ['nullable', 'numeric'],
+            'detalles.*.chofer_total'         => ['nullable', 'numeric'],
+            'detalles.*.carga_descarga_b'     => ['nullable', 'numeric'],
+            'detalles.*.carga_descarga_n'     => ['nullable', 'numeric'],
+            'detalles.*.noche_b'              => ['nullable', 'numeric'],
+            'detalles.*.noche_n'              => ['nullable', 'numeric'],
+            'detalles.*.chofer_cd_n'          => ['nullable', 'numeric'],
+            'detalles.*.chofer_n_n'           => ['nullable', 'numeric'],
+            'detalles.*.base_recaudacion_n'   => ['nullable', 'numeric'],
+            'detalles.*.chofer_n'             => ['nullable', 'numeric'],
+            'detalles.*.diferencia'           => ['nullable', 'numeric'],
+            'detalles.*.comentarios'          => ['nullable', 'string'],
+        ]);
+
+        DB::transaction(function () use ($data, $settlement) {
+            $ids = collect($data['detalles'])->pluck('id');
+
+            $detalles = SettlementDetail::where('settlement_id', $settlement->id)
+                ->whereIn('id', $ids)
+                ->get()
+                ->keyBy('id');
+
+            foreach ($data['detalles'] as $payload) {
+                $detalle = $detalles->get($payload['id']);
+                if (!$detalle) {
+                    continue;
+                }
+
+                $detalle->update(collect($payload)->except('id')->all());
+            }
+        });
+
+        return response()->json(['ok' => true, 'message' => 'Cambios guardados.']);
+    }
+    public function generateExcel(Settlement $settlement)
+    {
+        $settlement->load(['driver', 'details.client']);
+
+        $semanas = $settlement->details
+            ->groupBy('semana')
+            ->sortKeys()
+            ->all();
+
+        $filename = 'liquidacion_'
+            . $settlement->driver->name . '_'
+            . $settlement->periodo->format('Y-m')
+            . '.xlsx';
 
         return Excel::download(
             new class($semanas) implements WithMultipleSheets {
@@ -73,14 +215,18 @@ class SettlementController extends Controller
                     $sheets = [];
 
                     for ($s = 1; $s <= 5; $s++) {
-                        $tcs = $this->semanas[$s] ?? [];
-                        $sheets[] = new class($s, $tcs) implements FromArray, WithTitle, WithHeadings, WithStyles {
+                        $detalles = $this->semanas[$s] ?? collect();
+
+                        $sheets[] = new class($s, $detalles) implements FromArray, WithTitle, WithHeadings, WithStyles {
                             public function __construct(
-                                protected int   $semana,
-                                protected array $travelCertificates
+                                protected int $semana,
+                                protected $detalles
                             ) {}
 
-                            public function title(): string { return "Semana {$this->semana}"; }
+                            public function title(): string
+                            {
+                                return "Semana {$this->semana}";
+                            }
 
                             public function headings(): array
                             {
@@ -103,64 +249,102 @@ class SettlementController extends Controller
                                     'Base recaudacion N',
                                     'Chofer N',
                                     'Diferencia',
-                                    'Comentarios'
+                                    'Comentarios',
                                 ];
                             }
 
                             public function array(): array
                             {
-                                $rows = [];
-                                foreach ($this->travelCertificates as $tc) {
+                                $rows = $this->detalles->map(fn ($d) => [
+                                    optional($d->fecha)->format('d/m/Y'),
+                                    $d->travel_certificate_id,
+                                    $d->client?->name,
+                                    number_format($d->chofer_porcentaje, 2, ',', '.') . '%',
+                                    $d->importe_neto,
+                                    $d->base_recaudacion,
+                                    $d->peajes,
+                                    $d->estacionamiento,
+                                    $d->chofer_total,
+                                    $d->carga_descarga_b,
+                                    $d->carga_descarga_n,
+                                    $d->noche_b,
+                                    $d->noche_n,
+                                    $d->chofer_cd_n,
+                                    $d->chofer_n_n,
+                                    $d->base_recaudacion_n,
+                                    $d->chofer_n,
+                                    $d->diferencia,
+                                    $d->comentarios,
+                                ])->all();
+
+                                if ($this->detalles->isNotEmpty()) {
                                     $rows[] = [
-                                        $tc['date'],
-                                        $tc['number'],
-                                        $tc['cliente'],
-                                        number_format($tc['driverpercent'], 2, ',', '.') . '%',
-                                        $tc['importe_neto'],
-                                        $tc['baseRecaudacion'],
-                                        $tc['total_peajes'],
-                                        $tc['estacionamiento'],
-                                        $tc['choferTotal'],
-                                        $tc['totalcargadescargaB'],
-                                        $tc['totalcargadescargaN'],
-                                        $tc['totalNocheB'],
-                                        $tc['totalNocheN'],
-                                        $tc['choferCargDescN'],
-                                        $tc['choferNocheN'],
-                                        $tc['baseRecaudacionN'],
-                                        $tc['choferRecaudacion'],
-                                        $tc['diferencia'],
-                                        $tc['comentarios']
+                                        'TOTAL', '', '', '',
+                                        $this->detalles->sum('importe_neto'),
+                                        $this->detalles->sum('base_recaudacion'),
+                                        $this->detalles->sum('peajes'),
+                                        $this->detalles->sum('estacionamiento'),
+                                        $this->detalles->sum('chofer_total'),
+                                        $this->detalles->sum('carga_descarga_b'),
+                                        $this->detalles->sum('carga_descarga_n'),
+                                        $this->detalles->sum('noche_b'),
+                                        $this->detalles->sum('noche_n'),
+                                        $this->detalles->sum('chofer_cd_n'),
+                                        $this->detalles->sum('chofer_n_n'),
+                                        $this->detalles->sum('base_recaudacion_n'),
+                                        $this->detalles->sum('chofer_n'),
+                                        $this->detalles->sum('diferencia'),
+                                        '',
                                     ];
                                 }
+
                                 return $rows;
                             }
 
                             public function styles(Worksheet $sheet): void
                             {
-                                $sheet->getStyle('A1:Q1')->applyFromArray([
+                                $sheet->getStyle('A1:S1')->applyFromArray([
                                     'fill' => [
                                         'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                         'startColor' => ['rgb' => 'FFCCCC'],
                                     ],
+                                    'font' => ['bold' => true],
                                 ]);
 
-                                $lastRow = count($this->travelCertificates) + 1;
-                                $sheet->getStyle("A1:J{$lastRow}")->applyFromArray([
+                                $lastRow = $this->detalles->count() + 1;
+
+                                $sheet->getStyle("A1:S{$lastRow}")->applyFromArray([
                                     'alignment' => [
                                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                                         'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                                         'wrapText'   => true,
                                     ],
                                 ]);
+
+                                if ($this->detalles->isNotEmpty()) {
+                                    $totalRow = $lastRow + 1;
+                                    $sheet->getStyle("A{$totalRow}:S{$totalRow}")->applyFromArray([
+                                        'fill' => [
+                                            'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                            'startColor' => ['rgb' => 'FFE699'],
+                                        ],
+                                        'font' => ['bold' => true],
+                                        'alignment' => [
+                                            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                        ],
+                                    ]);
+                                }
                             }
                         };
                     }
 
                     $sheets[] = new class($this->semanas) implements FromArray, WithTitle, WithHeadings, WithStyles {
-                        public function __construct(private array $semanas) {}
+                        public function __construct(protected array $semanas) {}
 
-                        public function title(): string { return "Resumen de totales."; }
+                        public function title(): string
+                        {
+                            return 'Resumen de totales';
+                        }
 
                         public function headings(): array
                         {
@@ -170,63 +354,33 @@ class SettlementController extends Controller
                                 'Constancias total',
                                 'Peajes total',
                                 'Chofer Carg/desc(N) total',
-                                'Chofer Noche(N) total ',
-                                "Noche N total",
-                                "Noche B total",
-                                "Carga N total",
-                                "Carga B total",
-                                "Base recaudacion N",
-                                "Chofer recaudacion N"
+                                'Chofer Noche(N) total',
+                                'Noche N total',
+                                'Noche B total',
+                                'Carga N total',
+                                'Carga B total',
+                                'Base recaudacion N',
+                                'Chofer recaudacion N',
                             ];
                         }
 
                         public function array(): array
                         {
-                            $totalChofer      = 0;
-                            $totalDiferencia  = 0;
-                            $totalConstancias = 0;
-                            $totalPeajes      = 0;
-                            $chofercdnt       = 0;
-                            $chofernnt        = 0;
-                            $nochebt          = 0;
-                            $nochent          = 0;
-                            $cargabt          = 0;
-                            $cargant          = 0;
-                            $baseRecN          = 0;
-                            $chofRecN          = 0;
-
-                            foreach ($this->semanas as $viajes) {
-                                foreach ($viajes as $tc) {
-                    
-                                    $totalChofer      += $tc['choferTotal'];
-                                    $totalDiferencia  += $tc['diferencia'];
-                                    $totalConstancias += $tc['importe_neto'];
-                                    $totalPeajes      += $tc['total_peajes'];
-                                    $chofercdnt       += $tc['choferCargDescN'];
-                                    $chofernnt        += $tc['choferNocheN'];
-                                    $nochebt          += $tc['totalNocheB'];
-                                    $nochent          += $tc['totalNocheN'];
-                                    $cargabt          += $tc['totalcargadescargaB'];
-                                    $cargant          += $tc['totalcargadescargaN'];
-                                    $baseRecN          += $tc['baseRecaudacionN'];
-                                    $chofRecN          += $tc['choferRecaudacion'];
-                    
-                                }
-                            }
+                            $todos = collect($this->semanas)->flatten(1);
 
                             return [[
-                               $totalChofer    ,
-                            $totalDiferencia,
-                            $totalConstancias,
-                            $totalPeajes    ,
-                            $chofercdnt     ,
-                            $chofernnt      ,
-                            $nochebt        ,
-                            $nochent        ,
-                            $cargabt        ,
-                            $cargant        ,
-                            $baseRecN       ,
-                            $chofRecN
+                                $todos->sum('chofer_total'),
+                                $todos->sum('diferencia'),
+                                $todos->sum('importe_neto'),
+                                $todos->sum('peajes'),
+                                $todos->sum('chofer_cd_n'),
+                                $todos->sum('chofer_n_n'),
+                                $todos->sum('noche_n'),
+                                $todos->sum('noche_b'),
+                                $todos->sum('carga_descarga_n'),
+                                $todos->sum('carga_descarga_b'),
+                                $todos->sum('base_recaudacion_n'),
+                                $todos->sum('chofer_n'),
                             ]];
                         }
 
@@ -237,14 +391,7 @@ class SettlementController extends Controller
                                     'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                     'startColor' => ['rgb' => 'FFCCCC'],
                                 ],
-                            ]);
-
-                            $sheet->getStyle('A1:F2')->applyFromArray([
-                                'alignment' => [
-                                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                                    'wrapText'   => true,
-                                ],
+                                'font' => ['bold' => true],
                             ]);
                         }
                     };
@@ -255,78 +402,4 @@ class SettlementController extends Controller
             $filename
         );
     }
-    private function buildSemanas($driverId,$periodo): array
-    {
-        $semanas = array_fill(1, 5, []);
-
-        $query = TravelCertificate::query()->where('driverId', $driverId);
-        
-        // if ($periodo === 'mes') {
-        //     $query->whereMonth('date', date('n'));
-        //     $inicioMes = Carbon::now()->startOfMonth();
-        // } else {
-        //     $query->whereBetween('date', [$desde, $hasta]);
-        //     $inicioMes = Carbon::parse($desde)->startOfMonth();
-        // }
-        $periodo = Carbon::createFromFormat('Y-m', $periodo);
-        $inicioMes = $periodo->copy()->startOfMonth();
-        $finMes = $periodo->copy()->endOfMonth();
-        $query->whereBetween('date', [$inicioMes, $finMes]);
-        $semanaBase = $inicioMes->copy()->startOfWeek(Carbon::MONDAY);
-
-        foreach ($query->orderBy('date')->get() as $tc) {
-            $inicioSemanaFecha = Carbon::parse($tc->date)->startOfWeek(Carbon::MONDAY);
-            $semana = min((int) $semanaBase->diffInWeeks($inicioSemanaFecha) + 1, 5);
-            $semanas[$semana][] = $tc;
-        }
-
-        return $semanas;
-    }
-   
-    private function normalizeSemanas(array $semanas): array
-    {
-        $flag = true;
-        $resultado = [];
-
-        foreach ($semanas as $claveSemana => $viajes) {
-            $filas = [];
-
-            foreach ($viajes as $tc) {
-                if (is_array($tc)) {
-                    $filas[] = $tc;
-                    continue;
-                }
-                $filas[] = [
-                    'id'                  => $tc->id,
-                    'date'                => $tc->date->format('d/m/Y'),
-                    'number'              => $tc->number ?? $tc->id,
-                    'client'              => ['name' => $tc->client->name],
-                    'driver'              => [
-                        'percent' => $tc->driver->percent,
-                        'name'    => $tc->driver->name,
-                        'type'    => $tc->driver->type,
-                    ],
-                    'importe_neto'        => $tc->importe_neto,
-                    'total_peajes'        => $tc->total_peajes,
-                    'totalcargadescargaB' => $flag ? $tc->total_carga_descarga : 0,
-                    'totalcargadescargaN' => $flag ? 0 : $tc->total_carga_descarga,
-                    'totalNocheB'         => $flag ? $tc->total_noche : 0,
-                    'totalNocheN'         => $flag ? 0 : $tc->total_noche,
-                    'cargaDescargaNocheB' => $tc->total_noche + $tc->total_carga_descarga,
-                    'comentarios'         => $tc->comentarios ?? '',
-                    'estacionamiento'     => $tc->total_estacionamiento,
-                    'baseRecaudacionN'    => 0,
-                    'choferRecaudacion'   => 0,
-                ];
-
-                if ($tc->total_carga_descarga > 0 || $tc->total_noche > 0) {
-                    $flag = !$flag;
-                }
-            }
-
-            $resultado[$claveSemana] = $filas;
-        }
-
-        return $resultado;
-    }
-} 
+}

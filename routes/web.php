@@ -89,10 +89,13 @@ Route::group(['middleware' => 'auth'], function () {
     // Eliminar factura (solo si no está facturada y no está pagada)
     Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
     
-    Route::get('liquidaciones', [SettlementController::class, 'index'])->name('Settlements');//
-    Route::POST('liquidaciones/new', [SettlementController::class, 'generate'])->name('generateSettlement');
-    Route::get('liquidaciones/show/{id}', [SettlementController::class, 'show'])->name('ShowSettlement');
-    Route::match(['GET', 'POST'], 'liquidaciones/generar', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
+    Route::get('liquidaciones', [SettlementController::class, 'index'])->name('Settlements');
+    Route::get('liquidaciones/crear', [SettlementController::class, 'create'])->name('Settlements.create');
+    Route::post('liquidaciones', [SettlementController::class, 'store'])->name('Settlements.store');
+    Route::get('liquidaciones/{settlement}', [SettlementController::class, 'show'])->name('Settlements.show');
+    Route::post('liquidaciones/{settlement}/siguiente-semana', [SettlementController::class, 'siguienteSemana'])->name('Settlements.siguienteSemana');
+    Route::post('liquidaciones/{settlement}/guardar', [SettlementController::class, 'guardarEdicion'])->name('guardarEdicion');
+    Route::get('liquidaciones/{settlement}/excel', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
