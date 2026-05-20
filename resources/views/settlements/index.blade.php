@@ -20,9 +20,9 @@
 
     <div class="card">
         <div class="card-body">
-            <table class="table table-sm table-bordered text-center data-table">
-                <thead>
-                    <tr>
+            <table class="table table-sm table-bordered text-center data-table ">
+                <thead >
+                    <tr class="bg-danger">
                         <th>ID</th>
                         <th>Chofer</th>
                         <th>Período</th>
