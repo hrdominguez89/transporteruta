@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Contacto;
 use App\Models\Credit;
 use App\Models\Debit;
 use App\Models\Payments;
 use App\Models\Receipt;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+
 
 class ClientController extends Controller
 {
@@ -111,6 +114,19 @@ class ClientController extends Controller
         $client->paymentTermDays = (int)$request->paymentsDay;
         $client->save();
         return redirect(route('showClient', $client->id));
+    }
+    public function generateContact(Request $request,$id)
+    {
+        $contacto = new Contacto();
+        $contacto->client_id = $id;
+        $contacto->nombre = $request->name ?? "-";
+        $contacto->apellido = $request->lastname ?? "-";
+        $contacto->telefono = $request->telefono ?? "-";
+        $contacto->mail = $request->mail ?? "-";
+        $contacto->comentario = $request->comentario ?? "-";
+        $contacto->categoria = $request->category ?? "-";
+        $contacto->save();
+        return redirect(route('showClient', $id));
     }
 }
 

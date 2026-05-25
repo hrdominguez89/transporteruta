@@ -297,6 +297,13 @@ class SettlementController extends Controller
                                         '',
                                     ];
                                 }
+                                $rows[] = [
+                                    'Total a pagar',
+                                    $this->detalles->sum('chofer_cd_n')
+                                        + $this->detalles->sum('chofer_n_n')
+                                        + $this->detalles->sum('chofer_n'),
+                                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                                ];
 
                                 return $rows;
                             }
@@ -321,9 +328,10 @@ class SettlementController extends Controller
                                     ],
                                 ]);
 
-                                if ($this->detalles->isNotEmpty()) {
-                                    $totalRow = $lastRow + 1;
-                                    $sheet->getStyle("A{$totalRow}:S{$totalRow}")->applyFromArray([
+                               if ($this->detalles->isNotEmpty()) {
+                                    $totalRow   = $lastRow + 1;
+                                    $aPagarRow  = $lastRow + 2;
+                                    $sheet->getStyle("A{$totalRow}:S{$aPagarRow}")->applyFromArray([
                                         'fill' => [
                                             'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                             'startColor' => ['rgb' => 'FFE699'],

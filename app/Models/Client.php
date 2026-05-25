@@ -19,6 +19,10 @@ class Client extends Model
     {
         return $this->hasMany(TravelCertificate::class, 'clientId');
     }
+    public function contactos()
+    {
+        return $this->hasMany(Contacto::class, 'client_id');
+    }
 
     public function invoices()
     {

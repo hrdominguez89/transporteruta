@@ -3,6 +3,7 @@
 @section('title', 'Clientes')
 
 @section('content_header')
+
     <div class="row">
         <a href="{{ Route('clients') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col-9">Cliente: <strong>{{ $client->name }}</strong></h1>
@@ -36,9 +37,61 @@
             </tr>
         </tbody>
     </table>
-    <h4>Observaciones:</h4>
-    <p>{{ $client->observations }}</p>
-    <p>Dias de vencimiento asignado:  {{ $client->paymentTermDays }} dias.</p>
+    @include('client.modals.storeContacto')
+    <h4>Contactos:</h4>
+    <div class="row">
+        <div class="col-4">
+            <h5>Crear contacto</h3>
+            <button class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#storeContacto">
+                +
+            </button>
+            <div id="contactosCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @foreach($client->contactos as $index => $contacto)
+                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}" style="transition: 0.5s">
+                            <div class="d-flex justify-content-center">
+                                <article class="card" style="width: 220px;">
+                                    <div class="card-body">
+                                        <ul class="card__data list-unstyled mb-0">
+                                            <li><span>Nombre :</span><strong> {{ $contacto->nombre }}</strong></li>
+                                            <li><span>Apellido :</span><strong> {{ $contacto->apellido }}</strong></li>
+                                            <li><span>Categoria :</span><strong> {{ $contacto->categoria }}</strong></li>
+                                            <li><span>Mail :</span><strong> {{ $contacto->mail }}</strong></li>
+                                            <li><span>Telefono :</span><strong> {{ $contacto->telefono }}</strong></li>
+                                            <li><span>Comentario :</span><strong> {{ $contacto->comentario }}</strong></li>
+                                                <button class="btn btn-primary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#editContacto">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                        </ul>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#contactosCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#contactosCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+            </div>  
+        </div>
+        <div class="col-4">
+            <h5>Observaciones:</h5>
+            <div>{{ $client->observations }}</div>
+        </div>
+        <div class="col-4">
+            <h5>Plazos de vencimiento</h5>
+            <p>Dias de vencimiento asignado:  {{ $client->paymentTermDays }} dias.</p>
+        </div>
+    </div>
     
     <br>
     <h4>Facturas Pendientes de Pagar</h4>
@@ -116,6 +169,7 @@
     </table>
 @stop
 @section('js')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <script>
         $(document).ready(function() {
             $('.data-table').DataTable();

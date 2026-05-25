@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('ver/cliente/{id}', [ClientController::class, 'show'])->name('showClient');
     Route::get('generar/pdf/deudores', [ClientController::class, 'generateDebtorsPdf'])->name('generateDebtorsPdf');
     Route::put('actualizar/cliente/{id}', [ClientController::class, 'update'])->name('updateClient');
+    Route::post('crear/cliente/contacto/{id}', [ClientController::class, 'generateContact'])->name('crearContacto');
 
     // Driver
     Route::get('choferes', [DriverController::class, 'drivers'])->name('drivers');
