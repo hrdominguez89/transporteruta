@@ -16,12 +16,12 @@
                     <small id="number_help_{{ $travelCertificate->id }}" class="text-danger" style="display:none;"></small>
                     <div id="hora_salida_div">
                         <label>Hora de salida:</label>
-                        <input class="form-control mb-2" type="datetime-local" name="horaSalida" value="{{ $travelCertificate->horaLLegada ? \Carbon\Carbon::parse($travelCertificate->horaLLegada)->format('Y-m-d\TH:i') : '' }}">
+                        <input class="form-control mb-2" type="time" name="horaSalida" value="{{ $travelCertificate->horaLLegada ? \Carbon\Carbon::parse($travelCertificate->horaLLegada)->format('Y-m-d\TH:i') : '' }}">
                     </div>
 
                     <div id="hora_llegada_div">
                         <label>Hora de llegada:</label>
-                        <input class="form-control mb-2" type="datetime-local" name="horaLlegada" value="{{ $travelCertificate->horaLLegada ? \Carbon\Carbon::parse($travelCertificate->horaLLegada)->format('Y-m-d\TH:i') : '' }}">
+                        <input class="form-control mb-2" type="time" name="horaLlegada" value="{{ $travelCertificate->horaLLegada ? \Carbon\Carbon::parse($travelCertificate->horaLLegada)->format('Y-m-d\TH:i') : '' }}">
                     </div>
                     <button class="btn btn-sm btn-success">
                         Aceptar

@@ -61,8 +61,8 @@
         <p class="kv"><strong>Cliente:</strong> <span>{{ $travelCertificate->client->name }}</span></p>
         <p class="kv"><strong>Chofer:</strong> <span>{{ $travelCertificate->driver->name }}</span></p>
         <p class="kv"><strong>Vehículo:</strong> <span>{{ $travelCertificate->vehicle->name ?? $travelCertificate->driver->vehicle->name ?? ''  }}</span></p>
-        <p class="kv"><strong>Hora de Salida:</strong> <span>{{ $travelCertificate->horaSalida }}</span></p>
-        <p class="kv"><strong>Hora de Llegada:</strong> <span>{{ $travelCertificate->horaLLegada }}</span></p>
+        <p class="kv"><strong>Hora de Salida:</strong> <span>{{ \Carbon\Carbon::parse($travelCertificate->horaSalida)->format('H:i') }}</span></p>
+        <p class="kv"><strong>Hora de Llegada:</strong> <span>{{ \Carbon\Carbon::parse($travelCertificate->horaLLegada)->format('H:i') }}</span></p>
         <p class="kv"><strong>Destino:</strong> <span>{{ $travelCertificate->destiny }}</span></p>
     </div>
     <div class="table-bordered text-left mt-3 mb-3 p-2">

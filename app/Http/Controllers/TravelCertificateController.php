@@ -12,6 +12,7 @@ use App\Http\Requests\StoreTravelCertificateRequest;
 use App\Http\Requests\UpdateTravelCertificateRequest;
 use App\Models\Vehicle;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Stmt\Else_;
@@ -146,8 +147,12 @@ class TravelCertificateController extends Controller
     public function updateTime(Request $request,$id)
     {
         $travelCertificate = TravelCertificate::find($id);
-        $travelCertificate->horaLLegada = $request->horaLlegada;
-        $travelCertificate->horaSalida = $request->horaSalida;
+        
+        $fecha = Carbon::parse($travelCertificate->date)->format('Y-m-d');
+        $horaLlegada = Carbon::parse($fecha . ' ' . $request->horaLlegada);
+        $horaSalida = Carbon::parse($fecha . ' ' . $request->horaSalida);
+        $travelCertificate->horaLLegada = $horaLlegada;
+        $travelCertificate->horaSalida = $horaSalida;
         $travelCertificate->save();
         return redirect(route('showTravelCertificate', $travelCertificate->id));
     }

@@ -81,7 +81,8 @@ class SettlementController extends Controller
             ->get();
 
 
-        $flag = true;
+        $flag = $this->validarUltimoIntervalo($settlement);
+        
         $creados = 0;
 
         foreach ($tcs as $tc) {
@@ -112,6 +113,30 @@ class SettlementController extends Controller
         }
 
         return $creados;
+    }
+
+    private function validarUltimoIntervalo($settlement)
+    {
+        $ultimoDetalle = SettlementDetail::whereHas('settlement', function ($q) use ($settlement) {
+        $q->where('driver_id', $settlement->driver_id);
+            })
+            ->where('settlement_id', '!=', $settlement->id)
+            ->where(function ($q) {
+                $q->where('carga_descarga_b', '>', 0)
+                ->orWhere('carga_descarga_n', '>', 0)
+                ->orWhere('noche_b', '>', 0)
+                ->orWhere('noche_n', '>', 0);
+            })
+            ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        if ($ultimoDetalle) {
+            $ultimoFueBlanco = $ultimoDetalle->carga_descarga_b > 0 || $ultimoDetalle->noche_b > 0;
+            return  !$ultimoFueBlanco;
+        } else {
+            return  true;
+        }
     }
     public function show(Settlement $settlement)
     {

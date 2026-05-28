@@ -118,8 +118,8 @@
                 <td>{{ $travelCertificate->vehicle?->name }}</td>
                 <td>{{ $travelCertificate->destiny }}</td>
                 <td>{{ \Carbon\Carbon::parse($travelCertificate->date)->format('d/m/Y') }}</td>
-                <td>{{ $travelCertificate->horaSalida }}</td>
-                <td>{{ $travelCertificate->horaLLegada }}</td>
+                <td>{{ \Carbon\Carbon::parse($travelCertificate->horaSalida)->format('H:i') }}</td>
+                <td>{{ \Carbon\Carbon::parse($travelCertificate->horaLLegada)->format('H:i') }}</td>
             </tr>
         </tbody>
     </table>

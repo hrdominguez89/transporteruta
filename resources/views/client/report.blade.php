@@ -132,34 +132,34 @@
                         @endif
                     @endforeach
                     @endif
-                    @php $flag = collect($debitos)->contains('clientId', $client->id); @endphp
+                    @php $flag = collect($creditos)->contains('clientId', $client->id); @endphp
                     @if($flag)
-                    <tr>
-                        <th colspan="5" style="width: 100%;" class="text-center">Notas de credito</th>
-                    </tr>
-                    <tr style="background-color: #dc3546; color: white;">
-                        <th class="text-center" style="width:25%">Numero</th>
-                        <th class="text-center" style="width:25%">Fecha</th>
-                        <th class="text-center" style="width:25%">Factura</th>
-                        <th class="text-center" style="width:25%" colspan="5">Total</th>
-                    </tr>
-                    @foreach ($creditos as $nota )
-                        @if($nota['clientId'] == $client->id)
                         <tr>
-                            <td class="text-center">
-                                {{ $nota['number'] }}
-                            </td>
-                            <td class="text-center">
-                                {{\Carbon\Carbon::parse($nota['date'])->format('d/m/y') }}
-                            </td>
-                            <td class="text-center">
-                                {{ $nota['invoice']["number"] }}
-                            </td>
-                            <td class="text-center" colspan="5">
-                                $&nbsp;{{ number_format($notad['total'], 2, ',', '.') }}
-                            </td>
+                            <th colspan="5" style="width: 100%;" class="text-center">Notas de credito</th>
                         </tr>
-                        @endif
+                        <tr style="background-color: #dc3546; color: white;">
+                            <th class="text-center" style="width:25%">Numero</th>
+                            <th class="text-center" style="width:25%">Fecha</th>
+                            <th class="text-center" style="width:25%">Factura</th>
+                            <th class="text-center" style="width:25%" colspan="5">Total</th>
+                        </tr>
+                        @foreach ($creditos as $nota )
+                            @if($nota['clientId'] == $client->id)
+                            <tr>
+                                <td class="text-center">
+                                    {{ $nota['number'] }}
+                                </td>
+                                <td class="text-center">
+                                    {{\Carbon\Carbon::parse($nota['date'])->format('d/m/y') }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $nota['invoice']["number"] }}
+                                </td>
+                                <td class="text-center" colspan="5">
+                                    $&nbsp;{{ number_format($nota['total'], 2, ',', '.') }}
+                                </td>
+                            </tr>
+                            @endif
                         @endforeach
                     @endif
                     @php $flag = collect($debitos)->contains('clientId', $client->id); @endphp
