@@ -14,7 +14,7 @@
             <input type="text" name="name" class="form-control mb-2" placeholder="Ingrese el nombre..." >
             <label for="lastname">Apellido:</label>
             <input type="text" name="lastname" class="form-control mb-2" placeholder="Ingrese el apellido..." >
-            <label for="address">Categoria:</label>
+            <label for="address">Departamento:</label>
             <input type="text" name="category" class="form-control mb-2" placeholder="Ingrese la direccion..." >
             <label for="mail">Mail:</label>
             <input type="text" name="mail" class="form-control mb-2" placeholder="Ingrese la ciudad..." >

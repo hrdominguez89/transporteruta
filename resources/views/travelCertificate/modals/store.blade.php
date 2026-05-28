@@ -26,7 +26,7 @@
 
                     <label for="driverId">Chofer:<span class="text-danger"> *</span></label>
                     <select name="driverId" class="form-control mb-2" required>
-                        <option value="">Seleccione un cofer</option>
+                        <option value="">Seleccione un chofer</option>
                         @foreach ($drivers as $driver)
                             <option value="{{ $driver->id }}">{{ $driver->name }} - {{ $driver->percent }} %</option>
                         @endforeach

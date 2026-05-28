@@ -46,14 +46,14 @@
                 <option value="HABITUAL">Habitual</option>
                 <option value="EVENTUAL">Eventual</option>
             </select>
-            </div>
+            {{-- </div>
                 <label for="vehicleId">Vehiculo:<span class="text-danger"> *</span></label>
                 <select name="vehicleId" class="form-control mb-2">
                     @foreach($vehicles as $vehicle)
                         <option value="{{ $vehicle->id }}" {{$vehicle->id == $driver->vehicleId ?'selected':'' }}>{{ $vehicle->name }}</option>
                     @endforeach
               </select>
-            </div>
+            </div> --}}
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-sm btn-success">Actualizar</button>

@@ -9,14 +9,18 @@
         </div>
     @endif
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 d-flex gap-2">
             <a href="{{ Route('vehicles') }}" class="btn btn-sm btn-secondary">Volver</a>
         </div>
         <div class="col-12 mt-3">
+            
             <h1>Patente:
                 <strong>{{  $vehiculo->name   }}</strong>
             </h1>
-            {{-- <h5>Tipo:
+            <h5>Chofer:
+                <strong>{{ $vehiculo->driver?->name }}</strong>
+            </h5>
+            <h5>Tipo:
                 <strong>{{ $vehiculo->tipo }}</strong>
             </h5>
             <h5>Marca:
@@ -26,8 +30,10 @@
                 <strong>{{ $vehiculo->modelo }}</strong>
             </h5>
             <h5>Año:
-                <strong>{{ $vehiculo->año}}</strong>
-            </h5> --}}
+                <strong>{{ $vehiculo->anio?->format('Y')}}</strong>
+            </h5>
+            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#updateModal{{ $vehiculo->id }}">Editar</button>
+
         </div>
     </div>
     <form method="GET" action="{{ route('showVehicle',$vehiculo->id) }}">
@@ -47,7 +53,7 @@
                     <label for="hasta">Hasta</label>
                     <input type="date" name="hasta" id="hasta" class="form-control" value="{{ request('hasta') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-1">
                     <button type="submit" class="btn btn-primary btn-block">Buscar</button>
                 </div>
             </div>
@@ -76,5 +82,5 @@
             </tr>
         </tbody>
     </table>
+    @include('vehicle.modals.update', ['vehicle' => $vehiculo])
     @stop
-    

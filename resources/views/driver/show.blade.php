@@ -41,7 +41,6 @@
                 <th>Telefono</th>
                 <th>Tipo</th>
                 <th>Sub tipo</th>
-                <th>Vehiculo</th>
             </tr>
         </thead>
         <tbody>
@@ -52,8 +51,33 @@
                 <td>{{ $driver->phone }}</td>
                 <td>{{ $driver->type }}</td>
                 <td>{{ $driver->subtipo }}</td>
-                <td>{{ $driver->vehicle ? $driver->vehicle->name : "" }}</td>
             </tr>
+        </tbody>
+    </table>
+    <br>
+    <h4>Vehiculos</h4>
+     <table class="table table-bordered text-center">
+        <thead class="bg-danger">
+            <tr>
+                <th>Patente</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+            </tr>
+        </thead>
+        <tbody>
+           @if($driver->vehicles->isNotEmpty())
+                @foreach($driver->vehicles as $vehicle)
+                    <tr>
+                        <td>{{ $vehicle->name }}</td>
+                        <td>{{ $vehicle->tipo ?? "----"}}</td>
+                        <td>{{ $vehicle->marca ?? "----"}}</td>
+                        <td>{{ $vehicle->modelo ?? "----"}}</td>
+                        <td>{{ $vehicle->anio ?? "----"}}</td>
+                    </tr>
+                @endforeach
+            @endif
         </tbody>
     </table>
     <br>

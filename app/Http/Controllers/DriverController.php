@@ -37,9 +37,6 @@ class DriverController extends Controller
             $driver->subtipo = null;
         }
         
-        // si no selecciona vehículo, guardamos NULL para no romper la FK
-        $driver->vehicleId   = $request->filled('vehicleId') ? (int) $request->vehicleId : null;
-
         $driver->save();
 
         return redirect()->route('drivers')->with('success', 'Chofer creado correctamente.');
@@ -72,7 +69,6 @@ class DriverController extends Controller
     {
         $driver->subtipo = null;
     }
-    $driver->vehicleId = $request->filled('vehicleId') ? (int)$request->vehicleId : null;
 
     $driver->save();
 

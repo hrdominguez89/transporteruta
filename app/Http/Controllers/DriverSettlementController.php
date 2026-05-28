@@ -30,20 +30,45 @@ class DriverSettlementController extends Controller
         return view('driverSettlement.index', $data);
     }
 
-    public function generate(StoreDriverSettlementRequest $request)
+    public function generate(Request $request)
     {
+        $modo = $request->modo;
 
-        $newDriverSettlement = new DriverSettlement;
-        $newDriverSettlement->number = (DriverSettlement::max('number') ?? 0) + 1;
-        $newDriverSettlement->date = Carbon::now()->format('Y-m-d');
-        $newDriverSettlement->total = 0;
-        $newDriverSettlement->driverId = $request->driverId;
-        $newDriverSettlement->paymentMethodId = 0;
-        $newDriverSettlement->dateFrom = $request->dateFrom;
-        $newDriverSettlement->dateTo = $request->dateTo;
-        if($request->filled('tipo')) $newDriverSettlement->tipo = $request->tipo;
-        $newDriverSettlement->save();
-        return redirect(route('showDriverSettlement', $newDriverSettlement->id));
+        switch ($modo) {
+            case 'propios':
+                $driverIds = Driver::where('type', 'PROPIO')->pluck('id');
+                break;
+            case 'eventuales':
+                $driverIds = Driver::where('type', 'TERCERO')->pluck('id');
+                break;
+            case 'algunos':
+                $driverIds = collect($request->driverId);
+                break;
+            case 'todos':
+            default:
+                $driverIds = Driver::pluck('id');
+                break;
+        }
+
+        $number = (DriverSettlement::max('number') ?? 0);
+        $lastId = null;
+
+        foreach ($driverIds as $driverId) {
+            $newDriverSettlement = new DriverSettlement;
+            $newDriverSettlement->number = ++$number;
+            $newDriverSettlement->date = Carbon::now()->format('Y-m-d');
+            $newDriverSettlement->total = 0;
+            $newDriverSettlement->driverId = $driverId;
+            $newDriverSettlement->paymentMethodId = 0;
+            $newDriverSettlement->dateFrom = $request->dateFrom;
+            $newDriverSettlement->dateTo = $request->dateTo;
+            if ($request->filled('tipo')) $newDriverSettlement->tipo = $request->tipo;
+            $newDriverSettlement->save();
+
+            $lastId = $newDriverSettlement->id;
+        }
+
+        return redirect(route('showDriverSettlement', $lastId));
     }
     public function show($id)
     {

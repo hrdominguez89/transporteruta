@@ -24,10 +24,10 @@ class Driver extends Model
         return $this->hasMany(DriverSettlement::class, 'driverId');
     }
 
-    public function vehicle()
-    {
-        return $this->belongsTo(Vehicle::class, 'vehicleId');
-    }
+   public function vehicles()  // plural
+{
+    return $this->hasMany(Vehicle::class, 'driverId');
+}
 
     public function setPercentAttribute($value)
     {

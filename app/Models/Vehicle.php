@@ -11,11 +11,14 @@ class Vehicle extends Model
     use HasFactory;
 
     protected $fillable = ['name'];
+    protected $casts = [
+    'anio' => 'datetime',
+];
 
-    public function drivers()
-    {
-        return $this->hasMany(Driver::class, 'vehicleId');
-    }
+  public function driver()
+{
+    return $this->belongsTo(Driver::class, 'driverId');
+}
     public function recaudacionHistorica()
     {
         return TravelCertificate::where('vehicleId',$this->id)->sum('total');

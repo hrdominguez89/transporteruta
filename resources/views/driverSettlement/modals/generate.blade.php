@@ -1,3 +1,6 @@
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-theme@0.1.0-beta.10/dist/select2-bootstrap.min.css" rel="stylesheet">
+
 <div class="modal fade" id="generateModal" tabindex="-1" aria-labelledby="generateModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -11,9 +14,28 @@
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="driverId">Chofer:<span class="text-danger"> *</span></label>
-                        <select id="driverId" name="driverId" class="form-control mb-2" required>
-                            <option value="">---- Seleccione una opcion ----</option>
+                        <label class="d-block">Generar para:<span class="text-danger"> *</span></label>
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="modo" id="modoTodos" value="todos" checked>
+                                <label class="form-check-label" for="modoTodos">Todos</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="modo" id="modoPropios" value="propios">
+                                <label class="form-check-label" for="modoPropios">Propios</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="modo" id="modoEventuales" value="eventuales">
+                                <label class="form-check-label" for="modoEventuales">Eventuales</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="modo" id="modoAlgunos" value="algunos">
+                                <label class="form-check-label" for="modoAlgunos">Algunos</label>
+                            </div>
+                        </div>
+
+                        <label for="driverId">Chofer:</label>
+                        <select name="driverId[]" id="driverId" class="form-control mb-2" multiple disabled style="width:100%;">
                             @foreach ($drivers as $driver)
                                 <option value="{{ $driver->id }}">{{ $driver->name }}</option>
                             @endforeach
@@ -43,7 +65,28 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script>
+    $(function () {
+
+    const driverSelect = document.getElementById("driverId");
+
+    $('#driverId').select2({
+        placeholder: 'Seleccione choferes',
+        width: '100%',
+        dropdownParent: $('#generateModal .modal-body')
+    });
+
+    $(document).on('change', 'input[name="modo"]', function () {
+    const esAlgunos = this.value === "algunos";
+    
+    if (!esAlgunos) {
+        $('#driverId').val(null).trigger('change');
+    }
+    $('#driverId').prop('disabled', !esAlgunos);
+});
+
     function showToast(mensaje) {
         const existente = document.getElementById("toastError");
         if (existente) existente.remove();
@@ -74,6 +117,13 @@
     document.getElementById("btngenerar").addEventListener("click", function (e) {
         e.preventDefault();
 
+        const modo = document.querySelector('input[name="modo"]:checked').value;
+
+        if (modo === "algunos" && driverSelect.selectedOptions.length === 0) {
+            showToast("Seleccione al menos un chofer");
+            return;
+        }
+
         const tipo  = document.getElementById("tipoliquidacion").value;
         const desde = document.getElementById("dateFrom").value;
         const hasta = document.getElementById("dateTo").value;
@@ -92,4 +142,5 @@
             this.closest("form").submit();
         }
     });
+});
 </script>

@@ -57,7 +57,7 @@
                                         <ul class="card__data list-unstyled mb-0">
                                             <li><span>Nombre :</span><strong> {{ $contacto->nombre }}</strong></li>
                                             <li><span>Apellido :</span><strong> {{ $contacto->apellido }}</strong></li>
-                                            <li><span>Categoria :</span><strong> {{ $contacto->categoria }}</strong></li>
+                                            <li><span>Departamento :</span><strong> {{ $contacto->categoria }}</strong></li>
                                             <li><span>Mail :</span><strong> {{ $contacto->mail }}</strong></li>
                                             <li><span>Telefono :</span><strong> {{ $contacto->telefono }}</strong></li>
                                             <li><span>Comentario :</span><strong> {{ $contacto->comentario }}</strong></li>

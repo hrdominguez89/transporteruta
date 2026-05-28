@@ -47,7 +47,7 @@
                     </div>
 
                      {{-- Nueva refactorizacion si no se ingresa ninguna opcion --}}
-                    <label for="vehicleId">Vehículo:</label>
+                    {{-- <label for="vehicleId">Vehículo:</label>
                         <select id="vehicleId" name="vehicleId" class="form-control mb-2">
                             <option value="" selected>---- Seleccione una opción ----</option>
                             @forelse ($vehicles as $vehicle)
@@ -57,9 +57,8 @@
                                 </option>
                             @empty
                                 {{-- No hay vehículos cargados --}}
-                            @endforelse
-                        </select>
-                   
+                            {{-- @endforelse --}}
+                        {{-- </select> --}}                    
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
