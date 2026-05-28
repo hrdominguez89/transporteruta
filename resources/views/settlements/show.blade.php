@@ -145,14 +145,14 @@
                                             type="number" step="0.01"
                                             class="form-control form-control-sm input-editable"
                                             data-field="chofer_cd_n"
-                                            value="{{ $detalle->chofer_cd_n ?? ($detalle->carga_descarga_n * 0.25) }}">
+                                            value="{{ $detalle->chofer_cd_n ?? ($detalle->carga_descarga_n) }}">
                                     </td>
                                     <td>
                                         <input
                                             type="number" step="0.01"
                                             class="form-control form-control-sm input-editable"
                                             data-field="chofer_n_n"
-                                            value="{{ $detalle->chofer_n_n ?? ($detalle->noche_n * 0.25) }}">
+                                            value="{{ $detalle->chofer_n_n ?? ($detalle->noche_n) }}">
                                     </td>
                                     <td data-cell="chofer_total">{{ $detalle->chofer_total ?? number_format(($detalle->chofer_porcentaje / 100) * ($detalle->importe_neto - $detalle->carga_descarga_b - $detalle->noche_b), 2, '.', '') }}</td>
                                     <td data-cell="diferencia">{{ $detalle->diferencia ?? 0 }}</td>
