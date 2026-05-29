@@ -25,6 +25,23 @@
 @stop
 
 @section('content')
+    <div class="d-flex align-items-end mb-2">
+        <form method="GET" action="{{ route('drivers') }}" class="d-flex flex-column mr-3">
+            <label>Buscar por vehiculo</label>
+            <div class="d-flex">
+                <button type="submit" class="btn btn-primary mr-2">Buscar</button>
+                <select class="form-control" name="vehicleId">
+                    @foreach ($vehicles as $vehicle)
+                        <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </form>
+
+        <form method="GET" action="{{ route('drivers') }}" class="d-flex flex-column">
+            <button type="submit" class="btn btn-primary">Limpiar</button>
+        </form>
+    </div>
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>

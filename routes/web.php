@@ -38,6 +38,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('guardar/chofer', [DriverController::class, 'store'])->name('storeDriver');
     Route::get('ver/chofer/{id}', [DriverController::class, 'show'])->name('showDriver');
     Route::put('actualizar/chofer/{id}', [DriverController::class, 'update'])->name('updateDriver');
+    Route::put('agregarVehiculo/chofer/{id}', [DriverController::class, 'setVehicleToDriver'])->name('setVehicleToDriver');//setVehicleToDriver
+    Route::get('sacarVehiculo/chofer/{id}', [DriverController::class, 'unsetVehicleToDriver'])->name('unsetVehicleToDriver');
 
     // TravelCertificate
     Route::get('constancias-de-viaje', [TravelCertificateController::class, 'travelCertificates'])->name('travelCertificates');

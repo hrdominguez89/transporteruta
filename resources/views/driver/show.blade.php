@@ -6,9 +6,16 @@
     <div class="row">
         <a href="{{ Route('drivers') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col-9">Chofer: <strong>{{ $driver->name }}</strong></h1>
-        <button class="btn btn-sm btn-success col-2" data-toggle="modal" data-target="#updateModal{{ $driver->id }}">Actualizar
-            Chofer</button>
+        <div class="d-flex ml-auto align-items-center">
+            <button class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#updateModal{{ $driver->id }}">
+                Actualizar chofer
+            </button>
+            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#vehicleModal{{ $driver->id }}">
+                Agregar vehiculo
+            </button>
+        </div>
         @include('driver.modals.update')
+        @include('driver.modals.vehicle')
        @if($errors->any())
     <div id="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert">
         <strong>Corregí los siguientes errores:</strong>
@@ -64,6 +71,7 @@
                 <th>Marca</th>
                 <th>Modelo</th>
                 <th>Año</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -75,6 +83,7 @@
                         <td>{{ $vehicle->marca ?? "----"}}</td>
                         <td>{{ $vehicle->modelo ?? "----"}}</td>
                         <td>{{ $vehicle->anio ?? "----"}}</td>
+                        <td><a href="{{ route('unsetVehicleToDriver', ['id' => $driver->id, 'id_vehicle' => $vehicle->id]) }}">Eliminar</a></td>
                     </tr>
                 @endforeach
             @endif
