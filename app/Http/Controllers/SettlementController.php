@@ -100,9 +100,11 @@ class SettlementController extends Controller
                 'peajes'                => $tc->total_peajes,
                 'estacionamiento'       => $tc->total_estacionamiento,
                 'carga_descarga_b'      => $flag ? $cargaDescarga : 0,
-                'carga_descarga_n'      => $flag ? 0 : ($cargaDescarga * 0.75),
+                'carga_descarga_n'      => $flag ? 0 : $cargaDescarga,
+                'chofer_cd_n'           => $flag ? 0 : ($cargaDescarga * 0.20),
                 'noche_b'               => $flag ? $noche : 0,
-                'noche_n'               => $flag ? 0 : ($noche * 0.25),
+                'noche_n'               => $flag ? 0 : $noche,
+                'chofer_n_n'               => $flag ? 0 : ($noche * 0.20),
             ]);
 
             $creados++;

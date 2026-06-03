@@ -52,24 +52,35 @@ class DriverSettlementController extends Controller
 
         $number = (DriverSettlement::max('number') ?? 0);
         $lastId = null;
-
-        foreach ($driverIds as $driverId) {
+        $from = $request->dateFrom;
+        $to = $request->dateTo; 
+        $driverIdsPurgados = $this->purgarPorTcPeriodo($driverIds,$from,$to);
+        foreach ($driverIdsPurgados as $driverId) {
             $newDriverSettlement = new DriverSettlement;
             $newDriverSettlement->number = ++$number;
             $newDriverSettlement->date = Carbon::now()->format('Y-m-d');
             $newDriverSettlement->total = 0;
             $newDriverSettlement->driverId = $driverId;
             $newDriverSettlement->paymentMethodId = 0;
-            $newDriverSettlement->dateFrom = $request->dateFrom;
-            $newDriverSettlement->dateTo = $request->dateTo;
+            $newDriverSettlement->dateFrom = $from;
+            $newDriverSettlement->dateTo = $to;
             if ($request->filled('tipo')) $newDriverSettlement->tipo = $request->tipo;
             $newDriverSettlement->save();
 
             $lastId = $newDriverSettlement->id;
         }
-
+        
         return redirect(route('showDriverSettlement', $lastId));
     }
+    private function purgarPorTcPeriodo($driverIds,$from,$to)
+    {
+        return Driver::whereIn('id',$driverIds)
+                ->whereHas('travelCertificates',function ($q) use ($from,$to){
+                    $q->whereBetween('date',[$from,$to]);
+                })
+                ->pluck('id');
+    }
+
     public function show($id)
     {
         $data['driverSettlement'] = DriverSettlement::find($id);

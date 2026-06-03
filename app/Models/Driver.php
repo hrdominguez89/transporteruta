@@ -24,7 +24,7 @@ class Driver extends Model
         return $this->hasMany(DriverSettlement::class, 'driverId');
     }
 
-   public function vehicles()  // plural
+   public function vehicles() 
 {
     return $this->hasMany(Vehicle::class, 'driverId');
 }

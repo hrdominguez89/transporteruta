@@ -122,8 +122,17 @@
                                     </td>
                                     <td>{{ $detalle->peajes }}</td>
                                     <td>{{ $detalle->estacionamiento }}</td>
-                                    <td>{{ $detalle->carga_descarga_b }}</td>
-                                    <td>{{ $detalle->noche_b }}</td>
+                                    <td data-cell="carga_descarga_b" 
+                                        data-estado="{{ ($detalle->carga_descarga_n || $detalle->noche_n) ? 'n' : 'b' }}"
+                                        data-original-carg="{{ $detalle->carga_descarga_n }}"
+                                        data-original-noche="{{ $detalle->noche_n }}">
+                                        <span class="val-text">{{ $detalle->carga_descarga_b }}</span>
+                                        @if($detalle->carga_descarga_b || $detalle->noche_b || $detalle->carga_descarga_n || $detalle->noche_n)
+                                            <button type="button" class="btn btn-sm btn-primary py-0 ms-1"
+                                                    onclick="cambiarCargYNoche({{ $detalle->id }})">B↔N</button>
+                                        @endif
+                                    </td>
+                                    <td data-cell="noche_b">{{ $detalle->noche_b }}</td>
                                     <td data-cell="noche_n">{{ $detalle->noche_n }}</td>
                                     <td data-cell="carga_descarga_n">{{ $detalle->carga_descarga_n }}</td>
                                     <td>
@@ -179,6 +188,7 @@
         setTimeout(() => {
             document.querySelectorAll('.alert-auto').forEach(el => $(el).fadeOut());
         }, 3000);
+
         const URL_GUARDAR = '{{ route('guardarEdicion', $settlement) }}';
         const URL_EXCEL   = '{{ route('SettlementsExcel', $settlement) }}';
         const CSRF        = '{{ csrf_token() }}';
@@ -187,7 +197,7 @@
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
         });
 
-        // Recalcula chofer_total y diferencia en tiempo real
+        
         document.addEventListener('input', function (e) {
             if (!e.target.matches('.input-editable[data-field="chofer_porcentaje"], .input-editable[data-field="base_recaudacion"], .input-editable[data-field="chofer_n"]')) return;
 
@@ -208,21 +218,73 @@
             row.querySelector('[data-cell="diferencia"]').textContent   = diferencia.toFixed(2);
         });
 
-        // Junta todos los detalles de todas las semanas
-        function recolectarDetalles() {
-            const detalles = [];
-            document.querySelectorAll('tr[data-detail-id]').forEach(tr => {
-                const detalle = { id: parseInt(tr.dataset.detailId) };
-                tr.querySelectorAll('.input-editable').forEach(input => {
-                    const field = input.dataset.field;
-                    detalle[field] = input.type === 'text' ? input.value : (parseFloat(input.value) || 0);
-                });
-                detalle.chofer_total = parseFloat(tr.querySelector('[data-cell="chofer_total"]').textContent) || 0;
-                detalle.diferencia   = parseFloat(tr.querySelector('[data-cell="diferencia"]').textContent) || 0;
-                detalles.push(detalle);
-            });
-            return detalles;
+        function cambiarCargYNoche(id) {
+            const row = document.querySelector(`tr[data-detail-id="${id}"]`);
+
+            const tdCargB  = row.querySelector('[data-cell="carga_descarga_b"]');
+            const tdNocheB = row.querySelector('[data-cell="noche_b"]');
+
+            const inCargN  = row.querySelector('[data-cell="carga_descarga_n"]');
+            const inNocheN = row.querySelector('[data-cell="noche_n"]');
+            const inChCdN  = row.querySelector('[data-field="chofer_cd_n"]');
+            const inChNN   = row.querySelector('[data-field="chofer_n_n"]');
+
+            const estaEnB = parseFloat(inCargN.textContent) === 0 && parseFloat(inNocheN.textContent) === 0;
+            const valCarg  = parseFloat(tdCargB.querySelector('span.val-text').textContent.trim()) || 0;
+
+            if (estaEnB) {
+                const valCarg  = parseFloat(tdCargB.querySelector('span.val-text').textContent.trim()) || 0;
+                const valNoche = parseFloat(tdNocheB.textContent.trim()) || 0;
+
+                row.dataset.originalCarg  = valCarg;   // <-- en el <tr>
+                row.dataset.originalNoche = valNoche;  // <-- en el <tr>
+                tdCargB.dataset.estado = 'n';
+
+                tdCargB.querySelector('span.val-text').textContent = '0';
+                tdNocheB.textContent = '0';
+
+                inCargN.textContent  = valCarg.toFixed(2);
+                inNocheN.textContent = valNoche.toFixed(2);
+                inChCdN.value = (valCarg  * 0.20).toFixed(2);
+                inChNN.value  = (valNoche * 0.20).toFixed(2);
+
+            } else {
+                // Si hay dataset del swap previo (IF), usarlo. Si no, leer del td (recarga en N)
+                const valCarg  = parseFloat(row.dataset.originalCarg  ?? tdCargB.dataset.originalCarg)  || 0;
+                const valNoche = parseFloat(row.dataset.originalNoche ?? tdCargB.dataset.originalNoche) || 0;
+
+                tdCargB.dataset.estado = 'b';
+
+                tdCargB.querySelector('span.val-text').textContent = valCarg;
+                tdNocheB.textContent = valNoche;
+
+                inCargN.textContent  = '0';
+                inNocheN.textContent = '0';
+                inChCdN.value = '0.00';
+                inChNN.value  = '0.00';
+            }
         }
+        function recolectarDetalles() {
+    const detalles = [];
+    document.querySelectorAll('tr[data-detail-id]').forEach(tr => {
+        const detalle = { id: parseInt(tr.dataset.detailId) };
+
+        tr.querySelectorAll('.input-editable').forEach(input => {
+            const field = input.dataset.field;
+            detalle[field] = input.type === 'text' ? input.value : (parseFloat(input.value) || 0);
+        });
+
+        detalle.carga_descarga_b = parseFloat(tr.querySelector('[data-cell="carga_descarga_b"] span.val-text').textContent) || 0;
+        detalle.noche_b          = parseFloat(tr.querySelector('[data-cell="noche_b"]').textContent.trim()) || 0;
+        detalle.carga_descarga_n = parseFloat(tr.querySelector('[data-cell="carga_descarga_n"]').textContent.trim()) || 0;
+        detalle.noche_n          = parseFloat(tr.querySelector('[data-cell="noche_n"]').textContent.trim()) || 0;
+        detalle.chofer_total     = parseFloat(tr.querySelector('[data-cell="chofer_total"]').textContent) || 0;
+        detalle.diferencia       = parseFloat(tr.querySelector('[data-cell="diferencia"]').textContent) || 0;
+
+        detalles.push(detalle);
+    });
+    return detalles;
+}
 
         function guardar() {
             return fetch(URL_GUARDAR, {

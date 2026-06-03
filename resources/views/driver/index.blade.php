@@ -26,22 +26,41 @@
 
 @section('content')
     <div class="d-flex align-items-end mb-2">
-        <form method="GET" action="{{ route('drivers') }}" class="d-flex flex-column mr-3">
-            <label>Buscar por vehiculo</label>
-            <div class="d-flex">
-                <button type="submit" class="btn btn-primary mr-2">Buscar</button>
-                <select class="form-control" name="vehicleId">
-                    @foreach ($vehicles as $vehicle)
-                        <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </form>
+    <form method="GET" action="{{ route('drivers') }}" class="d-flex align-items-end">
+        <div class="d-flex flex-column mr-2">
+            <label>Vehículo</label>
+            <select class="form-control" name="vehicleId">
+                <option value="">Ninguno</option>
+                @foreach ($vehicles as $vehicle)
+                    <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="d-flex flex-column mr-2">
+            <label>Tipo</label>
+            <select class="form-control" name="tipo">
+                <option value="">Ninguno</option>
+                @foreach ($types as $type)
+                    <option value="{{ $type }}">{{ $type }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="d-flex flex-column mr-2">
+            <label>Modelo</label>
+            <select class="form-control" name="modelo">
+                <option value="">Ninguno</option>
+                @foreach ($models as $model)
+                    <option value="{{ $model }}">{{ $model }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mr-2">Buscar</button>
+    </form>
 
-        <form method="GET" action="{{ route('drivers') }}" class="d-flex flex-column">
-            <button type="submit" class="btn btn-primary">Limpiar</button>
-        </form>
-    </div>
+    <form method="GET" action="{{ route('drivers') }}">
+        <button type="submit" class="btn btn-secondary">Limpiar</button>
+    </form>
+</div>
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>

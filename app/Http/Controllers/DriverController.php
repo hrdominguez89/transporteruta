@@ -12,13 +12,48 @@ class DriverController extends Controller
 {
     public function drivers(Request $request)
     {
-        $request->vehicleId ? $drivers = Driver::where('id', Vehicle::find($request->vehicleId)->driverId)->get() : $drivers = Driver::all();; 
         $vehicles = Vehicle::all();
-        return view('driver.index', ['drivers' => $drivers, 'vehicles' => $vehicles]);
+        
+        $query = Driver::query();
+
+        if ($request->filled('vehicleId')) {
+            $query->whereHas('vehicles', fn($q) => $q->where('id', $request->vehicleId));
+        }
+
+        if ($request->filled('tipo')) {
+            $query->whereHas('vehicles', fn($q) => $q->where('tipo', $request->tipo));
+        }
+
+        if ($request->filled('modelo')) {
+            $query->whereHas('vehicles', fn($q) => $q->where('modelo', $request->modelo));
+        }
+        $drivers = $query->get();
+        $types = [];
+        $models=[];
+
+        foreach($vehicles as $v)
+        {
+            if($v->tipo!=null)
+            {
+
+                if(!in_array($v->tipo,$types))
+                    {
+                        $types[]=$v->tipo;
+                    }
+            }
+            if($v->modelo!=null)
+            {
+                if(!in_array($v->modelo,$models))
+                {
+                    $models[]=$v->modelo;
+                }
+            }
+        }
+        return view('driver.index', ['drivers'=>$drivers,'types'=>$types,'vehicles'=>$vehicles,'models'=>$models]);
     }
 
 
- public function store(StoreDriverRequest $request)
+    public function store(StoreDriverRequest $request)
     {
         $driver              = new Driver();
         $driver->name        = $request->name;
