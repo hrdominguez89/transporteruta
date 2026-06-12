@@ -106,22 +106,18 @@
                     <a target="_blank" href="{{ Route('showClient', $invoice->client->id) }}">{{ $invoice->client->name }}</a>
                 </td>
                 <td>{{ $invoice->reference ? $invoice->reference : '-' }}</td>
-                {{-- REF: "Total (Sin IVA)" debe ser SOLO el Neto, sin sumar Peajes --}}
-                <!-- <td>$&nbsp;{{ number_format($totalNeto, 2, ',', '.') }}</td> -->
+                
                 <td>$&nbsp;{{ $invoice->total }}</td>
 
-                {{-- IVA (0 si EXENTO; si no, calculado por fila arriba) --}}
                 <td>$&nbsp;{{ number_format($totalIva, 2, ',', '.') }}</td>
 
-                {{-- Peajes (sumatoria por constancias) --}}
                 <td>$&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}</td>
                 <td>$&nbsp;{{ number_format($estacionamiento, 2, ',', '.') }}</td>
                 
                 <td>$&nbsp;{{ number_format($invoice->balance, 2, ',', '.') }}</td>
                 <td>{{ $invoice->invoiced }}</td>
 
-                {{-- Total (Con IVA) = Neto + IVA + Peajes --}}
-                <td>$&nbsp;{{ number_format($invoice->getTotalWithIvaAttribute(), 2, ',', '.') }}</td>
+                <td>$&nbsp;{{ number_format($invoice->getTotalWithIvaAttribute(), 2, ',', '.')  }}</td>
             </tr>
         </tbody>
     </table>

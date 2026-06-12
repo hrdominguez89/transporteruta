@@ -50,6 +50,7 @@
             <div id="contactosCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     @foreach($client->contactos as $index => $contacto)
+                    @include('client.modals.updateContacto')
                         <div class="carousel-item {{ $index === 0 ? 'active' : '' }}" style="transition: 0.5s">
                             <div class="d-flex justify-content-center">
                                 <article class="card" style="width: 220px;">
@@ -61,11 +62,18 @@
                                             <li><span>Mail :</span><strong> {{ $contacto->mail }}</strong></li>
                                             <li><span>Telefono :</span><strong> {{ $contacto->telefono }}</strong></li>
                                             <li><span>Comentario :</span><strong> {{ $contacto->comentario }}</strong></li>
-                                                <button class="btn btn-primary"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#editContacto">
-                                                    <i class="bi bi-pencil-square"></i>
+                                           <button class="btn btn-primary"
+                                                    data-toggle="modal"
+                                                    data-target="#updateContacto-{{ $contacto->id }}-{{ $client->id }}">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <form action="{{ route('deleteContacto', [$contacto->id, $client->id]) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-link p-0">
+                                                    <i class="fas fa-trash"></i>
                                                 </button>
+                                            </form>
                                         </ul>
                                     </div>
                                 </article>

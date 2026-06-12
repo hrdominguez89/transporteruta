@@ -132,7 +132,42 @@ class Invoice extends Model
     }
     public function misrecibos()
     {
-          return $this->belongsToMany(Receipt::class, 'invoice_receipt', 'invoice_id', 'receipt_id')->withPivot('paymentMethodId', 'total', 'taxAmount');
+        return $this->belongsToMany(Receipt::class, 'invoice_receipt', 'invoice_id', 'receipt_id')->withPivot('paymentMethodId', 'total', 'taxAmount');
+    }
+    /**
+     * Detalle de pagos parciales de la factura.
+     * [
+     *   reciboId => [
+     *     'recibo'        => Receipt,                 // el recibo en el que está
+     *     'monto_factura' => float,                   // aplicado a ESTA factura (invoice_receipt.total)
+     *     'pagos'         => [
+     *         pagoId => [ 'pago' => Payments, 'monto' => float ]   // payment_recipe_pivot.total
+     *     ],
+     *   ],
+     * ]
+     */
+    public function detallePagos(): array
+    {
+        $detalle = [];
+
+        foreach ($this->misrecibos as $recibo) {
+            $pagos = [];
+
+            foreach ($recibo->paymentspivot as $pago) {
+                $pagos[$pago->id] = [
+                    'pago'  => $pago,
+                    'monto' => (float) $pago->pivot->total,
+                ];
+            }
+
+            $detalle[$recibo->id] = [
+                'recibo'        => $recibo,
+                'monto_factura' => (float) $recibo->pivot->total,
+                'pagos'         => $pagos,
+            ];
+        }
+
+        return $detalle;
     }
 }
 

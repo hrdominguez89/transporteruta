@@ -123,10 +123,26 @@ class ClientController extends Controller
         $contacto->apellido = $request->lastname ?? "-";
         $contacto->telefono = $request->telefono ?? "-";
         $contacto->mail = $request->mail ?? "-";
-        $contacto->comentario = $request->comentario ?? "-";
+        $contacto->comentario = $request->comentarios ?? "-";
         $contacto->categoria = $request->category ?? "-";
         $contacto->save();
         return redirect(route('showClient', $id));
     }
+      public function editContact(Request $request,$id_contacto,$id_cliente)
+    {
+        $contacto = Contacto::findOrFail($id_contacto);
+        $contacto->nombre = $request->name ?? "-";
+        $contacto->apellido = $request->lastname ?? "-";
+        $contacto->telefono = $request->telefono ?? "-";
+        $contacto->mail = $request->mail ?? "-";
+        $contacto->comentario = $request->comentarios ?? "-";
+        $contacto->categoria = $request->category ?? "-";
+        $contacto->save();
+        return redirect(route('showClient', $id_cliente));
+    }
+    public function deleteContacto(Request $request,$id_contacto,$id_cliente)
+    {
+        Contacto::findOrFail($id_contacto)->delete();
+        return redirect(route('showClient', $id_cliente));
+    }
 }
-
