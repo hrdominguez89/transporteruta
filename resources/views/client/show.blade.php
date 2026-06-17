@@ -49,8 +49,8 @@
             </button>
             <div id="contactosCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                    @foreach($client->contactos as $index => $contacto)
                     @include('client.modals.updateContacto')
+                    @foreach($client->contactos as $index => $contacto)
                         <div class="carousel-item {{ $index === 0 ? 'active' : '' }}" style="transition: 0.5s">
                             <div class="d-flex justify-content-center">
                                 <article class="card" style="width: 220px;">
