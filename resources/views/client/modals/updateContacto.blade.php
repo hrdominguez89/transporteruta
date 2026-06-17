@@ -3,9 +3,9 @@
     <div class="modal-content">
       <div class="modal-header bg-danger">
         <h5 class="modal-title">Editar Contacto</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+          <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
       </div>
       <div class="modal-body">
         <form action="{{ Route('editarContacto', [$contacto->id, $client->id]) }}" method="POST">
@@ -33,7 +33,7 @@
             <input type="text" name="comentarios" class="form-control mb-2" placeholder="Ingrese las observaciones..." value="{{ $contacto->comentario }}">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
         </form>
       </div>
