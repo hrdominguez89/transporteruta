@@ -55,13 +55,12 @@ class PaymentNotificationsService
                 $message->to('l.e.marguery@gmail.com')
                 // ->cc([env('MAIL_CC_ONE'),env('MAIL_CC_TWO')])
                 // ->cc(["matiivalin@gmail.com"])
-                ->subject($cliente.':notificación de facturas vencidas y a vencer en los proximos dias.')
+                ->subject('Facturas vencidas y en plazo - ' . $cliente )
                 ->from(env('MAIL_NOTIFICACION'));
             });
             return true;
         }
         return false;
-
     }
 
     public function validarNotificacion()

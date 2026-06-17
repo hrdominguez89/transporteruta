@@ -14,20 +14,27 @@ A continuación, adjuntamos el detalle, según nuestra cuenta corriente actualiz
             <hr>
             <p><strong>{{ $vencida ? 'Vencida' : 'En plazo' }}</strong></p>
             <p>Factura N° {{ $invoice->number }}, punto de venta: {{ $invoice->point_of_sale }}, fecha de emisión: {{ $invoice->date->format('d/m/Y') }}.</p>
-            <p>Total con IVA: ${{ number_format($invoice->totalWithIva, 2, ',', '.') }}.</p>
-            <p>Falta pagar (saldo): ${{ number_format($invoice->balance, 2, ',', '.') }}.</p>
+            <p>Total: ${{ number_format($invoice->totalWithIva, 2, ',', '.') }}.</p>
+            <p>Saldo pendiente: ${{ number_format($invoice->balance, 2, ',', '.') }}.</p>
 
             @if ($invoice->credits->count())
                 <p>Notas de crédito:</p>
                 @foreach ($invoice->credits as $credit)
-                    <p>&nbsp;&nbsp;N° {{ $credit->number }} — ${{ number_format($credit->total, 2, ',', '.') }}</p>
+                    <p>&nbsp;&nbsp;N° {{ $credit->number }}</p>
+                    <p>&nbsp;&nbsp;Total: ${{ number_format($credit->total, 2, ',', '.') }}</p>
+                    {{-- <p>&nbsp;&nbsp;Punto de venta: {{ $credit->point_of_sale }}</p> FALTA AGREGAR AL SISTEMA --}}
+                    <p>&nbsp;&nbsp;Punto de venta: {{ $invoice->point_of_sale }}</p> 
+                    <p>&nbsp;&nbsp;Fecha de emisión: {{ $credit->date }}</p>
                 @endforeach
             @endif
 
             @if ($invoice->debits->count())
                 <p>Notas de débito:</p>
                 @foreach ($invoice->debits as $debit)
-                    <p>&nbsp;&nbsp;N° {{ $debit->number }} — ${{ number_format($debit->total, 2, ',', '.') }}</p>
+                    <p>&nbsp;&nbsp;N° {{ $debit->number }} </p>
+                    <p>&nbsp;&nbsp;Total: ${{ number_format($debit->balance, 2, ',', '.') }}</p>
+                    <p>&nbsp;&nbsp;Punto de venta: {{ $invoice->point_of_sale }}</p>
+                    <p>&nbsp;&nbsp;Fecha de emisión: {{ $credit->date }}</p>
                 @endforeach
             @endif
 
