@@ -3,6 +3,11 @@
 @section('title', 'Liquidaciones de Choferes')
 
 @section('content_header')
+    @if(session('flag'))
+        <div class="alert alert-warning">
+            {{ session('message') }}
+        </div>
+    @endif
     <div class="row">
         <h1 class="col-10">Liquidaciones de Choferes</h1>
         <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Generar Liquidacion</button>

@@ -69,7 +69,14 @@ class DriverSettlementController extends Controller
 
             $lastId = $newDriverSettlement->id;
         }
-        
+        if($lastId==null)
+        {
+            session()->flash('flag', true);
+            session()->flash('message', 'No se encontraron constancias de viajes para este/os choferes por lo que no se genero ninguna liquidacion.');    
+            $data['driverSettlements'] = DriverSettlement::all();
+            $data['drivers'] = Driver::orderBy('name', 'asc')->get();
+            return view('driverSettlement.index', $data);
+        }
         return redirect(route('showDriverSettlement', $lastId));
     }
     private function purgarPorTcPeriodo($driverIds,$from,$to)
