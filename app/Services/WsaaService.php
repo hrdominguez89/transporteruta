@@ -61,14 +61,14 @@ class WsaaService
 
         file_put_contents($traFile, $tra);
 
-        // $signed = openssl_pkcs7_sign(
-        //     $traFile,
-        //     $cmsFile,
-        //     'file://' . $this->certPath,
-        //     ['file://' . $this->keyPath, ''],
-        //     [],
-        //         PKCS7_BINARY
-        // );
+        $signed = openssl_pkcs7_sign(
+            $traFile,
+            $cmsFile,
+            'file://' . $this->certPath,
+            ['file://' . $this->keyPath, ''],
+            [],
+                PKCS7_BINARY
+        );
         $cms = file_get_contents($cmsFile);
 
         unlink($traFile);
