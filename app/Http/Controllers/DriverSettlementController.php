@@ -131,11 +131,11 @@ class DriverSettlementController extends Controller
         $data['totalAgency'] = 0;
 
         $data['totalTolls'] = 0;
-
+        $data['estacionamientos'] = 0;
         // Calculamos el total de agency y sumamos los peajes
         foreach ($data['driverSettlement']->travelCertificates as $travelCertificate) {
             $data['totalAgency'] += $travelCertificate->driverPayment;
-
+            $data['estacionamientos'] += $travelCertificate->totalestacionamiento ;
             // Agregar el total de peajes a cada travelCertificate
             $travelCertificate->totalTolls = TravelItem::where('type', 'PEAJE')
                 ->where('travelCertificateId', $travelCertificate->id)
