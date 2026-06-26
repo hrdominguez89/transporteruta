@@ -159,6 +159,9 @@
                         <th class="text-center">Importe<br>Neto</th>
                         <th class="text-center">I.V.A.</th>
                         <th class="text-center">Subtotal</th>
+                        @if($travelCertificate->totalestacionamiento)
+                        <th class="text-center">Estacionamientos</th>
+                        @endif
                         <th class="text-center">Peajes</th>
                         <th class="text-center">Total</th>
                         <th class="text-center">% ó $<br>acordado</th>
@@ -181,6 +184,7 @@
                         $totalAFavorDelChofer = 0;
                         $totalIvaChofer = 0;
                         $totalAFavorDeLaEmpresa = 0;
+                        $totalEstacionamiento = 0;
                     @endphp
 
                     @foreach ($driverSettlement->travelCertificates as $travelCertificate)
@@ -192,7 +196,7 @@
                                 $travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva;
                             $totalIVA += $travelCertificate->iva;
                             $totalTotal += $travelCertificate->total + $travelCertificate->iva;
-
+                            $totalEstacionamiento += $travelCertificate->totalestacionamiento;
                             if (in_array($travelCertificate->commission_type, ['porcentaje', 'porcentaje pactado'])) {
                                 $totalAFavorDelChofer +=
                                     $travelCertificate->total -
@@ -239,7 +243,7 @@
                             <td class="text-left">{{ $travelCertificate->client->name }}</td>
                             {{-- IMPORTE NETO --}}
                             <td class="text-right">
-                                $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls, 2, ',', '.') }}
+                                $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls - $travelCertificate->totalestacionamiento, 2, ',', '.') }}
                             </td>
                             {{-- IVA --}}
                             <td class="text-right">$&nbsp;{{ number_format($travelCertificate->iva, 2, ',', '.') }}
@@ -248,6 +252,12 @@
                             <td class="text-right">
                                 $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva, 2, ',', '.') }}
                             </td>
+                            {{-- ESTACIONAMIENTO --}}
+                            @if($travelCertificate->totalestacionamiento)
+                            <td class="text-right">
+                                $&nbsp;{{ number_format($travelCertificate->totalestacionamiento, 2, ',', '.') }}
+                            </td>
+                            @endif
                             {{-- PEAJES --}}
                             <td class="text-right">
                                 $&nbsp;{{ number_format($travelCertificate->totalTolls, 2, ',', '.') }}</td>
@@ -322,6 +332,11 @@
                         <td class="text-right">
                             <strong>$&nbsp;{{ number_format($totalSubtotal, 2, ',', '.') }}</strong>
                         </td>
+                        {{-- total Estacionamientos --}}
+                        @if($totalEstacionamiento > 0 )
+                        <td class="text-right"><strong>$&nbsp;{{ number_format($totalEstacionamiento, 2, ',', '.') }}</strong>
+                        </td>
+                        @endif
                         {{-- totales peajes --}}
                         <td class="text-right"><strong>$&nbsp;{{ number_format($totalPeajes, 2, ',', '.') }}</strong>
                         </td>

@@ -208,10 +208,11 @@
             const base        = parseFloat(row.querySelector('[data-field="base_recaudacion"]').value) || 0;
             const importeNeto = parseFloat(row.querySelector('[data-cell="importe_neto"]').textContent) || 0;
             const choferN     = parseFloat(row.querySelector('[data-field="chofer_n"]').value) || 0;
-            const cargaN      = parseFloat(row.querySelector('[data-cell="carga_descarga_n"]').textContent) || 0;
-            const nocheN      = parseFloat(row.querySelector('[data-cell="noche_n"]').textContent) || 0;
+            const cargaN      = parseFloat(row.querySelector('[data-field="chofer_cd_n"]').textContent) || 0;
+            const nocheN      = parseFloat(row.querySelector('[data-field="chofer_n_n"]').textContent) || 0;
 
             const choferTotal = base * (percent / 100);
+            // LA DIFERENCIA ES EL 25% DEL IMPORTE NETO MENOS EL 25% (O LO QUE SE SELECCIONE) DE LA RECAUDACION EN BLANCO MENOS CHOFER RECAUDACION NEGRO MENOS CARGA NEGRA MENOS NOCHE NEGRA 
             const diferencia  = (importeNeto * 0.25) - choferTotal - choferN - cargaN - nocheN;
 
             row.querySelector('[data-cell="chofer_total"]').textContent = choferTotal.toFixed(2);

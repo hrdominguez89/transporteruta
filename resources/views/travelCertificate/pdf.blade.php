@@ -165,7 +165,7 @@
         $ivaCalculado = (float) ($travelCertificate->iva_calculado ?? 0);
 
         // Total final
-        $totalFinal = $importeNeto + $peajes + $ivaCalculado;
+        $totalFinal = $importeNeto + $peajes + $ivaCalculado + $travelCertificate->totalestacionamiento;
     @endphp
     <div class="table-bordered text-left mt-2 p-2 totales" >
         <p class="kv"  style="font-size: 0.87rem;"><strong>IMPORTE NETO:</strong>
@@ -177,6 +177,11 @@
         <p class="kv" style="font-size: 0.87rem;"><strong>PEAJES:</strong>
             <span>$&nbsp;{{ number_format($peajes, 2, ',', '.') }}</span>
         </p>
+        @if ($travelCertificate->totalestacionamiento)
+        <p class="kv" style="font-size: 0.87rem;"><strong>ESTACIONAMIENTOS:</strong>
+            <span>$&nbsp;{{ number_format($travelCertificate->totalestacionamiento, 2, ',', '.') }}</span>
+        </p>
+        @endif
         <p class="kv" style="font-size: 0.87rem;"><strong>TOTAL:</strong>
             <span>$&nbsp;{{ number_format($totalFinal, 2, ',', '.') }}</span>
         </p>
