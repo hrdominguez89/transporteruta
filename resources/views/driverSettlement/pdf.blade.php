@@ -140,6 +140,7 @@
                     </td>
                 </tr>
             </table>
+           
 
             <table style="width:100%">
                 <tr>
@@ -150,6 +151,7 @@
 
             </table>
             <table class="table-constancias" style="width:100%; font-size: 12px;">
+               
                 <thead>
                     <tr>
                         <th class="text-center">Fecha</th>
@@ -159,7 +161,7 @@
                         <th class="text-center">Importe<br>Neto</th>
                         <th class="text-center">I.V.A.</th>
                         <th class="text-center">Subtotal</th>
-                        @if($travelCertificate->totalestacionamiento)
+                        @if($estacionamientos > 0)
                         <th class="text-center">Estacionamientos</th>
                         @endif
                         <th class="text-center">Peajes</th>
@@ -188,7 +190,7 @@
                     @endphp
 
                     @foreach ($driverSettlement->travelCertificates as $travelCertificate)
-                        @php
+                    @php
                             // Sumar valores de cada columna
                             $totalImporte += $travelCertificate->total - $travelCertificate->totalTolls;
                             $totalPeajes += $travelCertificate->totalTolls;
@@ -226,8 +228,7 @@
                                     21;
                                 $totalAFavorDeLaEmpresa += $travelCertificate->fixed_amount;
                             }
-                        @endphp
-
+                    @endphp
                         <tr>
                             {{-- FECHA --}}
                             <td class="text-center">
