@@ -18,30 +18,26 @@ A continuación, adjuntamos el detalle, según nuestra cuenta corriente actualiz
             <p>Saldo pendiente: ${{ number_format($invoice->balance, 2, ',', '.') }}.</p>
 
             @if ($invoice->credits->count())
-                <p>Notas de crédito:</p>
+                <i>Notas de crédito:</i>
                 @foreach ($invoice->credits as $credit)
-                    <p>&nbsp;&nbsp;N° {{ $credit->number }}</p>
-                    <p>&nbsp;&nbsp;Total: ${{ number_format($credit->total, 2, ',', '.') }}</p>
-                    {{-- <p>&nbsp;&nbsp;Punto de venta: {{ $credit->point_of_sale }}</p> FALTA AGREGAR AL SISTEMA --}}
-                    <p>&nbsp;&nbsp;Punto de venta: {{ $invoice->point_of_sale }}</p> 
-                    <p>&nbsp;&nbsp;Fecha de emisión: {{ $credit->date }}</p>
+                <i>&nbsp;&nbsp;N° {{ $credit->number }},Punto de venta: {{ $invoice->point_of_sale }},Fecha de emisión: {{ $credit->date }},</i>
+                <i>&nbsp;&nbsp;Total: ${{ number_format($credit->total, 2, ',', '.') }}</i>
+                {{-- <i>&nbsp;&nbsp;Punto de venta: {{ $credit->point_of_sale }}</i> FALTA AGREGAR AL SISTEMA --}}
                 @endforeach
             @endif
 
             @if ($invoice->debits->count())
-                <p>Notas de débito:</p>
+                <i>Notas de débito:</i>
                 @foreach ($invoice->debits as $debit)
-                    <p>&nbsp;&nbsp;N° {{ $debit->number }} </p>
-                    <p>&nbsp;&nbsp;Total: ${{ number_format($debit->balance, 2, ',', '.') }}</p>
-                    <p>&nbsp;&nbsp;Punto de venta: {{ $invoice->point_of_sale }}</p>
-                    <p>&nbsp;&nbsp;Fecha de emisión: {{ $credit->date }}</p>
+                <i>&nbsp;&nbsp;N° {{ $debit->number }}, Punto de venta: {{ $invoice->point_of_sale }} ,Fecha de emisión: {{ $credit->date }},</i>
+                <i>&nbsp;&nbsp;Total: ${{ number_format($debit->balance, 2, ',', '.') }}</i>
                 @endforeach
             @endif
 
             @if ($invoice->misrecibos->count())
-                <p>Pagos parciales:</p>
+                <i>Pagos parciales:</i>
                 @foreach ($invoice->misrecibos as $recibo)
-                    <p>&nbsp;&nbsp;Recibo #{{ $recibo->id }} ({{ \Carbon\Carbon::parse($recibo->date)->format('d/m/Y') }}) — aplicado a esta factura: ${{ number_format($recibo->pivot->total, 2, ',', '.') }}</p>
+                <i>&nbsp;&nbsp;Recibo #{{ $recibo->id }} ({{ \Carbon\Carbon::parse($recibo->date)->format('d/m/Y') }}) — aplicado a esta factura: ${{ number_format($recibo->pivot->total, 2, ',', '.') }}</i>
                 @endforeach
             @endif
         @endif
