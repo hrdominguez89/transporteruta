@@ -22,7 +22,7 @@ class PaymentNotificationsService
             {
                 $sinNotificar[] = $invoices[0]->client->name;
             }
-            break;
+            sleep(2);
         }
     }
 
@@ -52,17 +52,16 @@ class PaymentNotificationsService
                     $pdf = Pdf::loadView('invoice.pdf', compact('invoice'));
                     $message->attachData($pdf->output(), 'resumen_de_factura.pdf', ['mime' => 'application/pdf']);
                 }
-                $message->to('l.e.marguery@gmail.com')
-                // ->cc([env('MAIL_CC_ONE'),env('MAIL_CC_TWO')])
-                // ->cc(["matiivalin@gmail.com"])
+                $message->to($destinatario?->mail)
+                ->cc([env('MAIL_CC_ONE'),env('MAIL_CC_TWO')])
                 ->subject('Facturas vencidas y en plazo - ' . $cliente )
-                ->from(env('MAIL_NOTIFICACION'));
+                ->from(env('MAIL_FROM_ADDRESS'));
             });
             return true;
         }
         return false;
     }
-
+  
     public function validarNotificacion()
     {
         return Invoice::with([
