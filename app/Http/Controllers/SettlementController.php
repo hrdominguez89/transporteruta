@@ -153,6 +153,17 @@ class SettlementController extends Controller
 
         return view('settlements.show', compact('settlement', 'semanas', 'ultimaSemanaCargada'));
     }
+    public function delete(Request $request, Settlement $settlement)
+    {
+        $settlment = Settlement::find($settlement->id);
+        $detalles  = SettlementDetail::where('settlement_id',$settlment->id);
+        foreach($detalles as $detalle)
+        {   
+            $detalle->delete();
+        }
+        $settlement->delete();
+        return $this->index();
+    }
 
     public function siguienteSemana(Request $request, Settlement $settlement)
     {

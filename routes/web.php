@@ -101,6 +101,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('liquidaciones/{settlement}/siguiente-semana', [SettlementController::class, 'siguienteSemana'])->name('Settlements.siguienteSemana');
     Route::post('liquidaciones/{settlement}/guardar', [SettlementController::class, 'guardarEdicion'])->name('guardarEdicion');
     Route::get('liquidaciones/{settlement}/excel', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
+    Route::get('liquidaciones/{settlement}/eliminar', [SettlementController::class, 'delete'])->name('deleteSettlements');
     
     // DriverSettlement
     Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
