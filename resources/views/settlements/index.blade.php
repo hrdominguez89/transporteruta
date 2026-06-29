@@ -41,6 +41,9 @@
                                 <a href="{{ route('Settlements.show', $settlement) }}" class="btn btn-sm btn-info">
                                     <i class="fas fa-eye"></i> Ver
                                 </a>
+                                <a href="{{ route('deleteSettlements', $settlement) }}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </a>
                             </td>
                         </tr>
                     @endforeach
@@ -84,6 +87,7 @@
 @stop
 
 @section('js')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script>
         $(document).ready(function () {
             $('.data-table').DataTable({
