@@ -41,7 +41,7 @@ class PaymentNotificationsService
 
         $cliente = $invoices[0]->client->name;
         $destinatario = Contacto::where('client_id',$invoices[0]->client->id)
-                                ->where('categoria','Depto. Cobros y Pagos')->first();
+                                ->where('categoria','Cobros y pagos')->first();
         
         if($destinatario?->mail != null)
         {
