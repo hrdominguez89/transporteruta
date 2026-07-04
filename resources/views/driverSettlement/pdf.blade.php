@@ -162,7 +162,7 @@
                         <th class="text-center">I.V.A.</th>
                         <th class="text-center">Subtotal</th>
                         @if($estacionamientos > 0)
-                        <th class="text-center">Estacionamientos</th>
+                            <th class="text-center">Estacionamientos</th>
                         @endif
                         <th class="text-center">Peajes</th>
                         <th class="text-center">Total</th>
@@ -254,7 +254,7 @@
                                 $&nbsp;{{ number_format($travelCertificate->total - $travelCertificate->totalTolls + $travelCertificate->iva, 2, ',', '.') }}
                             </td>
                             {{-- ESTACIONAMIENTO --}}
-                            @if($travelCertificate->totalestacionamiento)
+                              @if($estacionamientos > 0)
                             <td class="text-right">
                                 $&nbsp;{{ number_format($travelCertificate->totalestacionamiento, 2, ',', '.') }}
                             </td>
@@ -387,6 +387,16 @@
                         $ {{ number_format($totalIvaChofer, 2, ',', '.') }}
                     </td>
                 </tr>
+                @if($totalEstacionamiento > 0 )
+                    <tr>
+                        <th>
+                            Estacionamientos
+                        </th>
+                        <td class="text-right">
+                            $ {{ number_format($totalEstacionamiento, 2, ',', '.') }}
+                        </td>
+                    </tr>
+                @endif
                 <tr>
                     <th>
                         Peajes
