@@ -176,7 +176,14 @@ class SettlementController extends Controller
         $yaExiste = $settlement->details()->where('semana', $semana)->exists();
 
         if ($yaExiste) {
-            return back()->with('warning', "La semana {$semana} ya fue cargada.");
+            if($request->accionsemana)
+            {
+                $this->eliminarSemana($settlement, $semana);
+                return back()->with('warning', "Se elimino la semana {$semana}.");
+            }
+            else{
+                return back()->with('warning', "La semana {$semana} ya fue cargada.");
+            }    
         }
 
         $creados = DB::transaction(
@@ -188,6 +195,13 @@ class SettlementController extends Controller
             : "Semana {$semana} cargada sin viajes.";
 
         return back()->with('success', $mensaje);
+    }
+    public function eliminarSemana($settlement, $semana)
+    {
+        $detalles = SettlementDetail::where('settlement_id', $settlement->id)
+            ->where('semana', $semana)
+            ->delete();
+            
     }
 
     public function guardarEdicion(Request $request, Settlement $settlement)
