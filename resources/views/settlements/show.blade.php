@@ -24,24 +24,24 @@
     @endif
 
     <div class="container-fluid mb-3">
-    <div class="row align-items-end">
+        <div class="row align-items-end">
         <div class="col-md-1">
             <label class="d-block">&nbsp;</label>
-            <button type="button" id="btn-guardar" class="btn btn-sm btn-secondary btn-block">
-                <i class="fas fa-save"></i> Guardar
+            <button type="button" id="btn-guardar" title="Guardar"class="btn btn-sm btn-secondary btn-block">
+                <i class="fas fa-save"></i> 
             </button>
         </div>
         <div class="col-md-1">
             <label class="d-block">&nbsp;</label>
-            <button type="button" id="btn-excel" class="btn btn-sm btn-success btn-block">
-                <i class="fas fa-file-excel"></i> Generar Excel
+            <button type="button" id="btn-excel" class="btn btn-sm btn-success btn-block"title="Generar excel">
+                <i class="fas fa-file-excel"></i>  Excel
             </button>
         </div>
         @if($ultimaSemanaCargada < 5)
         <div class="col-md-4">
             <form action="{{ route('Settlements.siguienteSemana', $settlement) }}" method="POST" class="m-0">
                 @csrf
-                <label for="semana" class="d-block">Semana N°</label>
+                <label for="semana" class="d-block"title="Seleccione la semana">Semana N°</label>
                 <div class="d-flex align-items-center">
                     <select name="semana" id="semana" class="form-control mr-2" style="width: auto;">
                         <option value="2">2</option>
@@ -49,15 +49,19 @@
                         <option value="4">4</option>
                         <option value="5">5</option>
                     </select>
-                    <button type="submit" class="btn btn-sm btn-primary">
-                        Generar semana
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="accionsemana" id="accionsemana">
+                        <label title="Seleccione para generar o eliminar una semana" class="form-check-label" for="accionsemana">Indique accion</label>
+                    </div>
+                    <button type="submit" id="btndecarga" class="btn btn-sm btn-primary ml-3">
+                        Generar 
                     </button>
                 </div>
             </form>
         </div>
         @endif
+        </div>
     </div>
-</div>
 
     <div id="miCarrusel" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
         <div class="carousel-indicators">
@@ -197,7 +201,12 @@
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
         });
 
-        
+        var accionsemana = document.getElementById("accionsemana");
+        accionsemana.addEventListener('change',function(){
+            btn =  document.getElementById("btndecarga");                
+            accionsemana.checked ? btn.textContent = "Eliminar" : btn.textContent = "Generar" ;
+            
+        });
         document.addEventListener('input', function (e) {
             if (!e.target.matches('.input-editable[data-field="chofer_porcentaje"], .input-editable[data-field="base_recaudacion"], .input-editable[data-field="chofer_n"], .input-editable[data-field="chofer_cd_n"],.input-editable[data-field="chofer_n_n"]')) return;
 
