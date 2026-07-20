@@ -43,6 +43,10 @@ class Invoice extends Model
     {
         return $this->hasMany(Debit::class, 'invoiceId');
     }
+    public function arcaFactura()
+    {
+        return $this->hasOne(ArcaFacturas::class, 'invoiceId');
+    }
 
     // Que se castee numéricos como float
     protected $casts = [

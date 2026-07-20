@@ -16,7 +16,7 @@ use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\FacturaArcaController;
 Auth::routes(['register' => false]);
 
 Route::group(['middleware' => 'auth'], function () {
@@ -153,4 +153,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
     Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//
     Route::post('pagos/delete',[PaymentsController::class , 'delete' ])->name('deletePayment');//deletePayment
+
+   
+
+    Route::get('/arca',              [FacturaArcaController::class, 'index'])->name('facturasArca');
+    Route::get('/arca/{id}',         [FacturaArcaController::class, 'show'])->name('showFacturaArca');
+    Route::post('/arca/generar',     [FacturaArcaController::class, 'generar'])->name('generateArcaInvoice');
 });

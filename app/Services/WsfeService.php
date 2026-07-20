@@ -10,29 +10,33 @@ use Exception;
 
 class WsfeService
 {
+    private const CBTE_TIPO_FACTURA_A = 1;
+    private const CONCEPTO_SERVICIOS  = 2;
+    private const DOC_TIPO_CUIT       = 80;
+    private const IVA_ID_21           = 5;
+    private const COND_IVA_RECEPTOR_RI = 1;
+    private const MONEDA_PESOS        = 'PES';
+
     private WsaaService $wsaa;
     private SoapClient  $client;
     private int         $cuit;
     private string      $wsdl;
 
-    // Fechas de servicio — ajustar desde el controlador según necesidad
     private string $fechaServDesde;
     private string $fechaServHasta;
     private string $fechaVencPago;
 
     public function __construct(WsaaService $wsaa)
     {
-        $this->wsaa  = $wsaa;
-        $this->cuit  = (int) config('afip.cuit');
-        $this->wsdl  = config('afip.wsfe_wsdl');
+        $this->wsaa = $wsaa;
+        $this->cuit = (int) config('afip.cuit');
+        $this->wsdl = config('afip.wsfe_wsdl');
 
-        // Por defecto: primer y último día del mes actual
         $this->fechaServDesde = now()->startOfMonth()->format('Ymd');
         $this->fechaServHasta = now()->endOfMonth()->format('Ymd');
         $this->fechaVencPago  = now()->endOfMonth()->format('Ymd');
     }
 
-    // Setters para las fechas de servicio
     public function setFechaServDesde(string $fecha): void { $this->fechaServDesde = $fecha; }
     public function setFechaServHasta(string $fecha): void { $this->fechaServHasta = $fecha; }
     public function setFechaVencPago(string $fecha): void  { $this->fechaVencPago  = $fecha; }
@@ -52,104 +56,170 @@ class WsfeService
     private function getAuth(): array
     {
         $credentials = $this->wsaa->getCredentials();
+
         return [
             'Token' => $credentials['token'],
             'Sign'  => $credentials['sign'],
-            'cuit'  => $this->cuit,
+            'Cuit'  => $this->cuit,
         ];
+    }
+
+    /**
+     * SoapClient devuelve un objeto si hay 1 elemento y un array si hay varios.
+     * Normalizamos siempre a array.
+     */
+    private function toArray($nodo): array
+    {
+        if ($nodo === null)   return [];
+        if (is_array($nodo))  return $nodo;
+        return [$nodo];
+    }
+
+    private function checkErrors($response): void
+    {
+        if (!isset($response->Errors)) {
+            return;
+        }
+
+        $errores = $this->toArray($response->Errors->Err ?? null);
+
+        if (empty($errores)) {
+            return;
+        }
+
+        $mensajes = array_map(
+            fn($e) => "[{$e->Code}] {$e->Msg}",
+            $errores
+        );
+
+        throw new Exception('WSFEv1: ' . implode(' | ', $mensajes));
     }
 
     public function dummy(): array
     {
         try {
             $result = $this->getClient()->FEDummy();
+
             return [
-                'appserver'  => $result->FEDummyResult->appserver,
-                'dbserver'   => $result->FEDummyResult->dbserver,
-                'authserver' => $result->FEDummyResult->authserver,
+                'appserver'  => $result->FEDummyResult->AppServer,
+                'dbserver'   => $result->FEDummyResult->DbServer,
+                'authserver' => $result->FEDummyResult->AuthServer,
             ];
         } catch (SoapFault $e) {
             throw new Exception('Error SOAP en FEDummy: ' . $e->getMessage());
         }
     }
 
-    public function ultimoComprobante(int $puntoVenta): int
+    public function ultimoComprobante(int $puntoVenta, int $tipoCbte = self::CBTE_TIPO_FACTURA_A): int
     {
         try {
-            $result = $this->getClient()->FERecuperaLastCMPRequest([
-                'argAuth' => $this->getAuth(),
-                'argTCMP' => [
-                    'PtoVta'   => $puntoVenta,
-                    'TipoCbte' => 11, // Factura C
-                ],
+            $result = $this->getClient()->FECompUltimoAutorizado([
+                'Auth'     => $this->getAuth(),
+                'PtoVta'   => $puntoVenta,
+                'CbteTipo' => $tipoCbte,
             ]);
 
-            $response = $result->FERecuperaLastCMPRequestResult;
+            $response = $result->FECompUltimoAutorizadoResult;
 
-            if ($response->RError->percode !== 0) {
-                throw new Exception('Error WSFE: ' . $response->RError->perrmsg);
-            }
+            $this->checkErrors($response);
 
-            return (int) $response->cbte_nro;
+            return (int) $response->CbteNro;
 
         } catch (SoapFault $e) {
             throw new Exception('Error SOAP en ultimoComprobante: ' . $e->getMessage());
         }
     }
 
-    public function autorizarComprobante(Invoice $invoice): array
+    public function autorizarComprobante(Invoice $invoice, ?int $puntoVenta = null): array
     {
-        $puntoVenta = $invoice->pointOfSale;
+        $puntoVenta = $puntoVenta ?? (int) $invoice->pointOfSale;
         $siguiente  = $this->ultimoComprobante($puntoVenta) + 1;
 
+        // Importes: ImpTotal debe ser exactamente la suma de los componentes
+        // $neto  = round((float) $invoice->total, 2);
+        // $iva   = round((float) $invoice->iva, 2);
+        // $total = round($neto + $iva, 2);
+        // MOCK TEMPORAL — el desglose real de IVA se resuelve en el módulo de Invoice
+        $neto  = 100000.00;
+        $iva   = 21000.00;
+        $total = 121000.00;
         $detalle = [
-            'tipo_doc'             => 96,                              // DNI por defecto
-            'nro_doc'              => $invoice->client->documento ?? 0,
-            'tipo_cbte'            => 11,                              // Factura C
-            'punto_vta'            => $puntoVenta,
-            'cbt_desde'            => $siguiente,
-            'cbt_hasta'            => $siguiente,
-            'imp_total'            => round($invoice->totalWithIva, 2),
-            'imp_tot_conc'         => 0,
-            'imp_neto'             => round($invoice->total, 2),
-            'impto_liq'            => round($invoice->iva, 2),
-            'impto_liq_rni'        => 0,
-            'imp_op_ex'            => 0,
-            'fecha_cbte'           => now()->format('Ymd'),
-            'fecha_serv_desde'     => $this->fechaServDesde,
-            'fecha_serv_hasta'     => $this->fechaServHasta,
-            'fecha_venc_pago'      => $this->fechaVencPago,
-            'Cond_IVA_Receptor_Id' => 5,                              // Consumidor Final
-        ];
-
-        try {
-            $result = $this->getClient()->FEAutRequest([
-                'argAuth' => $this->getAuth(),
-                'Fer'     => [
-                    'Fecr' => [
-                        'id'          => time(),
-                        'cantidadreg' => 1,
-                        'presta_serv' => 1,
+            'Concepto'                => self::CONCEPTO_SERVICIOS,
+            'DocTipo'                 => self::DOC_TIPO_CUIT,
+            'DocNro'                  => 20111111112,//$invoice->client->documento ?? 0,
+            'CbteDesde'               => $siguiente,
+            'CbteHasta'               => $siguiente,
+            'CbteFch'                 => now()->format('Ymd'),
+            'ImpTotal'                => $total,
+            'ImpTotConc'              => 0,
+            'ImpNeto'                 => $neto,
+            'ImpOpEx'                 => 0,
+            'ImpTrib'                 => 0,
+            'ImpIVA'                  => $iva,
+            'FchServDesde'            => $this->fechaServDesde,
+            'FchServHasta'            => $this->fechaServHasta,
+            'FchVtoPago'              => $this->fechaVencPago,
+            'MonId'                   => self::MONEDA_PESOS,
+            'MonCotiz'                => 1,
+            'CondicionIVAReceptorId'  => self::COND_IVA_RECEPTOR_RI,
+            'Iva' => [
+                'AlicIva' => [
+                    [
+                        'Id'      => self::IVA_ID_21,
+                        'BaseImp' => $neto,
+                        'Importe' => $iva,
                     ],
-                    'Fedr' => [
-                        'FEDetalleRequest' => $detalle,
+                ],
+            ],
+        ];
+        // dd([
+        //     'neto'      => $neto,
+        //     'iva'       => $iva,
+        //     'iva_21'    => round($neto * 0.21, 2),
+        //     'coincide'  => $iva == round($neto * 0.21, 2),
+        // ]);
+        try {
+            $result = $this->getClient()->FECAESolicitar([
+                'Auth'     => $this->getAuth(),
+                'FeCAEReq' => [
+                    'FeCabReq' => [
+                        'CantReg'  => 1,
+                        'PtoVta'   => $puntoVenta,
+                        'CbteTipo' => self::CBTE_TIPO_FACTURA_A,
+                    ],
+                    'FeDetReq' => [
+                        'FECAEDetRequest' => $detalle,
                     ],
                 ],
             ]);
 
-            $response    = $result->FEAutRequestResult;
-            $cabecera    = $response->FecResp;
-            $detalleResp = $response->FedResp->FEDetalleResponse;
+            $response = $result->FECAESolicitarResult;
 
-            if ($cabecera->resultado === 'R') {
-                throw new Exception('Comprobante rechazado: ' . $cabecera->motivo);
+            // 1° errores a nivel request
+            $this->checkErrors($response);
+
+            $cabecera    = $response->FeCabResp;
+            // $detalleResp = $response->FeDetResp->FEDetResponse;
+            $detalleResp = $this->toArray($response->FeDetResp->FECAEDetResponse)[0];
+            // 2° rechazo a nivel comprobante
+            if ($cabecera->Resultado === 'R') {
+                // $obs = $this->toArray($detalleResp->Obs->Observaciones ?? null);
+                $obs = $this->toArray($detalleResp->Observaciones->Obs ?? null);
+                $motivos = array_map(
+                    fn($o) => "[{$o->Code}] {$o->Msg}",
+                    $obs
+                );
+
+                throw new Exception(
+                    'Comprobante rechazado: ' . (empty($motivos) ? 'sin detalle' : implode(' | ', $motivos))
+                );
             }
 
             return [
-                'cae'       => $detalleResp->cae,
-                'fecha_vto' => $detalleResp->fecha_vto,
-                'nro_cbte'  => $detalleResp->cbt_desde,
-                'resultado' => $detalleResp->resultado,
+                'cae'       => $detalleResp->CAE,
+                'fecha_vto' => $detalleResp->CAEFchVto,
+                'nro_cbte'  => (int) $detalleResp->CbteDesde,
+                'resultado' => $detalleResp->Resultado,
             ];
 
         } catch (SoapFault $e) {

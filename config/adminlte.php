@@ -303,6 +303,11 @@ return [
         ],
 
         [
+            'text' => 'Arca',
+            'url'  => 'arca',
+            'icon' => 'fas fa-file-invoice-dollar',
+        ],
+        [
             'text' => 'Choferes',
             'url'  => 'choferes',
             'icon' => 'fas fa-user-tie',
