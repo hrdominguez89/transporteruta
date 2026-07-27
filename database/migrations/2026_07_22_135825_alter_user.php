@@ -1,5 +1,4 @@
 <?php
-// database/migrations/2026_07_22_000000_add_role_and_client_id_to_users_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

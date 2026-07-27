@@ -17,6 +17,15 @@
                             <option value="{{ $client->id }}" {{ old('clientId') == $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
                         @endforeach
                     </select>
+                    <label for="cliente_tercero_id">Cliente tercero:</label>
+                    <select id="cliente_tercero_id" name="cliente_tercero_id" class="form-control mb-2">
+                        <option value="">---- Sin tercero ----</option>
+                        @foreach ($clientes_terceros as $tercero)
+                            <option value="{{ $tercero->id }}" data-client="{{ $tercero->client_id }}">
+                                {{ $tercero->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
                     <label for="nombre">Nombre:<span class="text-danger"> *</span></label>
                     <input id="nombre" type="text" name="nombre" class="form-control mb-2"
                         placeholder="Ingrese el nombre..." required>
@@ -55,19 +64,38 @@
         </div>
     </div>
 </div>
-
 <script>
-  document.getElementById("tipo").addEventListener("change", function() {
+  // --- toggle tamaño pallet (lo que ya tenías) ---
+  document.getElementById("tipo").addEventListener("change", function () {
       var type = this.value;
       if (type === "PALLET") {
-        // Mostrar campo de porcentaje y ocultar monto fijo
-        document.getElementById("tamaño_pallet_div").style.display = "block";
-        document.getElementById("tamaño_pallet").setAttribute("required", "required");
-        
+          document.getElementById("tamaño_pallet_div").style.display = "block";
+          document.getElementById("tamaño_pallet").setAttribute("required", "required");
       } else {
-          // Si no se selecciona ninguna opción, ocultar ambos campos
           document.getElementById("tamaño_pallet_div").style.display = "none";
           document.getElementById("tamaño_pallet").removeAttribute("required");
       }
   });
+
+  // --- select encadenado cliente -> tercero ---
+  (function () {
+      const cliente = document.querySelector('select[name="client_id"]');
+      const tercero = document.getElementById('cliente_tercero_id');
+      const opciones = Array.from(tercero.options);
+
+      function filtrar() {
+          const clientId = cliente.value;
+          tercero.value = ''; // reset al cambiar de cliente
+
+          opciones.forEach(function (op) {
+              if (op.value === '') return; // "Sin tercero" siempre visible
+
+              const visible = op.dataset.client === clientId;
+              op.hidden = !visible;
+          });
+      }
+
+      cliente.addEventListener('change', filtrar);
+      filtrar(); // estado inicial
+  })();
 </script>

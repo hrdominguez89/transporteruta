@@ -41,37 +41,34 @@ class PaymentNotificationsService
         )->count();
 
         $cliente = $invoices[0]->client->name;
-        $destinatarios = Contacto::where('client_id',$invoices[0]->client->id)
-                                ->where('categoria','Cobros y Pagos')->get();
-        if(!empty($destinatarios))
+        $destinatarios = Contacto::where('client_id', $invoices[0]->client->id)
+                            ->where('categoria', 'Cobros y Pagos')
+                            ->whereNotNull('mail')
+                            ->get();
+        if ($destinatarios->isNotEmpty())
         {
             $TC = new TravelCertificateController();
-            
-            foreach($destinatarios as $destinatario)
-            {   
-                if($destinatario?->mail != null)
+            Mail::send('emails.notificacion', compact('invoices', 'cantidadVencidas', 'cantidadEnPlazo'), function ($message) 
+            use ($destinatarios,$cliente,$invoices,$TC) {
+                foreach($invoices as $invoice)
                 {
-                    Mail::send('emails.notificacion', compact('invoices', 'cantidadVencidas', 'cantidadEnPlazo'), function ($message) 
-                    use ($destinatario,$cliente,$invoices,$TC) {
-                        foreach($invoices as $invoice)
-                        {
-                            $tcPDFs=[];
-                            $invoiceHtml = view('invoice.pdf', ['invoice'=>$invoice])->render();
-                            foreach($invoice->travelCertificates as $travelCertificate)
-                            {
-                                $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id,true);
-                            }
-                            $allHtml = $invoiceHtml  . implode( $tcPDFs);
-                            $pdf = Pdf::loadHTML($allHtml);
-                            $message->attachData($pdf->output(), 'resumen_de_factura.pdf', ['mime' => 'application/pdf']);
-                        }
-                            $message->to($destinatario?->mail)
-                                ->cc([env('MAIL_CC_ONE'),env('MAIL_CC_TWO'),env('MAIL_CC_THREE')])
-                                ->subject('Facturas vencidas y en plazo - ' . $cliente )
-                                ->from(env('MAIL_FROM_ADDRESS'));
-                    });
+                    $tcPDFs=[];
+                    $invoiceHtml = view('invoice.pdf', ['invoice'=>$invoice])->render();
+                    foreach($invoice->travelCertificates as $travelCertificate)
+                    {
+                        $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id,true);
+                    }
+                    $allHtml = $invoiceHtml  . implode( $tcPDFs);
+                    $pdf = Pdf::loadHTML($allHtml);
+                    $message->attachData($pdf->output(), 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
                 }
-            }
+
+                    $mails = $destinatarios->pluck('mail')->all();
+                    $message->to($mails)
+                        ->cc([env('MAIL_CC_ONE'),env('MAIL_CC_TWO'),env('MAIL_CC_THREE')])
+                        ->subject('Facturas vencidas y en plazo - ' . $cliente )
+                        ->from(env('MAIL_FROM_ADDRESS'));
+            });
             return true;
         }
         return false;
