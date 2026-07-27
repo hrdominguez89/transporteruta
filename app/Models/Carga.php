@@ -26,6 +26,7 @@ class Carga extends Model
         'estado_de_envio',
         'notificacion_de_recepcion',
         'notificacion_de_entrega',
+        'cliente_tercero_id'
     ];
 
     protected $casts = [
@@ -46,5 +47,13 @@ class Carga extends Model
     public function remito(): BelongsTo
     {
         return $this->belongsTo(Remito::class, 'remito_id');
+    }
+    public function cliente_tercero()
+    {
+        return $this->belongsTo(ClienteTercero::class, 'cliente_tercero_id');
+    }
+    public function travel_certificate()
+    {
+        return $this->belongsTo(TravelCertificate::class, 'travel_certificate_id');
     }
 }

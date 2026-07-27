@@ -170,9 +170,15 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
         Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//
         Route::post('pagos/delete',[PaymentsController::class , 'delete' ])->name('deletePayment');//deletePayment
-    });
-    // Route::group(['middleware' => 'role:CLIENT', 'prefix' => 'portal'], function () {
-        // });
+
+        
+        });
+    Route::post('/stock/cortedeoperaciones', [StockController::class, 'corteDeOperaciones'])->name('cortedeoperaciones');//crearContactoTercero
+    Route::post('/contacto-tercero/{tercero}', [StockController::class, 'crearContactoTercero'])->name('crearContactoTercero');
+    Route::post('/stock/contacto3roupd/{contacto}/{tercero}', [StockController::class, 'editarContactoTercero'])
+    ->name('editarContactoTercero');
+    Route::post('/stock/storecliente3ro', [StockController::class, 'storeClientTercero'])->name('storeClientTercero');//
+    
     Route::get('/stock', [StockController::class, 'index'])->name('stock');
     Route::get('/stock/show/{id}', [StockController::class, 'show'])->name('showcarga');
     Route::post('/stock/generate', [StockController::class, 'generate'])->name('generatestock');
@@ -180,4 +186,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/stock/delete/{id}', [StockController::class, 'delete'])->name('deletestock');
     Route::post('/stock/update/price', [StockController::class, 'updateprice'])->name('updateprice');
     Route::post('/stock/remitos', [StockController::class, 'storeRemito'])->name('storeRemito');
+    Route::delete('/stock/contacto3rodel/{contacto}/{tercero}', [StockController::class, 'eliminarContactoTercero'])->name('eliminarContactoTercero');
+    Route::get('/remito/{remito}/pdf', [StockController::class, 'remitoPdf'])
+    ->middleware('auth')->name('remitoPdf');
 });

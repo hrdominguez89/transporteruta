@@ -3,17 +3,32 @@
 @section('title', 'Carga')
 
 @section('content_header')
-    <div class="row">
+    <div class="row align-items-center">
         <a href="{{ Route('stock') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
-        <h1 class="col-9">Cliente: <strong>{{ $carga->client->name }}</strong></h1>
-        <div class="d-flex ml-auto align-items-center">
-          
+        <h1 class="col">Cliente: <strong>{{ $carga->client->name }}</strong></h1>
+
+        <div class="ml-auto d-flex">
             <button class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#remitoModal">
                 Cargar remito
             </button>
+            <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#storeContacto">
+                Crear contacto
+            </button>
+            @if ($carga->cliente_tercero?->contacto)
+                <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#updateContacto-{{ $carga->cliente_tercero->contacto->id }}-{{ $carga->cliente_tercero->id }}">
+                Editar contacto
+            </button>
+                <button class="btn btn-sm btn-danger mr-2" data-toggle="modal" data-target="#deleteContacto-{{ $carga->cliente_tercero->contacto->id }}-{{ $carga->cliente_tercero->id }}">
+                Eliminar contacto
+            </button>
+            @endif
         </div>
         @include('stock.admin.modals.edit')
         @include('stock.admin.modals.uploadRemito')
+        @include('stock.admin.modals.storeContacto')
+        @include('stock.admin.modals.updateContacto')
+        @include('stock.admin.modals.deleteContacto')
+    
        @if($errors->any())
     <div id="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert">
         <strong>Corregí los siguientes errores:</strong>
@@ -41,7 +56,11 @@
         <thead class="bg-danger">
             <tr>
                 <th>Nombre</th>
+                <th>Cliente destino</th>
                 <th>Cantidad</th>
+                <th>Liquidado</th>
+                <th>Constancia</th>
+                <th>Motivo</th>
                 <th>Fecha de recepcion T.R.</th>
                 <th>Fecha de entrega</th>
                 <th>Precio</th>
@@ -55,7 +74,11 @@
         <tbody>
             <tr>
                <td>{{ $carga->nombre }}</td>
+                <td>{{ $carga->cliente_tercero?->nombre }}</td>
                 <td>{{ $carga->cantidad }}</td>
+                <td>{{ $carga->liquidado ? 'Sí' : 'No' }}</td>
+                <td>{{ $carga->travel_certificate?->number ?? '-' }}</td>
+                <td>{{ $carga->motivo ?? '-' }}</td>
                 <td>{{ $carga->fecha_de_recepcion }}</td>
                 <td>{{ $carga->fecha_de_entrega }}</td>
                 <td>{{ $carga->precio }}</td>
@@ -74,7 +97,6 @@
     </table>
     <br>
     <h4>Remito</h4>
-
     <table class="table table-bordered text-center">
         <thead class="bg-danger">
             <tr>
@@ -88,14 +110,47 @@
                 <td style="font-size:100px">
                     {{ $carga->remito?->numero }}
                 </td>
-               <td>
-                @if ($carga->remito?->path)
-                    <img src="{{ asset('storage/' . $carga->remito->path) }}"
-                        alt="Remito" class="img-thumbnail" style="max-height: 250px">
-                @else
-                    <span class="text-muted">Sin remito</span>
-                @endif
-            </td>
+                <td>
+    @if ($carga->remito?->path)
+        @php $url = asset('storage/' . $carga->remito->path); @endphp
+
+        <a href="{{ $url }}" target="_blank" rel="noopener">
+            <img src="{{ $url }}" alt="Remito {{ $carga->remito->numero }}"
+                 class="img-thumbnail" style="max-height: 80px; cursor: zoom-in">
+        </a>
+
+        <div class="mt-1">
+            <a href="{{ route('remitoPdf', $carga->remito->id) }}"
+               class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-download"></i> Descargar PDF
+            </a>
+        </div>
+    @else
+        <span class="text-muted">Sin remito</span>
+    @endif
+</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <h4>Contacto de tercero</h4>
+    <table class="table table-bordered text-center">
+        <thead class="bg-danger">
+            <tr>
+                <th>Nombre</th>
+                <th>Telefono</th>
+                <th>Mail</th>
+                <th>Categoria</th>
+                <th>Comentario</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ $carga->cliente_tercero?->contacto?->nombre }} {{ $carga->cliente_tercero?->contacto?->apellido }}</td>
+                <td>{{ $carga->cliente_tercero?->contacto?->telefono }}</td>
+                <td>{{ $carga->cliente_tercero?->contacto?->mail }}</td>
+                <td>{{ $carga->cliente_tercero?->contacto?->categoria }}</td>
+                <td>{{ $carga->cliente_tercero?->contacto?->comentario }}</td>
             </tr>
         </tbody>
     </table>
@@ -109,11 +164,7 @@
         $(document).ready(function() {
             $('.data-table').DataTable();
         });
-        var table = new DataTable('.data-table', {
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
-            }
-        });
+    
         $('.select2').select2();
     </script>
 @stop

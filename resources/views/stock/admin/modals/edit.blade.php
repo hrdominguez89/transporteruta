@@ -41,6 +41,17 @@
                         <option value="BULTO" {{ old('tipo', $carga->tipo) == 'BULTO' ? 'selected' : '' }}>Bulto</option>
                     </select>
 
+                    <label for="cliente_tercero_id{{ $carga->id }}">Cliente tercero:</label>
+                    <select id="cliente_tercero_id{{ $carga->id }}" name="cliente_tercero_id" class="form-control mb-2">
+                        <option value="">---- Sin tercero ----</option>
+                        @foreach ($clientes_terceros as $tercero)
+                            <option value="{{ $tercero->id }}"
+                                {{ old('cliente_tercero_id', $carga->cliente_tercero_id) == $tercero->id ? 'selected' : '' }}>
+                                {{ $tercero->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+
                     <label for="estado_de_envio{{ $carga->id }}">Estado de envio:</label>
                     <select id="estado_de_envio{{ $carga->id }}" name="estado_de_envio" class="form-control mb-2" required>
                         @foreach (['ALMACEN', 'VIAJE', 'ENTREGADO', 'RECHAZADO'] as $estado)
@@ -59,6 +70,29 @@
                             <option value="EXTRA" {{ old('espacio', $carga->espacio) == 'EXTRA' ? 'selected' : '' }}>Extra</option>
                         </select>
                     </div>
+                                        {{-- Motivo de rechazo: solo visible si estado = RECHAZADO --}}
+                    <div id="motivoDiv{{ $carga->id }}" style="display: none">
+                        <label for="motivo{{ $carga->id }}">Motivo de rechazo:</label>
+                        <input id="motivo{{ $carga->id }}" type="text" name="motivo" class="form-control mb-2"
+                            value="{{ old('motivo', $carga->motivo) }}">
+                    </div>
+
+                    <label for="liquidado{{ $carga->id }}">Liquidado:</label>
+                    <select id="liquidado{{ $carga->id }}" name="liquidado" class="form-control mb-2">
+                        <option value="0" {{ old('liquidado', $carga->liquidado) == 0 ? 'selected' : '' }}>No</option>
+                        <option value="1" {{ old('liquidado', $carga->liquidado) == 1 ? 'selected' : '' }}>Sí</option>
+                    </select>
+
+                    <label for="travel_certificate_id{{ $carga->id }}">Constancia de viaje:</label>
+                    <select id="travel_certificate_id{{ $carga->id }}" name="travel_certificate_id" class="form-control mb-2">
+                        <option value="">---- Sin constancia ----</option>
+                        @foreach ($travel_certificates as $tc)
+                            <option value="{{ $tc->id }}"
+                                {{ old('travel_certificate_id', $carga->travel_certificate_id) == $tc->id ? 'selected' : '' }}>
+                                N° {{ $tc->number ?? $tc->id }} 
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="modal-footer">
@@ -86,5 +120,16 @@
 
     tipo.addEventListener('change', toggle);
     toggle();
+})();
+(function () {
+    const estado = document.getElementById('estado_de_envio{{ $carga->id }}');
+    const motivo = document.getElementById('motivoDiv{{ $carga->id }}');
+
+    function toggleMotivo() {
+        motivo.style.display = estado.value === 'RECHAZADO' ? 'block' : 'none';
+    }
+
+    estado.addEventListener('change', toggleMotivo);
+    toggleMotivo();
 })();
 </script>

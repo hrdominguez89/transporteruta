@@ -1,5 +1,4 @@
 <?php
-// database/migrations/2026_07_23_100000_insert_default_prices.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
