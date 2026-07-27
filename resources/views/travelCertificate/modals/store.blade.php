@@ -18,7 +18,7 @@
 
                     <label for="clientId">Cliente:<span class="text-danger"> *</span></label>
                     <select name="clientId" class="form-control mb-2" required>
-                        <option value="">Seleccione un cliente</option>
+                        <option value="">Seleccione un cliente22222</option>
                         @foreach ($clients as $client)
                             <option value="{{ $client->id }}">{{ $client->name }}</option>
                         @endforeach

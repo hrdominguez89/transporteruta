@@ -14,6 +14,7 @@ use App\Http\Controllers\CreditController;
 use App\Http\Controllers\DebitController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\SettlementController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\UserController;
@@ -21,152 +22,171 @@ use App\Http\Controllers\UserController;
 Auth::routes(['register' => false]);
 
 Route::group(['middleware' => 'auth'], function () {
-
+    Route::group(['middleware' => 'role:ADMIN'], function () {
     //Dashboard
-    Route::get('', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('', [DashboardController::class, 'dashboard'])->name('dashboard');
 
-    // Client
-    Route::get('clientes', [ClientController::class, 'clients'])->name('clients');
-    Route::post('guardar/cliente', [ClientController::class, 'store'])->name('storeClient');
-    Route::get('ver/cliente/{id}', [ClientController::class, 'show'])->name('showClient');
-    Route::get('generar/pdf/deudores', [ClientController::class, 'generateDebtorsPdf'])->name('generateDebtorsPdf');
-    Route::put('actualizar/cliente/{id}', [ClientController::class, 'update'])->name('updateClient');
-    Route::post('crear/cliente/contacto/{id}', [ClientController::class, 'generateContact'])->name('crearContacto');
-    Route::post('editar/cliente/contacto/{id_contacto}/{id_cliente}', [ClientController::class, 'editContact'])->name('editarContacto');//editarContacto
-    Route::delete('eliminar/cliente/contacto/{id_contacto}/{id_cliente}', [ClientController::class, 'deleteContacto'])->name('deleteContacto');//editarContacto
+        // Client
+        Route::get('clientes', [ClientController::class, 'clients'])->name('clients');
+        Route::post('guardar/cliente', [ClientController::class, 'store'])->name('storeClient');
+        Route::get('ver/cliente/{id}', [ClientController::class, 'show'])->name('showClient');
+        Route::get('generar/pdf/deudores', [ClientController::class, 'generateDebtorsPdf'])->name('generateDebtorsPdf');
+        Route::put('actualizar/cliente/{id}', [ClientController::class, 'update'])->name('updateClient');
+        Route::post('crear/cliente/contacto/{id}', [ClientController::class, 'generateContact'])->name('crearContacto');
+        Route::post('editar/cliente/contacto/{id_contacto}/{id_cliente}', [ClientController::class, 'editContact'])->name('editarContacto');//editarContacto
+        Route::delete('eliminar/cliente/contacto/{id_contacto}/{id_cliente}', [ClientController::class, 'deleteContacto'])->name('deleteContacto');//editarContacto
 
-    // Driver
-    Route::get('choferes', [DriverController::class, 'drivers'])->name('drivers');
-    Route::post('guardar/chofer', [DriverController::class, 'store'])->name('storeDriver');
-    Route::get('ver/chofer/{id}', [DriverController::class, 'show'])->name('showDriver');
-    Route::put('actualizar/chofer/{id}', [DriverController::class, 'update'])->name('updateDriver');
-    Route::put('agregarVehiculo/chofer/{id}', [DriverController::class, 'setVehicleToDriver'])->name('setVehicleToDriver');//setVehicleToDriver
-    Route::get('sacarVehiculo/chofer/{id}', [DriverController::class, 'unsetVehicleToDriver'])->name('unsetVehicleToDriver');
+        // Driver
+        Route::get('choferes', [DriverController::class, 'drivers'])->name('drivers');
+        Route::post('guardar/chofer', [DriverController::class, 'store'])->name('storeDriver');
+        Route::get('ver/chofer/{id}', [DriverController::class, 'show'])->name('showDriver');
+        Route::put('actualizar/chofer/{id}', [DriverController::class, 'update'])->name('updateDriver');
+        Route::put('agregarVehiculo/chofer/{id}', [DriverController::class, 'setVehicleToDriver'])->name('setVehicleToDriver');//setVehicleToDriver
+        Route::get('sacarVehiculo/chofer/{id}', [DriverController::class, 'unsetVehicleToDriver'])->name('unsetVehicleToDriver');
 
-    // TravelCertificate
-    Route::get('constancias-de-viaje', [TravelCertificateController::class, 'travelCertificates'])->name('travelCertificates');
-    Route::post('guardar/constancia-de-viaje', [TravelCertificateController::class, 'store'])->name('storeTravelCertificate');
-    Route::get('constancia-de-viaje/check-number', [TravelCertificateController::class, 'checkNumberExists'])->name('checkTravelCertificateNumber');
-    Route::get('ver/constancia-de-viaje/{id}', [TravelCertificateController::class, 'show'])->name('showTravelCertificate');
-    Route::put('actualizar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'update'])->name('updateTravelCertificate');//
-    Route::put('actualizarTime/constancia-de-viaje/{id}', [TravelCertificateController::class, 'updateTime'])->name('updateTimeTravelCertificate');//updateTimeTravelCertificate
-    Route::get('imprimir/constancia-de-viaje/{id}', [TravelCertificateController::class, 'generateTravelCertificatePdf'])->name('travelCertificatePdf');
+        // TravelCertificate
+        Route::get('constancias-de-viaje', [TravelCertificateController::class, 'travelCertificates'])->name('travelCertificates');
+        Route::post('guardar/constancia-de-viaje', [TravelCertificateController::class, 'store'])->name('storeTravelCertificate');
+        Route::get('constancia-de-viaje/check-number', [TravelCertificateController::class, 'checkNumberExists'])->name('checkTravelCertificateNumber');
+        Route::get('ver/constancia-de-viaje/{id}', [TravelCertificateController::class, 'show'])->name('showTravelCertificate');
+        Route::put('actualizar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'update'])->name('updateTravelCertificate');//
+        Route::put('actualizarTime/constancia-de-viaje/{id}', [TravelCertificateController::class, 'updateTime'])->name('updateTimeTravelCertificate');//updateTimeTravelCertificate
+        Route::get('imprimir/constancia-de-viaje/{id}', [TravelCertificateController::class, 'generateTravelCertificatePdf'])->name('travelCertificatePdf');
+        
+        //QUITÉ ESTAS RUTAS PARA PODWER VISUALIZAR EN LAS FACTURAS DESCUENTOS Y DEMÁS
+        //Route::put('agregar/a/la/factura/{id}', [TravelCertificateController::class, 'addToInvoice'])->name('addToInvoice');//
+        //Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
+        // Bulk add/remove travel certificates to/from an invoice
+        Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
+        Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');//
+        
+        // ✅ NUEVAS: usan InvoiceController (coinciden con los name() que usa nuestro Blade)
+        Route::put('agregar/a/la/factura/{id}', [InvoiceController::class, 'addToInvoice'])->name('addToInvoice');
+        Route::put('quitar/de/la/factura/{id}', [InvoiceController::class, 'removeFromInvoice'])->name('removeFromInvoice');
+        // Route::put('agregar/multiples/a/la/factura', [InvoiceController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
+        // Route::put('quitar/multiples/de/la/factura', [InvoiceController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
+
+        Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');
+        Route::put('quitar/de/la/liquidacion/{id}', [TravelCertificateController::class, 'removeFromDriverSettlement'])->name('removeFromDriverSettlement');
+        Route::post('agregar/varios/la/liquidacion/', [TravelCertificateController::class, 'addMultipleToDriverSettlement'])->name('addMultipleToDriverSettlement');
+
+        // Eliminar constancia de viaje (solo si no está facturada)
+        Route::delete('eliminar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'destroy'])->name('deleteTravelCertificate');
+
+        // TravelItem
+        Route::post('guardar/item-de-viaje/{travelCertificateId}', [TravelItemController::class, 'store'])->name('storeTravelItem');
+        Route::delete('eliminar/item-de-viaje/{id}/{travelCertificateId}', [TravelItemController::class, 'delete'])->name('deleteTravelItem');
+        // Remitos múltiples por constancia
+        Route::post('/constancia/{id}/remitos/multiple', [\App\Http\Controllers\TravelItemController::class, 'storeMultipleRemitos'])
+        ->name('travelItems.storeMultipleRemitos');
+        
+        // Invoice
+        Route::get('facturas', [InvoiceController::class, 'invoices'])->name('invoices');
+        Route::post('generar/factura', [InvoiceController::class, 'generate'])->name('generateInvoice');
+        Route::get('ver/factura/{id}', [InvoiceController::class, 'show'])->name('showInvoice');
+        Route::get('facturar/{id}', [InvoiceController::class, 'invoiced'])->name('invoicedInvoice');
+        Route::get('imprimir/factura/{id}', [InvoiceController::class, 'generateInvoicePdf'])->name('invoicePdf');
+        Route::post('agregar/al/recibo/{id}', [InvoiceController::class, 'addToReceipt'])->name('addToReceipt');
+        Route::post('agregar/tax/al/recibo/{id}', [InvoiceController::class, 'addTaxToReceiptInvoice'])->name('addTaxToReceiptInvoice');
+        Route::delete('remover/tax/al/recibo/{taxId}', [InvoiceController::class, 'removeTaxFromInvoiceReceipt'])->name('removeTaxFromInvoiceReceipt');
+        Route::post('edit/{id}',[InvoiceController::class,'edit'])->name("editInvoice");
+        Route::delete('quitar/al/recibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
+        Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
+        // Eliminar factura (solo si no está facturada y no está pagada)
+        Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
+        
+        Route::get('liquidaciones', [SettlementController::class, 'index'])->name('Settlements');
+        Route::get('liquidaciones/crear', [SettlementController::class, 'create'])->name('Settlements.create');
+        Route::post('liquidaciones', [SettlementController::class, 'store'])->name('Settlements.store');
+        Route::get('liquidaciones/{settlement}', [SettlementController::class, 'show'])->name('Settlements.show');
+        Route::post('liquidaciones/{settlement}/siguiente-semana', [SettlementController::class, 'siguienteSemana'])->name('Settlements.siguienteSemana');
+        Route::post('liquidaciones/{settlement}/guardar', [SettlementController::class, 'guardarEdicion'])->name('guardarEdicion');
+        Route::get('liquidaciones/{settlement}/excel', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
+        Route::get('liquidaciones/{settlement}/eliminar', [SettlementController::class, 'delete'])->name('deleteSettlements');
+        
+        // DriverSettlement
+        Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
+        Route::post('generar/liquidacion', [DriverSettlementController::class, 'generate'])->name('generateDriverSettlement');
+        Route::get('ver/liquidacion/{id}', [DriverSettlementController::class, 'show'])->name('showDriverSettlement');
+        Route::get('imprimir/liquidacion/{id}', [DriverSettlementController::class, 'generateDriverSettlementPdf'])->name('driverSettlementPdf');
+        Route::get('liquidar/{id}', [DriverSettlementController::class, 'liquidated'])->name('liquidatedDriverSettlement');
+        Route::get('anular/liquidacion/{id}', [DriverSettlementController::class, 'cancel'])->name('cancelDriverSettlement');
+        Route::get('eliminar/liquidacion/{id}', [DriverSettlementController::class, 'delete'])->name('deleteDriverSettlement');
+        Route::put('editar/liquidacion', [DriverSettlementController::class, 'edit'])->name('editarDriverSettlement');
+
+        // Receipt
+        Route::get('recibos', [ReceiptController::class, 'receipts'])->name('receipts');
+        Route::post('generar/recibo', [ReceiptController::class, 'generate'])->name('generateReceipt');
+        Route::get('ver/recibo/{id}', [ReceiptController::class, 'show'])->name('showReceipt');
+        Route::get('imprimir/recibo/{id}', [ReceiptController::class, 'generateReceiptPdf'])->name('receiptPdf');
+        Route::get('pagar/{id}', [ReceiptController::class, 'paid'])->name('paidReceipt');
+        Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');//
+        Route::post('agregar/pago/{id}', [ReceiptController::class, 'addPaymentToReceipt'])->name('addPaymentToReceipt');//
+        Route::post('cancelar/pago/{id}', [ReceiptController::class, 'quitPaymentToReceipt'])->name('quitPaymentToReceipt');//
+        Route::post('editar/pago/{id}', [ReceiptController::class, 'editPaymentFromReceipt'])->name('editPaymentFromReceipt');//
+        
+
+        // PaymentMethod
+        Route::get('medios-de-pago', [PaymentMethodController::class, 'paymentMethods'])->name('paymentMethods');
+        Route::post('guardar/medio-de-pago', [PaymentMethodController::class, 'store'])->name('storePaymentMethod');
+        Route::put('actualizar/medio-de-pago/{id}', [PaymentMethodController::class, 'update'])->name('updatePaymentMethod');
+
+        // Credit
+        Route::get('notas-de-credito', [CreditController::class, 'credits'])->name('credits');
+        Route::post('generar/nota-de-credito', [CreditController::class, 'generate'])->name('generateCredit');
+        Route::get('ver/nota-de-/credito/{id}', [CreditController::class, 'show'])->name('showCredit');
+        Route::post('agregar/factura/a/la/nota-de-credito/{id}', [CreditController::class, 'addInvoice'])->name('addInvoiceToCredit');
+        Route::get('quitar/factura/de/la/nota-de-credito/{id}', [CreditController::class, 'removeInvoice'])->name('removeInvoiceFromCredit');
+
+        // Tax
+        Route::get('impuestos', [TaxController::class, 'taxes'])->name('taxes');
+        Route::post('guardar/impuesto', [TaxController::class, 'store'])->name('storeTax');
+        Route::put('actualizar/impuesto/{id}', [TaxController::class, 'update'])->name('updateTax');
+
+        // Vehicle
+        Route::get('vehiculos', [VehicleController::class, 'vehicles'])->name('vehicles');//
+        Route::get('vehiculos/ver/{id}', [VehicleController::class, 'show'])->name('showVehicle');//showVehicle
+        Route::post('guardar/vehiculo', [VehicleController::class, 'store'])->name('storeVehicle');
+        Route::put('actualizar/vehiculo/{id}', [VehicleController::class, 'update'])->name('updateVehicle');
+
+        // User
+        Route::get('usuarios', [UserController::class, 'users'])->name('users');
+        Route::post('guardar/usuario', [UserController::class, 'store'])->name('storeUser');
+        Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
+        Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
+
+        // Debits
+        Route::get('notas-de-debito',[DebitController::class , 'index'])->name('debitos');
+        Route::post('nota-D/generar',[DebitController::class , 'generate'])->name('generateDebit');
+        Route::post('nota-D/add/{id}',[DebitController::class , 'addToInvoice'])->name('addInvoiceToDebit');
+        Route::post('nota-D/show',[DebitController::class , 'show'])->name('showDebit');
+        Route::get('nota-D/remove/{id}',[DebitController::class , 'remove'])->name('removeInvoiceFromDebit');
+        Route::get('nota-D/delete/{id}',[DebitController::class , 'delete'])->name('deleteDebit');
+        Route::get('nota-D/showd/{id}',[DebitController::class , 'show'])->name('debitshow');
+
+        // Payments
+        Route::get('pagos',[PaymentsController::class , 'index' ])->name('pagos');
+        Route::post('pagos/generar',[PaymentsController::class , 'generate' ])->name('generatePayment');
+        Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
+        Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//
+        Route::post('pagos/delete',[PaymentsController::class , 'delete' ])->name('deletePayment');//deletePayment
+
+        
+        });
+    Route::post('/stock/cortedeoperaciones', [StockController::class, 'corteDeOperaciones'])->name('cortedeoperaciones');//crearContactoTercero
+    Route::post('/contacto-tercero/{tercero}', [StockController::class, 'crearContactoTercero'])->name('crearContactoTercero');
+    Route::post('/stock/contacto3roupd/{contacto}/{tercero}', [StockController::class, 'editarContactoTercero'])
+    ->name('editarContactoTercero');
+    Route::post('/stock/storecliente3ro', [StockController::class, 'storeClientTercero'])->name('storeClientTercero');//
     
-    //QUITÉ ESTAS RUTAS PARA PODWER VISUALIZAR EN LAS FACTURAS DESCUENTOS Y DEMÁS
-    //Route::put('agregar/a/la/factura/{id}', [TravelCertificateController::class, 'addToInvoice'])->name('addToInvoice');//
-    //Route::put('quitar/de/la/factura/{id}', [TravelCertificateController::class, 'removeFromInvoice'])->name('removeFromInvoice');
-    // Bulk add/remove travel certificates to/from an invoice
-    Route::put('agregar/multiples/a/la/factura', [TravelCertificateController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
-    Route::put('quitar/multiples/de/la/factura', [TravelCertificateController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');//
-    
-    // ✅ NUEVAS: usan InvoiceController (coinciden con los name() que usa nuestro Blade)
-    Route::put('agregar/a/la/factura/{id}', [InvoiceController::class, 'addToInvoice'])->name('addToInvoice');
-    Route::put('quitar/de/la/factura/{id}', [InvoiceController::class, 'removeFromInvoice'])->name('removeFromInvoice');
-    // Route::put('agregar/multiples/a/la/factura', [InvoiceController::class, 'addMultipleToInvoice'])->name('addMultipleToInvoice');
-    // Route::put('quitar/multiples/de/la/factura', [InvoiceController::class, 'removeMultipleFromInvoice'])->name('removeMultipleFromInvoice');
-
-    Route::put('agregar/a/la/liquidacion/{id}', [TravelCertificateController::class, 'addToDriverSettlement'])->name('addToDriverSettlement');
-    Route::put('quitar/de/la/liquidacion/{id}', [TravelCertificateController::class, 'removeFromDriverSettlement'])->name('removeFromDriverSettlement');
-    Route::post('agregar/varios/la/liquidacion/', [TravelCertificateController::class, 'addMultipleToDriverSettlement'])->name('addMultipleToDriverSettlement');
-
-    // Eliminar constancia de viaje (solo si no está facturada)
-    Route::delete('eliminar/constancia-de-viaje/{id}', [TravelCertificateController::class, 'destroy'])->name('deleteTravelCertificate');
-
-    // TravelItem
-    Route::post('guardar/item-de-viaje/{travelCertificateId}', [TravelItemController::class, 'store'])->name('storeTravelItem');
-    Route::delete('eliminar/item-de-viaje/{id}/{travelCertificateId}', [TravelItemController::class, 'delete'])->name('deleteTravelItem');
-    // Remitos múltiples por constancia
-    Route::post('/constancia/{id}/remitos/multiple', [\App\Http\Controllers\TravelItemController::class, 'storeMultipleRemitos'])
-    ->name('travelItems.storeMultipleRemitos');
-    
-    // Invoice
-    Route::get('facturas', [InvoiceController::class, 'invoices'])->name('invoices');
-    Route::post('generar/factura', [InvoiceController::class, 'generate'])->name('generateInvoice');
-    Route::get('ver/factura/{id}', [InvoiceController::class, 'show'])->name('showInvoice');
-    Route::get('facturar/{id}', [InvoiceController::class, 'invoiced'])->name('invoicedInvoice');
-    Route::get('imprimir/factura/{id}', [InvoiceController::class, 'generateInvoicePdf'])->name('invoicePdf');
-    Route::post('agregar/al/recibo/{id}', [InvoiceController::class, 'addToReceipt'])->name('addToReceipt');
-    Route::post('agregar/tax/al/recibo/{id}', [InvoiceController::class, 'addTaxToReceiptInvoice'])->name('addTaxToReceiptInvoice');
-    Route::delete('remover/tax/al/recibo/{taxId}', [InvoiceController::class, 'removeTaxFromInvoiceReceipt'])->name('removeTaxFromInvoiceReceipt');
-    Route::post('edit/{id}',[InvoiceController::class,'edit'])->name("editInvoice");
-    Route::delete('quitar/al/recibo/{id}', [InvoiceController::class, 'removeFromReceipt'])->name('removeFromReceipt');
-    Route::get('anular/factura/{id}', [InvoiceController::class, 'cancel'])->name('cancelInvoice');
-    // Eliminar factura (solo si no está facturada y no está pagada)
-    Route::delete('eliminar/factura/{id}', [InvoiceController::class, 'delete'])->name('deleteInvoice');
-    
-    Route::get('liquidaciones', [SettlementController::class, 'index'])->name('Settlements');
-    Route::get('liquidaciones/crear', [SettlementController::class, 'create'])->name('Settlements.create');
-    Route::post('liquidaciones', [SettlementController::class, 'store'])->name('Settlements.store');
-    Route::get('liquidaciones/{settlement}', [SettlementController::class, 'show'])->name('Settlements.show');
-    Route::post('liquidaciones/{settlement}/siguiente-semana', [SettlementController::class, 'siguienteSemana'])->name('Settlements.siguienteSemana');
-    Route::post('liquidaciones/{settlement}/guardar', [SettlementController::class, 'guardarEdicion'])->name('guardarEdicion');
-    Route::get('liquidaciones/{settlement}/excel', [SettlementController::class, 'generateExcel'])->name('SettlementsExcel');
-    Route::get('liquidaciones/{settlement}/eliminar', [SettlementController::class, 'delete'])->name('deleteSettlements');
-    
-    // DriverSettlement
-    Route::get('liquidaciones-de-choferes', [DriverSettlementController::class, 'driverSettlements'])->name('driverSettlements');
-    Route::post('generar/liquidacion', [DriverSettlementController::class, 'generate'])->name('generateDriverSettlement');
-    Route::get('ver/liquidacion/{id}', [DriverSettlementController::class, 'show'])->name('showDriverSettlement');
-    Route::get('imprimir/liquidacion/{id}', [DriverSettlementController::class, 'generateDriverSettlementPdf'])->name('driverSettlementPdf');
-    Route::get('liquidar/{id}', [DriverSettlementController::class, 'liquidated'])->name('liquidatedDriverSettlement');
-    Route::get('anular/liquidacion/{id}', [DriverSettlementController::class, 'cancel'])->name('cancelDriverSettlement');
-    Route::get('eliminar/liquidacion/{id}', [DriverSettlementController::class, 'delete'])->name('deleteDriverSettlement');
-    Route::put('editar/liquidacion', [DriverSettlementController::class, 'edit'])->name('editarDriverSettlement');
-
-    // Receipt
-    Route::get('recibos', [ReceiptController::class, 'receipts'])->name('receipts');
-    Route::post('generar/recibo', [ReceiptController::class, 'generate'])->name('generateReceipt');
-    Route::get('ver/recibo/{id}', [ReceiptController::class, 'show'])->name('showReceipt');
-    Route::get('imprimir/recibo/{id}', [ReceiptController::class, 'generateReceiptPdf'])->name('receiptPdf');
-    Route::get('pagar/{id}', [ReceiptController::class, 'paid'])->name('paidReceipt');
-    Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');//
-    Route::post('agregar/pago/{id}', [ReceiptController::class, 'addPaymentToReceipt'])->name('addPaymentToReceipt');//
-    Route::post('cancelar/pago/{id}', [ReceiptController::class, 'quitPaymentToReceipt'])->name('quitPaymentToReceipt');//
-    Route::post('editar/pago/{id}', [ReceiptController::class, 'editPaymentFromReceipt'])->name('editPaymentFromReceipt');//
-    
-
-    // PaymentMethod
-    Route::get('medios-de-pago', [PaymentMethodController::class, 'paymentMethods'])->name('paymentMethods');
-    Route::post('guardar/medio-de-pago', [PaymentMethodController::class, 'store'])->name('storePaymentMethod');
-    Route::put('actualizar/medio-de-pago/{id}', [PaymentMethodController::class, 'update'])->name('updatePaymentMethod');
-
-    // Credit
-    Route::get('notas-de-credito', [CreditController::class, 'credits'])->name('credits');
-    Route::post('generar/nota-de-credito', [CreditController::class, 'generate'])->name('generateCredit');
-    Route::get('ver/nota-de-/credito/{id}', [CreditController::class, 'show'])->name('showCredit');
-    Route::post('agregar/factura/a/la/nota-de-credito/{id}', [CreditController::class, 'addInvoice'])->name('addInvoiceToCredit');
-    Route::get('quitar/factura/de/la/nota-de-credito/{id}', [CreditController::class, 'removeInvoice'])->name('removeInvoiceFromCredit');
-
-    // Tax
-    Route::get('impuestos', [TaxController::class, 'taxes'])->name('taxes');
-    Route::post('guardar/impuesto', [TaxController::class, 'store'])->name('storeTax');
-    Route::put('actualizar/impuesto/{id}', [TaxController::class, 'update'])->name('updateTax');
-
-    // Vehicle
-    Route::get('vehiculos', [VehicleController::class, 'vehicles'])->name('vehicles');//
-    Route::get('vehiculos/ver/{id}', [VehicleController::class, 'show'])->name('showVehicle');//showVehicle
-    Route::post('guardar/vehiculo', [VehicleController::class, 'store'])->name('storeVehicle');
-    Route::put('actualizar/vehiculo/{id}', [VehicleController::class, 'update'])->name('updateVehicle');
-
-    // User
-    Route::get('usuarios', [UserController::class, 'users'])->name('users');
-    Route::post('guardar/usuario', [UserController::class, 'store'])->name('storeUser');
-    Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
-    Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
-
-    // Debits
-    Route::get('notas-de-debito',[DebitController::class , 'index'])->name('debitos');
-    Route::post('nota-D/generar',[DebitController::class , 'generate'])->name('generateDebit');
-    Route::post('nota-D/add/{id}',[DebitController::class , 'addToInvoice'])->name('addInvoiceToDebit');
-    Route::post('nota-D/show',[DebitController::class , 'show'])->name('showDebit');
-    Route::get('nota-D/remove/{id}',[DebitController::class , 'remove'])->name('removeInvoiceFromDebit');
-    Route::get('nota-D/delete/{id}',[DebitController::class , 'delete'])->name('deleteDebit');
-    Route::get('nota-D/showd/{id}',[DebitController::class , 'show'])->name('debitshow');
-
-    // Payments
-    Route::get('pagos',[PaymentsController::class , 'index' ])->name('pagos');
-    Route::post('pagos/generar',[PaymentsController::class , 'generate' ])->name('generatePayment');
-    Route::get('pagos/ver/{id}',[PaymentsController::class , 'show' ])->name('showPayment');//editPayment
-    Route::post('pagos/editar/{id}',[PaymentsController::class , 'edit' ])->name('editPayment');//
-    Route::post('pagos/delete',[PaymentsController::class , 'delete' ])->name('deletePayment');//deletePayment
+    Route::get('/stock', [StockController::class, 'index'])->name('stock');
+    Route::get('/stock/show/{id}', [StockController::class, 'show'])->name('showcarga');
+    Route::post('/stock/generate', [StockController::class, 'generate'])->name('generatestock');
+    Route::post('/stock/edit', [StockController::class, 'edit'])->name('editstock');
+    Route::get('/stock/delete/{id}', [StockController::class, 'delete'])->name('deletestock');
+    Route::post('/stock/update/price', [StockController::class, 'updateprice'])->name('updateprice');
+    Route::post('/stock/remitos', [StockController::class, 'storeRemito'])->name('storeRemito');
+    Route::delete('/stock/contacto3rodel/{contacto}/{tercero}', [StockController::class, 'eliminarContactoTercero'])->name('eliminarContactoTercero');
+    Route::get('/remito/{remito}/pdf', [StockController::class, 'remitoPdf'])
+    ->middleware('auth')->name('remitoPdf');
 });

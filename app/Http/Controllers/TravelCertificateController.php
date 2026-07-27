@@ -67,8 +67,14 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->iva = 0.00;
         $newTravelCertificate->commission_type = $request->commission_type;
         $newTravelCertificate->vehicleId = $vehicleId;
-        $newTravelCertificate->horaLLegada = $horaLlegada;
-        $newTravelCertificate->horaSalida = $horaSalida;
+        if($horaLlegada != null)
+        {
+        $newTravelCertificate->horaLlegada = $horaLlegada;
+        }
+        if($horaSalida != null)
+        {
+            $newTravelCertificate->horaSalida = $horaSalida;
+        }
         // Lógica para establecer el tipo de comisión
         if ($request->commission_type == "porcentaje pactado") {
             // Obtener el porcentaje del driver seleccionado y asignarlo al campo `percent`
@@ -84,9 +90,9 @@ class TravelCertificateController extends Controller
                 $newTravelCertificate->percent = 0; // Asegurarse de que `percent` sea nulo si no se utiliza
             }
         }
-        
         // Guardar el nuevo certificado de viaje
         $newTravelCertificate->save();
+        dd($horaLlegada, $horaSalida, $newTravelCertificate->horaLlegada, $newTravelCertificate->horaSalida);
 
         // Redirigir al detalle de la constancia de viaje recién guardada
         return redirect(route('showTravelCertificate', $newTravelCertificate->id));

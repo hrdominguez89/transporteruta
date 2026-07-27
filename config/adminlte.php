@@ -363,6 +363,11 @@ return [
             'icon' => 'fas fa-receipt',
         ],
         [
+            'text' => 'Stock',
+            'url'  => 'stock',
+            'icon' => 'fas fa-users',
+        ],
+        [
             'text' => 'Usuarios',
             'url'  => 'usuarios',
             'icon' => 'fas fa-users',
