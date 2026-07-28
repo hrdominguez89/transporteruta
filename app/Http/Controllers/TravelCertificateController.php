@@ -92,7 +92,6 @@ class TravelCertificateController extends Controller
         }
         // Guardar el nuevo certificado de viaje
         $newTravelCertificate->save();
-        dd($horaLlegada, $horaSalida, $newTravelCertificate->horaLlegada, $newTravelCertificate->horaSalida);
 
         // Redirigir al detalle de la constancia de viaje recién guardada
         return redirect(route('showTravelCertificate', $newTravelCertificate->id));
