@@ -43,6 +43,7 @@
                     </div>
                 </div>
             </div>
+            {{ base_path() }}
             <div class="col-6">
                 <h4> Clientes con Saldo Deudor</h4>
                 <table class="table table-bordered text-center">
