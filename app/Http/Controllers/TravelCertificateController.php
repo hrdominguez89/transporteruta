@@ -69,7 +69,7 @@ class TravelCertificateController extends Controller
         $newTravelCertificate->vehicleId = $vehicleId;
         if($horaLlegada != null)
         {
-        $newTravelCertificate->horaLlegada = $horaLlegada;
+        $newTravelCertificate->horaLLegada = $horaLlegada;
         }
         if($horaSalida != null)
         {
