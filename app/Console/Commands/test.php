@@ -32,7 +32,6 @@ class test extends Command
      */
     public function handle()
     {
-        $this->testeodedireccionesdemail();
         Mail::send('emails.test', [], function ($message) {
             $message->to('l.e.marguery@gmail.com')
                     ->subject('Facturas vencidas y en plazo')
