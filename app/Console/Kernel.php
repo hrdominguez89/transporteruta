@@ -15,9 +15,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('command:notificarpagosatrasados') 
-            ->weeklyOn(2, '11:00')
+        $schedule->command('command:name')->weeklyOn(3, '13:55')
             ->timezone('America/Argentina/Buenos_Aires');
+
+        // $schedule->command('command:notificarpagosatrasados') 
+        //     ->weeklyOn(2, '11:00')
+        //     ->timezone('America/Argentina/Buenos_Aires');
     }
 
     /**
