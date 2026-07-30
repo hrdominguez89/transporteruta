@@ -167,7 +167,7 @@
                                             data-field="chofer_n_n"
                                             value="{{ $detalle->chofer_n_n ?? ($detalle->noche_n) }}">
                                     </td>
-                                    <td data-cell="chofer_total">{{ $detalle->chofer_total ?? number_format(($detalle->chofer_porcentaje / 100) * ($detalle->importe_neto - $detalle->carga_descarga_b - $detalle->noche_b), 2, '.', '') }}</td>
+                                    <td data-cell="chofer_total">{{ $detalle->chofer_total ?? number_format(($detalle->chofer_porcentaje / 100) * ($detalle->importe_neto - $detalle->carga_descarga_b - $detalle->noche_b - $detalle->carga_descarga_n - $detalle->noche_n), 2, '.', '') }}</td>
                                     <td data-cell="diferencia">{{ $detalle->diferencia ?? 0 }}</td>
                                     <td>
                                         <input

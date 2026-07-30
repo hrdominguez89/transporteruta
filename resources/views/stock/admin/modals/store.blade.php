@@ -21,7 +21,7 @@
                     <select id="cliente_tercero_id" name="cliente_tercero_id" class="form-control mb-2">
                         <option value="">---- Sin tercero ----</option>
                         @foreach ($clientes_terceros as $tercero)
-                            <option value="{{ $tercero->id }}" data-client="{{ $tercero->client_id }}">
+                            <option value="{{ $tercero->id }}" data-client="{{ $tercero->client->id }}">
                                 {{ $tercero->nombre }}
                             </option>
                         @endforeach
@@ -78,24 +78,32 @@
   });
 
   // --- select encadenado cliente -> tercero ---
-  (function () {
-      const cliente = document.querySelector('select[name="client_id"]');
-      const tercero = document.getElementById('cliente_tercero_id');
-      const opciones = Array.from(tercero.options);
+// (function () {
+//     const cliente = document.querySelector('select[name="client_id"]');
+//     const tercero = document.getElementById('cliente_tercero_id');
 
-      function filtrar() {
-          const clientId = cliente.value;
-          tercero.value = ''; // reset al cambiar de cliente
+//     // guardo TODAS las options una sola vez (clonadas), incluida "Sin tercero"
+//     const todas = Array.from(tercero.options).map(op => op.cloneNode(true));
 
-          opciones.forEach(function (op) {
-              if (op.value === '') return; // "Sin tercero" siempre visible
+//     function filtrar() {
+//         const clientId = cliente.value;
 
-              const visible = op.dataset.client === clientId;
-              op.hidden = !visible;
-          });
-      }
+//         // vacío el select
+//         tercero.innerHTML = '';
 
-      cliente.addEventListener('change', filtrar);
-      filtrar(); // estado inicial
-  })();
+//         // reinserto solo las que corresponden
+//         todas.forEach(function (op) {
+//             // la opción "Sin tercero" (value vacío) siempre va
+//             console.log(clientId);
+//             if (op.value === '' || op.dataset.client === clientId) {
+//                 tercero.appendChild(op.cloneNode(true));
+//             }
+//         });
+
+//         tercero.value = ''; // reset a "Sin tercero" al cambiar de cliente
+//     }
+
+//     cliente.addEventListener('change', filtrar);
+//     filtrar(); // estado inicial
+// })();
 </script>
