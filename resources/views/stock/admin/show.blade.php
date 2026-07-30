@@ -68,6 +68,7 @@
                 <th>Espacio</th>
                 <th>Destino</th>
                 <th>Estado de envio</th>
+                <th>Motivo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -86,6 +87,7 @@
                 <td>{{ $carga->espacio }}</td>
                 <td>{{ $carga->destino }}</td>
                 <td>{{ $carga->estado_de_envio }}</td>
+                <td>{{ $carga->motivo }}</td>
                 <td>
                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">
                     Editar

@@ -22,7 +22,6 @@ class StockController extends Controller
             $cargas = Carga::when($request->client_id, function ($query, $clientId) {
                 $query->where('client_id', $clientId);
             })->get();
-
             return view('stock.admin.index', [
                 'cargas'            => $cargas,
                 'clients'           => Client::all(),
@@ -72,7 +71,7 @@ class StockController extends Controller
             'espacio'                   => 'nullable|string',
             'tipo'                      => 'sometimes|in:PALLET,BULTO',
             'destino'                   => 'nullable|string|max:255',
-            'estado_de_envio'           => 'sometimes|in:ALMACEN,VIAJE,ENTREGADO,RECHAZADO',
+            'estado_de_envio'           => 'sometimes',
             'notificacion_de_recepcion' => 'sometimes|boolean',
             'notificacion_de_entrega'   => 'sometimes|boolean',
             'espacio'                   => 'nullable|string|max:255',
@@ -207,6 +206,7 @@ class StockController extends Controller
             'cargas'  => $cargasIndex,
             'clients' => $clientes,
             'corte'   => $corte,
+            'clientes_terceros' => ClienteTercero::all()
         ]);
     }
     public function storeClientTercero(Request $request)
