@@ -54,7 +54,7 @@
 
                     <label for="estado_de_envio{{ $carga->id }}">Estado de envio:</label>
                     <select id="estado_de_envio{{ $carga->id }}" name="estado_de_envio" class="form-control mb-2" required>
-                        @foreach (['ALMACEN', 'VIAJE', 'ENTREGADO', 'RECHAZADO'] as $estado)
+                        @foreach (['DEPOSITO', 'COORDINADO', 'TRANSITO','ENTREGADO', 'RECHAZADO'] as $estado)
                             <option value="{{ $estado }}"
                                 {{ old('estado_de_envio', $carga->estado_de_envio) == $estado ? 'selected' : '' }}>
                                 {{ ucfirst(strtolower($estado)) }}
