@@ -66,44 +66,39 @@
 </div>
 <script>
   // --- toggle tamaño pallet (lo que ya tenías) ---
-  document.getElementById("tipo").addEventListener("change", function () {
-      var type = this.value;
-      if (type === "PALLET") {
-          document.getElementById("tamaño_pallet_div").style.display = "block";
-          document.getElementById("tamaño_pallet").setAttribute("required", "required");
-      } else {
-          document.getElementById("tamaño_pallet_div").style.display = "none";
-          document.getElementById("tamaño_pallet").removeAttribute("required");
-      }
-  });
+    document.getElementById("tipo").addEventListener("change", function () {
+        var type = this.value;
+        if (type === "PALLET") {
+            document.getElementById("tamaño_pallet_div").style.display = "block";
+            document.getElementById("tamaño_pallet").setAttribute("required", "required");
+        } else {
+            document.getElementById("tamaño_pallet_div").style.display = "none";
+            document.getElementById("tamaño_pallet").removeAttribute("required");
+        }
+    });
+    window.addEventListener('load', function () {
+    var tercero = $('#cliente_tercero_id');
+    var htmlOriginal = tercero.html();
 
-  // --- select encadenado cliente -> tercero ---
-// (function () {
-//     const cliente = document.querySelector('select[name="client_id"]');
-//     const tercero = document.getElementById('cliente_tercero_id');
+    function filtrar(clientId) {
+        var temp = $('<select>').html(htmlOriginal);
+        var nuevo = '<option value="">---- Sin tercero ----</option>';
 
-//     // guardo TODAS las options una sola vez (clonadas), incluida "Sin tercero"
-//     const todas = Array.from(tercero.options).map(op => op.cloneNode(true));
+        temp.find('option').each(function () {
+            var op = $(this);
+            if (op.val() === '') return;
+            if (op.attr('data-client') === clientId) {
+                nuevo += '<option value="' + op.val() + '">' + op.text() + '</option>';
+            }
+        });
 
-//     function filtrar() {
-//         const clientId = cliente.value;
+        tercero.html(nuevo);
+    }
 
-//         // vacío el select
-//         tercero.innerHTML = '';
+    $('select[name="client_id"]').on('change', function () {
+        filtrar($(this).val());
+    });
 
-//         // reinserto solo las que corresponden
-//         todas.forEach(function (op) {
-//             // la opción "Sin tercero" (value vacío) siempre va
-//             console.log(clientId);
-//             if (op.value === '' || op.dataset.client === clientId) {
-//                 tercero.appendChild(op.cloneNode(true));
-//             }
-//         });
-
-//         tercero.value = ''; // reset a "Sin tercero" al cambiar de cliente
-//     }
-
-//     cliente.addEventListener('change', filtrar);
-//     filtrar(); // estado inicial
-// })();
+    filtrar($('select[name="client_id"]').val()); // filtrado inicial
+});
 </script>

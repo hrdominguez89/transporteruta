@@ -177,7 +177,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/contacto-tercero/{tercero}', [StockController::class, 'crearContactoTercero'])->name('crearContactoTercero');
     Route::post('/stock/contacto3roupd/{contacto}/{tercero}', [StockController::class, 'editarContactoTercero'])
     ->name('editarContactoTercero');
-    Route::post('/stock/storecliente3ro', [StockController::class, 'storeClientTercero'])->name('storeClientTercero');//
+    Route::post('/stock/storecliente3ro', [StockController::class, 'storeClientTercero'])->name('storeClientTercero');
+    Route::post('/stock/editprice', [StockController::class, 'editpriceoncarga'])->name('editpriceoncarga');//edittypeofcarga
+    Route::post('/stock/edittype', [StockController::class, 'edittypeofcarga'])->name('edittypeofcarga');//
     
     Route::get('/stock', [StockController::class, 'index'])->name('stock');
     Route::get('/stock/show/{id}', [StockController::class, 'show'])->name('showcarga');
