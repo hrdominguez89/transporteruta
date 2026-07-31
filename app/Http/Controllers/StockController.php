@@ -65,22 +65,38 @@ class StockController extends Controller
 
         $data = $request->validate([
             'nombre'                    => 'sometimes|string|max:255',
-            'cantidad'                  => 'sometimes|integer',
             'fecha_de_recepcion'        => 'sometimes|date',
             'fecha_de_entrega'          => 'nullable|date',
-            'espacio'                   => 'nullable|string',
-            'tipo'                      => 'sometimes|in:PALLET,BULTO',
             'destino'                   => 'nullable|string|max:255',
             'estado_de_envio'           => 'sometimes',
             'notificacion_de_recepcion' => 'sometimes|boolean',
             'notificacion_de_entrega'   => 'sometimes|boolean',
-            'espacio'                   => 'nullable|string|max:255',
-            'cliente_tercero_id'        => 'sometimes|integer',
+            'cliente_tercero_id'        => 'nullable|integer',
             'motivo'                => 'nullable|string|max:255',
             'liquidado'             => 'nullable|boolean',
             'travel_certificate_id' => 'nullable|exists:travel_certificates,id',
         ]);
-        $price = Price::where('type',$data['tipo'])->value('price');
+        
+        $carga->update($data);
+        
+        return redirect()->route('showcarga', $carga->id)
+            ->with('success', 'Carga actualizada correctamente.');
+    }
+    public function edittypeofcarga(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+        $carga = Carga::findOrFail($request->id);
+        
+        $data = $request->validate([
+            'cantidad'                  => 'sometimes|integer',
+            'tipo'                      => 'sometimes|in:PALLET,BULTO',
+            'espacio'                   => 'nullable|string|max:255',
+            ]);
+            
+            $price = Price::where('type',$data['tipo'])->value('price');
+            
         if($data['tipo'] == 'PALLET' & $data['espacio'] == 'EXTRA')
         {
             $price = $price * 1.5;
@@ -88,13 +104,25 @@ class StockController extends Controller
 
         $data['precio'] = $price * $data['cantidad'];
         $carga->update($data);
-        
+        return redirect()->route('showcarga', $carga->id)
+            ->with('success', 'Carga actualizada correctamente.');
+    }
+
+    public function editpriceoncarga(Request $request )
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+        $carga = Carga::findOrFail($request->id);
+        $data = $request->validate(['precio' => 'required|decimal:0,2']);
+        $carga->update($data);
+
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
     }
     public function generate(Request $request)
     {
-         if (!auth()->user()->isAdmin() ) {
+        if (!auth()->user()->isAdmin() ) {  
             abort(403);
         }
         $data = $request->validate([
@@ -181,14 +209,13 @@ class StockController extends Controller
             'fecha'     => 'required|date',
         ]);
 
-        $cargas = Carga::where('client_id', $data['client_id'])
-            ->where('estado_de_envio','ENTREGADO')
-            ->whereDate('fecha_de_recepcion', '<=', $data['fecha'])
-            ->get();
-
+       $cargas = Carga::where('client_id', $data['client_id'])
+        ->whereIn('estado_de_envio', ['ENTREGADO', 'RECHAZADO'])
+        ->whereDate('fecha_de_entrega', $data['fecha'])
+        ->get();
         $bultos  = $cargas->where('tipo', 'BULTO');
         $pallets = $cargas->where('tipo', 'PALLET');
-
+        $remitos = $cargas->pluck('remito')->filter();
         $corte = [
             'cliente'          => Client::find($data['client_id'])->name,
             'fecha'            => $data['fecha'],
@@ -197,10 +224,12 @@ class StockController extends Controller
             'pallets_cantidad' => $pallets->sum('cantidad'),
             'pallets_total'    => $pallets->sum('precio'),
             'total'            => $cargas->sum('precio'),
+            'remitos'          => $remitos
         ];
 
         $clientes = Client::all();
-        $cargasIndex = Carga::all(); // lo que ya pasás normalmente a la vista
+        $cargasIndex = Carga::all();
+
 
         return view('stock.admin.index', [
             'cargas'  => $cargasIndex,
