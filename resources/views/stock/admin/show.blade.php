@@ -14,6 +14,12 @@
             <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#storeContacto">
                 Crear contacto
             </button>
+             <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#editPrice-{{ $carga->id }}">
+                Editar precio
+            </button>
+            <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#editType-{{ $carga->id }}">
+                Editar tipo y cantidad
+            </button>
             @if ($carga->cliente_tercero?->contacto)
                 <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#updateContacto-{{ $carga->cliente_tercero->contacto->id }}-{{ $carga->cliente_tercero->id }}">
                 Editar contacto
@@ -24,6 +30,8 @@
             @endif
         </div>
         @include('stock.admin.modals.edit')
+        @include('stock.admin.modals.editPrice')
+        @include('stock.admin.modals.editType')
         @include('stock.admin.modals.uploadRemito')
         @include('stock.admin.modals.storeContacto')
         @include('stock.admin.modals.updateContacto')
@@ -109,28 +117,28 @@
         </thead>
          <tbody>
             <tr>
-                <td style="font-size:100px">
+                <td style="font-size:50px">
                     {{ $carga->remito?->numero }}
                 </td>
                 <td>
-    @if ($carga->remito?->path)
-        @php $url = asset('storage/' . $carga->remito->path); @endphp
-
-        <a href="{{ $url }}" target="_blank" rel="noopener">
-            <img src="{{ $url }}" alt="Remito {{ $carga->remito->numero }}"
-                 class="img-thumbnail" style="max-height: 80px; cursor: zoom-in">
-        </a>
-
-        <div class="mt-1">
-            <a href="{{ route('remitoPdf', $carga->remito->id) }}"
-               class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-download"></i> Descargar PDF
-            </a>
-        </div>
-    @else
-        <span class="text-muted">Sin remito</span>
-    @endif
-</td>
+                    @if ($carga->remito?->path)
+                        @php 
+                            $url = asset('storage/' . $carga->remito->path); 
+                        @endphp
+                        <a href="{{ $url }}" target="_blank" rel="noopener">
+                            <img src="{{ $url }}" alt="Remito {{ $carga->remito->numero }}"
+                                class="img-thumbnail" style="max-height: 100px; cursor: zoom-in">
+                        </a>
+                        <div class="mt-1">
+                            <a href="{{ route('remitoPdf', $carga->remito->id) }}"
+                            class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download"></i> Descargar PDF
+                            </a>
+                        </div>
+                    @else
+                        <span class="text-muted">Sin remito</span>
+                    @endif
+                </td>
             </tr>
         </tbody>
     </table>

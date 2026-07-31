@@ -17,10 +17,6 @@
                     <input id="nombre{{ $carga->id }}" type="text" name="nombre" class="form-control mb-2"
                         value="{{ old('nombre', $carga->nombre) }}" required>
 
-                    <label for="cantidad{{ $carga->id }}">Cantidad:</label>
-                    <input id="cantidad{{ $carga->id }}" type="number" name="cantidad" class="form-control mb-2"
-                        value="{{ old('cantidad', $carga->cantidad) }}">
-
                     <label for="destino{{ $carga->id }}">Destino:</label>
                     <input id="destino{{ $carga->id }}" type="text" name="destino" class="form-control mb-2"
                         value="{{ old('destino', $carga->destino) }}">
@@ -35,11 +31,6 @@
                         class="form-control mb-2"
                         value="{{ old('fecha_de_entrega', $carga->fecha_de_entrega?->format('Y-m-d')) }}">
 
-                    <label for="tipo{{ $carga->id }}">Tipo:</label>
-                    <select id="tipo{{ $carga->id }}" name="tipo" class="form-control mb-2" required>
-                        <option value="PALLET" {{ old('tipo', $carga->tipo) == 'PALLET' ? 'selected' : '' }}>Pallet</option>
-                        <option value="BULTO" {{ old('tipo', $carga->tipo) == 'BULTO' ? 'selected' : '' }}>Bulto</option>
-                    </select>
 
                     <label for="cliente_tercero_id{{ $carga->id }}">Cliente tercero:</label>
                     <select id="cliente_tercero_id{{ $carga->id }}" name="cliente_tercero_id" class="form-control mb-2">
@@ -61,16 +52,7 @@
                             </option>
                         @endforeach
                     </select>
-
-                    <div id="tamañoDiv{{ $carga->id }}" style="display: none">
-                        <label for="tamaño{{ $carga->id }}">Tamaño del pallet<span class="text-danger"> *</span></label>
-                        <select id="tamaño{{ $carga->id }}" name="espacio" class="form-control mb-2">
-                            <option value="">Seleccione una opcion</option>
-                            <option value="ESTANDAR" {{ old('espacio', $carga->espacio) == 'ESTANDAR' ? 'selected' : '' }}>Estandar</option>
-                            <option value="EXTRA" {{ old('espacio', $carga->espacio) == 'EXTRA' ? 'selected' : '' }}>Extra</option>
-                        </select>
-                    </div>
-                                        {{-- Motivo de rechazo: solo visible si estado = RECHAZADO --}}
+                                        
                     <div id="motivoDiv{{ $carga->id }}" style="display: none">
                         <label for="motivo{{ $carga->id }}">Motivo de rechazo:</label>
                         <input id="motivo{{ $carga->id }}" type="text" name="motivo" class="form-control mb-2"
@@ -104,23 +86,7 @@
     </div>
 </div>
 <script>
-(function () {
-    const tipo   = document.getElementById('tipo{{ $carga->id }}');
-    const div    = document.getElementById('tamañoDiv{{ $carga->id }}');
-    const tamaño = document.getElementById('tamaño{{ $carga->id }}');
 
-    function toggle() {
-        const esPallet = tipo.value === 'PALLET';
-
-        div.style.display = esPallet ? 'block' : 'none';
-        tamaño.required   = esPallet;
-
-        if (!esPallet) tamaño.value = '';
-    }
-
-    tipo.addEventListener('change', toggle);
-    toggle();
-})();
 (function () {
     const estado = document.getElementById('estado_de_envio{{ $carga->id }}');
     const motivo = document.getElementById('motivoDiv{{ $carga->id }}');

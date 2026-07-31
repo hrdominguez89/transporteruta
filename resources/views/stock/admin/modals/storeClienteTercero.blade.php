@@ -20,7 +20,7 @@
               </option>
             @endforeach
           </select>
-        <label for="nombre">Nombre:</label>
+        <label for="nombre">Nombre (de 3ro):</label>
         <input type="text" name="nombre" class="form-control mb-2" placeholder="Ingrese el nombre..." required>
 
         <label for="codigo_postal">Código postal:</label>

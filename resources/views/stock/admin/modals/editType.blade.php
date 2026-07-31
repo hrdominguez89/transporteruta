@@ -1,0 +1,60 @@
+<div class="modal fade" id="editType-{{ $carga->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('edittypeofcarga') }}" method="POST">
+                @csrf
+                <input type="hidden" name="id" value="{{ $carga->id }}">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title">Actualizar carga (se modificara el precio)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="cantidad{{ $carga->id }}">Cantidad:</label>
+                    <input id="cantidad{{ $carga->id }}" type="number" name="cantidad" class="form-control mb-2"
+                        value="{{ old('cantidad', $carga->cantidad) }}">
+
+                    <label for="tipo{{ $carga->id }}">Tipo:</label>
+                    <select id="tipo{{ $carga->id }}" name="tipo" class="form-control mb-2" required>
+                        <option value="PALLET" {{ old('tipo', $carga->tipo) == 'PALLET' ? 'selected' : '' }}>Pallet</option>
+                        <option value="BULTO" {{ old('tipo', $carga->tipo) == 'BULTO' ? 'selected' : '' }}>Bulto</option>
+                    </select>
+                    
+                    <div id="tamañoDiv{{ $carga->id }}" style="display: none">
+                        <label for="tamaño{{ $carga->id }}">Tamaño del pallet<span class="text-danger"> *</span></label>
+                        <select id="tamaño{{ $carga->id }}" name="espacio" class="form-control mb-2">
+                            <option value="">Seleccione una opcion</option>
+                            <option value="ESTANDAR" {{ old('espacio', $carga->espacio) == 'ESTANDAR' ? 'selected' : '' }}>Estandar</option>
+                            <option value="EXTRA" {{ old('espacio', $carga->espacio) == 'EXTRA' ? 'selected' : '' }}>Extra</option>
+                        </select>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+    const tipo   = document.getElementById('tipo{{ $carga->id }}');
+    const div    = document.getElementById('tamañoDiv{{ $carga->id }}');
+    const tamaño = document.getElementById('tamaño{{ $carga->id }}');
+
+    function toggle() {
+        const esPallet = tipo.value === 'PALLET';
+
+        div.style.display = esPallet ? 'block' : 'none';
+        tamaño.required   = esPallet;
+
+        if (!esPallet) tamaño.value = '';
+    }
+
+    tipo.addEventListener('change', toggle);
+    toggle();
+})();
+</script>
