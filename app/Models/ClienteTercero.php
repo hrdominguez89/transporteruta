@@ -18,6 +18,10 @@ class ClienteTercero extends Model
         'nombre',
         'codigo_postal',
         'direccion',
+        'horario_entrega',
+        'cuit',
+        'condicion_venta',
+        'numero_cliente',
     ];
 
     public function client(): BelongsTo
