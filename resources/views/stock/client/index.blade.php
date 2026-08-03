@@ -28,6 +28,7 @@
         <tr>
             <th>Cliente 3ro</th>
             <th>Destino</th>
+            <th>Cantidad</th>
             <th>Remito</th>
             <th>Nombre</th>
             <th>Fecha de recepcion</th>
@@ -42,6 +43,7 @@
             <tr>
                 <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
                 <td>{{ $carga->destino }}</td>
+                <td>{{ $carga->cantidad }}</td>
                 <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
                 <td>{{ $carga->nombre }}</td>
                 <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
