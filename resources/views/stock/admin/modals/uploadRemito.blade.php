@@ -16,6 +16,10 @@
           <input type="text" name="numero" id="numero" class="form-control mb-3"
                  placeholder="Ingrese el número de remito..." required>
 
+          <label for="valor_declarado">Valor declarado:</label>
+          <input type="text" name="valor_declarado" id="valor_declarado" class="form-control mb-3"
+                 placeholder="Ingrese el valor declarado...">    
+
           <label for="image">Imagen:</label>
           <input type="file" name="image" id="image" class="form-control-file mb-2"
                  accept="image/*" required>

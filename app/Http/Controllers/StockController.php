@@ -120,6 +120,23 @@ class StockController extends Controller
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
     }
+    public function updateClienteTercero(Request $request)
+    {
+        $request->validate([
+            'nombre'          => 'required|string',
+            'numero_cliente'  => 'nullable|string',
+            'cuit'            => 'nullable|string',
+            'condicion_venta' => 'nullable|string',
+            'codigo_postal'   => 'nullable|string',
+            'direccion'       => 'nullable|string',
+            'horario_entrega' => 'nullable|string',
+        ]);
+
+        $tercero = ClienteTercero::findOrFail($request->id);
+        $tercero->update($request->except(['_token', 'id']));
+
+        return redirect()->route('stock')->with('success', 'Cliente 3ro actualizado.');
+    }
     public function generate(Request $request)
     {
         if (!auth()->user()->isAdmin() ) {  
@@ -188,6 +205,7 @@ class StockController extends Controller
             'numero' => 'required|string|max:50|unique:remitos,numero',
             'image'  => 'required|image|mimes:jpg,jpeg,png|max:4096',
             'carga_id' => 'required|exists:cargas,id',
+            'valor_declarado' => 'nullable|string'
         ]);
 
         $data['path'] = $request->file('image')->store('remitos', 'public');
@@ -198,7 +216,33 @@ class StockController extends Controller
         $c->save();
         return redirect()->back()->with('success', 'Remito cargado correctamente.');
     }
+    public function updateRemito(Request $request)
+    {
+        $request->validate([
+            'id'              => 'required|exists:remitos,id',
+            'numero'          => 'required|string',
+            'valor_declarado' => 'nullable|numeric',
+            'image'           => 'nullable|image|max:4096',
+        ]);
 
+        $remito = Remito::findOrFail($request->id);
+
+        $remito->numero          = $request->numero;
+        $remito->valor_declarado = $request->valor_declarado;
+
+        // Solo reemplaza la imagen si subieron una nueva
+        if ($request->hasFile('image')) {
+            // borra la anterior si existía
+            if ($remito->path && Storage::disk('public')->exists($remito->path)) {
+                Storage::disk('public')->delete($remito->path);
+            }
+            $remito->path = $request->file('image')->store('remitos', 'public');
+        }
+
+        $remito->save();
+
+        return back()->with('success', 'Remito actualizado.');
+    }
     public function corteDeOperaciones(Request $request)
     {
          if (!auth()->user()->isAdmin() ) {
@@ -261,6 +305,7 @@ class StockController extends Controller
         }
         $tercero = ClienteTercero::findOrFail($terceroId);
 
+       
         $data = $request->validate([
             'name'        => 'required|string|max:255',
             'lastname'    => 'nullable|string|max:255',

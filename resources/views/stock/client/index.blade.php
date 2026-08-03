@@ -24,37 +24,37 @@
 
 @section('content')
     <table class="table table-sm table-bordered text-center data-table">
-        <thead class="bg-danger">
+    <thead class="bg-danger">
+        <tr>
+            <th>Cliente 3ro</th>
+            <th>Destino</th>
+            <th>Remito</th>
+            <th>Nombre</th>
+            <th>Fecha de recepcion</th>
+            <th>Tipo</th>
+            <th>Espacio</th>
+            <th>Estado de envio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($cargas as $carga)
             <tr>
-                <th>Nombre</th>
-                <th>Cantidad</th>
-                <th>Fecha de recepcion T.R.</th>
-                <th>Fecha de entrega</th>
-                <th>Precio</th>
-                <th>Tipo</th>
-                <th>Destino</th>
-                <th>Remito</th>
-                <th>Estado de envio</th>
+                <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
+                <td>{{ $carga->destino }}</td>
+                <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
+                <td>{{ $carga->nombre }}</td>
+                <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
+                <td>{{ $carga->tipo }}</td>
+                <td>{{ $carga->espacio }}</td>
+                <td>{{ $carga->estado_de_envio }}</td>
+                <td>
+                    <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach ($cargas as $carga)
-                <tr>
-                    <td>{{ $carga->nombre }}</td>
-                    <td>{{ $carga->cantidad }}</td>
-                    <td>{{ $carga->fecha_de_recepcion }}</td>
-                    <td>{{ $carga->fecha_de_entrega }}</td>
-                    <td>{{ $carga->precio }}</td>
-                    <td>{{ $carga->tipo }}</td>
-                    <td>{{ $carga->destino }}</td>
-                    <td>{{ $carga->remito?->numero }}</td>
-                    <td>
-                        <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+        @endforeach
+    </tbody>
+</table>
 @stop
 @section('js')
     <script>
