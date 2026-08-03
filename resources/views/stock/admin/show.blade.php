@@ -97,7 +97,7 @@
                 <td>{{ $carga->motivo ?? '-' }}</td>
                 <td>{{ $carga->fecha_de_recepcion }}</td>
                 <td>{{ $carga->fecha_de_entrega }}</td>
-                <td>{{ $carga->precio }}</td>
+                <td>${{ $carga->precio }}</td>
                 <td>{{ $carga->tipo }}</td>
                 <td>{{ $carga->espacio }}</td>
                 <td>{{ $carga->destino }}</td>
@@ -126,7 +126,7 @@
          <tbody>
             <tr>
                 <td style="font-size:30px">{{ $carga->remito?->numero }}</td>
-                <td style="font-size:30px">{{ $carga->remito?->valor_declarado }}</td>
+                <td style="font-size:30px">${{ $carga->remito?->valor_declarado }}</td>
                 <td>
                     @if ($carga->remito?->path)
                         @php 
