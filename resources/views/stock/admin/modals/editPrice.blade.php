@@ -11,7 +11,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <label>Ingrece el precio de la carga</label>
+                    <label>Ingrese el precio de la carga</label>
                     <input type="number" name="precio" class="form-control mb-2">
                 </div>
                 <div class="modal-footer">

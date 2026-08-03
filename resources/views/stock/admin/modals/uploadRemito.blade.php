@@ -12,7 +12,7 @@
         </div>
 
         <div class="modal-body">
-          <label for="numero">N° de Remito:</label>
+          <label for="numero">N° de Remito*:</label>
           <input type="text" name="numero" id="numero" class="form-control mb-3"
                  placeholder="Ingrese el número de remito..." required>
 
@@ -22,9 +22,9 @@
 
           <label for="image">Imagen:</label>
           <input type="file" name="image" id="image" class="form-control-file mb-2"
-                 accept="image/*" required>
-          <small class="text-muted d-block mb-2">Formatos: JPG, PNG. Máximo 4 MB.</small>
+                 accept="image/*">
 
+          <small class="text-muted d-block mb-2">Formatos: JPG, PNG. Máximo 4 MB.</small>
           <img id="preview" class="img-fluid d-none border rounded" alt="Vista previa">
         </div>
 
