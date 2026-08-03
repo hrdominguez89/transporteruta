@@ -50,6 +50,7 @@
              <tr>
                 <th>Cliente</th>
                 <th>Cliente 3ro</th>
+                <th>Cantidad</th>
                 <th>Destino</th>
                 <th>Remito</th>
                 <th>Nombre</th>
@@ -65,6 +66,7 @@
                  <tr>
                     <td>{{ $carga->client->name }}</td>
                     <td>{{ $carga->cliente_tercero?->name ?? 'no asignado' }}</td>
+                    <td>{{ $carga->cantidad }}</td>
                     <td>{{ $carga->destino }}</td>
                     <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
                     <td>{{ $carga->nombre }}</td>

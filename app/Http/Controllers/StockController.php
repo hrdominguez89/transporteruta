@@ -203,7 +203,7 @@ class StockController extends Controller
         }
         $data = $request->validate([
             'numero' => 'required|string|max:50|unique:remitos,numero',
-            'image'  => 'required|image|mimes:jpg,jpeg,png|max:4096',
+            'image'  => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
             'carga_id' => 'required|exists:cargas,id',
             'valor_declarado' => 'nullable|string'
         ]);
