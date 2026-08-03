@@ -29,7 +29,7 @@
           <label>Mail:</label>
           <input type="text" name="mail" class="form-control mb-2" placeholder="Ingrese un mail...">
           <label>Telefono:</label>
-          <input type="text" name="telefono" class="form-control mb-2" placeholder="Ingrese el telefono...">
+          <input type="text" name="telefono" class="form-control mb-2" placeholder="Ingrese el telefono..." required>
           <label>Observaciones</label>
           <input type="text" name="comentarios" class="form-control mb-2" placeholder="Ingrese las observaciones...">
         </div>

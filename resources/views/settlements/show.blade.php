@@ -37,7 +37,6 @@
                 <i class="fas fa-file-excel"></i>  Excel
             </button>
         </div>
-        @if($ultimaSemanaCargada < 5)
         <div class="col-md-4">
             <form action="{{ route('Settlements.siguienteSemana', $settlement) }}" method="POST" class="m-0">
                 @csrf
@@ -53,13 +52,13 @@
                         <input type="checkbox" class="form-check-input" name="accionsemana" id="accionsemana">
                         <label title="Seleccione para generar o eliminar una semana" class="form-check-label" for="accionsemana">Indique accion</label>
                     </div>
+                    
                     <button type="submit" id="btndecarga" class="btn btn-sm btn-primary ml-3">
                         Generar 
                     </button>
                 </div>
             </form>
         </div>
-        @endif
         </div>
     </div>
 

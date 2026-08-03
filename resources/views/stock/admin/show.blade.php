@@ -8,9 +8,15 @@
         <h1 class="col">Cliente: <strong>{{ $carga->client->name }}</strong></h1>
 
         <div class="ml-auto d-flex">
+       @if ($carga?->remito)
+            <button class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editRemitoModal">
+                Editar remito
+            </button>
+        @else
             <button class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#remitoModal">
                 Cargar remito
             </button>
+        @endif
             <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#storeContacto">
                 Crear contacto
             </button>
@@ -32,6 +38,7 @@
         @include('stock.admin.modals.edit')
         @include('stock.admin.modals.editPrice')
         @include('stock.admin.modals.editType')
+        @include('stock.admin.modals.editRemito')
         @include('stock.admin.modals.uploadRemito')
         @include('stock.admin.modals.storeContacto')
         @include('stock.admin.modals.updateContacto')
@@ -111,15 +118,15 @@
         <thead class="bg-danger">
             <tr>
                 <th>Numero</th>
+                <th>Valor declarado</th>
                <th>Remito</th>
             </tr>
             
         </thead>
          <tbody>
             <tr>
-                <td style="font-size:50px">
-                    {{ $carga->remito?->numero }}
-                </td>
+                <td style="font-size:30px">{{ $carga->remito?->numero }}</td>
+                <td style="font-size:30px">{{ $carga->remito?->valor_declarado }}</td>
                 <td>
                     @if ($carga->remito?->path)
                         @php 
@@ -143,23 +150,49 @@
         </tbody>
     </table>
     <br>
-    <h4>Contacto de tercero</h4>
+    <h4>Datos del cliente 3ro</h4>
     <table class="table table-bordered text-center">
         <thead class="bg-danger">
             <tr>
                 <th>Nombre</th>
-                <th>Telefono</th>
-                <th>Mail</th>
-                <th>Categoria</th>
-                <th>Comentario</th>
+                <th>N° de cliente</th>
+                <th>CUIT</th>
+                <th>Condición de venta</th>
+                <th>Código postal</th>
+                <th>Domicilio de entrega</th>
+                <th>Horario de entrega</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>{{ $carga->cliente_tercero?->contacto?->nombre }} {{ $carga->cliente_tercero?->contacto?->apellido }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->telefono }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->mail }}</td>
+                <td>{{ $carga->cliente_tercero?->nombre }}</td>
+                <td>{{ $carga->cliente_tercero?->numero_cliente }}</td>
+                <td>{{ $carga->cliente_tercero?->cuit }}</td>
+                <td>{{ $carga->cliente_tercero?->condicion_venta }}</td>
+                <td>{{ $carga->cliente_tercero?->codigo_postal }}</td>
+                <td>{{ $carga->cliente_tercero?->direccion }}</td>
+                <td>{{ $carga->cliente_tercero?->horario_entrega }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <h4>Datos del contacto</h4>
+    <table class="table table-bordered text-center">
+        <thead class="bg-danger">
+            <tr>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th>mail</th>
+                <th>telefono</th>
+                <th>observacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ $carga->cliente_tercero?->contacto?->nombre }}</td>
                 <td>{{ $carga->cliente_tercero?->contacto?->categoria }}</td>
+                <td>{{ $carga->cliente_tercero?->contacto?->mail }}</td>
+                <td>{{ $carga->cliente_tercero?->contacto?->telefono }}</td>
                 <td>{{ $carga->cliente_tercero?->contacto?->comentario }}</td>
             </tr>
         </tbody>

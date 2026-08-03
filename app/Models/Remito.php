@@ -17,6 +17,7 @@ class Remito extends Model
         'numero',
         'client_id',
         'path',
+        'valor_declarado'
     ];
 
     public function client(): BelongsTo

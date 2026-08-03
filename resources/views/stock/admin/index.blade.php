@@ -4,13 +4,14 @@
 
 @section('content_header')
     <div class="row">
-        <h1 class="col-7">Cargas</h1>
+        <h1 class="col-6">Cargas</h1>
         <button class="btn btn-sm btn-danger col-1" data-toggle="modal" data-target="#storeModal">Agregar carga</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#pricemodal">Precios</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#buscarcortedeoperaciones">Corte de op.</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#storeClienteTercero">Agregar 3ro</button>
+        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#editClienteTercero">Editar 3ro</button>
         <form action="{{ route('stock') }}" method="GET" class="form-inline mb-3">
-            <select name="client_id" class="form-control mr-2">
+            <select name="client_id" id="client_id" class="form-control mr-2">
                 <option value="">Todos los clientes</option>
                 @foreach ($clients as $client)
                     <option value="{{ $client->id }}"
@@ -22,6 +23,7 @@
             <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
         </form>
     </div>
+    @include('stock.admin.modals.editClienteTercero')   
     @include('stock.admin.modals.store')
     @include('stock.admin.modals.price')
     @include('stock.admin.modals.operations')
@@ -46,13 +48,14 @@
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
              <tr>
-                <th>Nombre</th>
                 <th>Cliente</th>
-                <th>Cantidad</th>
-                <th>Fecha de recepcion T.R.</th>
-                <th>Fecha de entrega</th>
-                <th>Tipo</th>
+                <th>Cliente 3ro</th>
                 <th>Destino</th>
+                <th>Remito</th>
+                <th>Nombre</th>
+                <th>Fecha de recepcion</th>
+                <th>Tipo</th>
+                <th>Espacio</th>
                 <th>Estado de envio</th>
                 <th>Acciones</th>
             </tr>
@@ -60,13 +63,14 @@
         <tbody>
             @foreach ($cargas as $carga)
                  <tr>
-                    <td>{{ $carga->nombre }}</td>
                     <td>{{ $carga->client->name }}</td>
-                    <td>{{ $carga->cantidad }}</td>
-                    <td>{{ $carga->fecha_de_recepcion }}</td>
-                    <td>{{ $carga->fecha_de_entrega }}</td>
-                    <td>{{ $carga->tipo }}</td>
+                    <td>{{ $carga->cliente_tercero?->name ?? 'no asignado' }}</td>
                     <td>{{ $carga->destino }}</td>
+                    <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
+                    <td>{{ $carga->nombre }}</td>
+                    <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
+                    <td>{{ $carga->tipo }}</td>
+                    <td>{{ $carga->espacio }}</td>
                     <td>{{ $carga->estado_de_envio }}</td>
                     <td>
                         <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
@@ -132,19 +136,28 @@
        
         @endisset   
 @stop
+@section('css')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@stop
 @section('js')
-    <script>
-        $(document).ready(function() {
-            $('.data-table').DataTable();
-        });
-        var table = new DataTable('.data-table', {
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
-            }
-        });
-        $('.select2').select2();
-        $(document).ready(function () {
-            $('#cortedeoperaciones').modal('show');
-        });
-    </script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.data-table').DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+        }
+    });
+
+    $('#client_id').select2({
+        placeholder: 'Buscá...',
+        allowClear: true
+    });
+
+    @isset($corte)
+        $('#cortedeoperaciones').modal('show');
+    @endisset
+});
+</script>
 @stop
