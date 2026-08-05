@@ -71,7 +71,7 @@
                     <tr>
                 @endif   
                     <td>{{ $carga->client->name }}</td>
-                    <td>{{ $carga->cliente_tercero?->name ?? 'no asignado' }}</td>
+                    <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
                     <td>{{ $carga->destino }}</td>
                     <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
                     <td>{{ $carga->nombre }}</td>
