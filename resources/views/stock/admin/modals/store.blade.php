@@ -26,7 +26,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <label for="nombre">Nombre:<span class="text-danger"> *</span></label>
+                    <label for="nombre">Mercaderia:<span class="text-danger"> *</span></label>
                     <input id="nombre" type="text" name="nombre" class="form-control mb-2"
                         placeholder="Ingrese el nombre..." required>
                     <label for="cantidad">Cantidad:</label>
