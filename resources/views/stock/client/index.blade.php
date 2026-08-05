@@ -33,14 +33,20 @@
             <th>Nombre</th>
             <th>Fecha de recepcion</th>
             <th>Tipo</th>
-            <th>Espacio</th>
+            <th>Tamaño</th>
             <th>Estado de envio</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
         @foreach ($cargas as $carga)
-            <tr>
+             @if ($carga->estado_de_envio =='ENTREGADO')
+                    <tr class="bg-success">
+                @elseif($carga->estado_de_envio =='RECHAZADO')
+                    <tr class="bg-danger">
+                @else
+                    <tr>
+                @endif
                 <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
                 <td>{{ $carga->destino }}</td>
                 <td>{{ $carga->cantidad }}</td>
@@ -48,7 +54,11 @@
                 <td>{{ $carga->nombre }}</td>
                 <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
                 <td>{{ $carga->tipo }}</td>
-                <td>{{ $carga->espacio }}</td>
+                @if( $carga->tipo =='BULTO' )
+                    <td>Normal</td>
+                @else
+                    <td>{{ $carga->espacio }}</td>
+                @endif
                 <td>{{ $carga->estado_de_envio }}</td>
                 <td>
                     <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>

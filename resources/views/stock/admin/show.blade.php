@@ -75,12 +75,11 @@
                 <th>Cantidad</th>
                 <th>Liquidado</th>
                 <th>Constancia</th>
-                <th>Motivo</th>
                 <th>Fecha de recepcion T.R.</th>
                 <th>Fecha de entrega</th>
                 <th>Precio</th>
                 <th>Tipo</th>
-                <th>Espacio</th>
+                <th>Tamaño</th>
                 <th>Destino</th>
                 <th>Estado de envio</th>
                 <th>Motivo</th>
@@ -94,7 +93,7 @@
                 <td>{{ $carga->cantidad }}</td>
                 <td>{{ $carga->liquidado ? 'Sí' : 'No' }}</td>
                 <td>{{ $carga->travel_certificate?->number ?? '-' }}</td>
-                <td>{{ $carga->motivo ?? '-' }}</td>
+                
                 <td>{{ $carga->fecha_de_recepcion }}</td>
                 <td>{{ $carga->fecha_de_entrega }}</td>
                 <td>${{ $carga->precio }}</td>
@@ -102,7 +101,7 @@
                 <td>{{ $carga->espacio }}</td>
                 <td>{{ $carga->destino }}</td>
                 <td>{{ $carga->estado_de_envio }}</td>
-                <td>{{ $carga->motivo }}</td>
+                <td>{{ $carga->motivo ?? '-'}}</td>
                 <td>
                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">
                     Editar

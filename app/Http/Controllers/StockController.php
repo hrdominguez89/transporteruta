@@ -26,6 +26,7 @@ class StockController extends Controller
                 'cargas'            => $cargas,
                 'clients'           => Client::all(),
                 'clientes_terceros' => ClienteTercero::all(),
+                'prices'            => Price::all()
             ]);
         }
 
@@ -279,7 +280,8 @@ class StockController extends Controller
             'cargas'  => $cargasIndex,
             'clients' => $clientes,
             'corte'   => $corte,
-            'clientes_terceros' => ClienteTercero::all()
+            'clientes_terceros' => ClienteTercero::all(),
+            'prices'            => Price::all()
         ]);
     }
     public function storeClientTercero(Request $request)
