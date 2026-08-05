@@ -293,9 +293,13 @@ class StockController extends Controller
         }
         $data = $request->validate([
             'client_id'     => 'required|exists:clients,id',
-            'nombre'        => 'required|string|max:255',
-            'codigo_postal' => 'nullable|string|max:20',
-            'direccion'     => 'nullable|string|max:255',
+            'nombre'          => 'required|string',
+            'numero_cliente'  => 'nullable|string',
+            'cuit'            => 'nullable|string',
+            'condicion_venta' => 'nullable|string',
+            'codigo_postal'   => 'nullable|string',
+            'direccion'       => 'nullable|string',
+            'horario_entrega' => 'nullable|string',
         ]);
 
         ClienteTercero::create($data);
