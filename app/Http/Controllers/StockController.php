@@ -26,6 +26,7 @@ class StockController extends Controller
                 'cargas'            => $cargas,
                 'clients'           => Client::all(),
                 'clientes_terceros' => ClienteTercero::all(),
+                'prices'            => Price::all()
             ]);
         }
 
@@ -203,7 +204,7 @@ class StockController extends Controller
         }
         $data = $request->validate([
             'numero' => 'required|string|max:50|unique:remitos,numero',
-            'image'  => 'required|image|mimes:jpg,jpeg,png|max:4096',
+            'image'  => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
             'carga_id' => 'required|exists:cargas,id',
             'valor_declarado' => 'nullable|string'
         ]);
@@ -279,7 +280,8 @@ class StockController extends Controller
             'cargas'  => $cargasIndex,
             'clients' => $clientes,
             'corte'   => $corte,
-            'clientes_terceros' => ClienteTercero::all()
+            'clientes_terceros' => ClienteTercero::all(),
+            'prices'            => Price::all()
         ]);
     }
     public function storeClientTercero(Request $request)
