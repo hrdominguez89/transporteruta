@@ -208,8 +208,10 @@ class StockController extends Controller
             'carga_id' => 'required|exists:cargas,id',
             'valor_declarado' => 'nullable|string'
         ]);
-
-        $data['path'] = $request->file('image')->store('remitos', 'public');
+        if($request->hasFile('image'))
+        {
+            $data['path'] = $request->file('image')->store('remitos', 'public');
+        }
         $c = Carga::find($data["carga_id"]);
         $data['client_id'] = $c->client->id;
         $r = Remito::create($data);
