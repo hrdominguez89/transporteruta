@@ -106,7 +106,7 @@
                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">
                     Editar
                 </button>
-                    <a href="{{ Route('deletestock', $carga->id) }}" class="btn btn-sm btn-info">Eliminar</a>
+                    <a href="{{ Route('deletestock', $carga->id) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro?')">Eliminar</a>
                 </td>
             </tr>
         </tbody>
