@@ -63,6 +63,8 @@
         </thead>
         <tbody>
             @foreach ($cargas as $carga)
+                @include('stock.admin.modals.delete')
+
                 @if ($carga->estado_de_envio =='ENTREGADO')
                     <tr class="bg-success">
                 @elseif($carga->estado_de_envio =='RECHAZADO')
@@ -77,76 +79,75 @@
                     <td>{{ $carga->nombre }}</td>
                     <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
                     <td>{{ $carga->tipo }}</td>
-                    @if ( $carga->tipo   =='BULTO'  )
-                    <td>Normal</td>
+                    @if ( $carga->tipo == 'BULTO')
+                        <td>Normal</td>
                     @else
-                    <td>{{ $carga->espacio }}</td>
+                        <td>{{ $carga->espacio }}</td>
                     @endif
                     <td>{{ $carga->cantidad }}</td>
                     <td>{{ $carga->estado_de_envio }}</td>
                     <td>
                         <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
+                        <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deletecarga{{ $carga->id }}">Eliminar</button>               
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-        @isset($corte)
-            <div class="modal fade" id="cortedeoperaciones" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-danger">
-                            <h5 class="modal-title">Resultado del corte</h5>
-                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
+    @isset($corte)
+        <div class="modal fade" id="cortedeoperaciones" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <h5 class="modal-title">Resultado del corte</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
-                        <div class="modal-body">
-                            <p class="mb-1"><strong>Cliente:</strong> {{ $corte['cliente'] }}</p>
-                            <p class="mb-3"><strong>Corte al:</strong> {{ $corte['fecha'] }}</p>
-                            <table class="table table-bordered text-center">
-                            <thead class="bg-danger">
-                                <tr>
-                                <th>Tipo</th>
-                                <th>Cantidad</th>
-                                <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                <td>Bultos</td>
-                                <td>{{ $corte['bultos_cantidad'] }}</td>
-                                <td>${{ number_format($corte['bultos_total'], 2, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                <td>Pallets</td>
-                                <td>{{ $corte['pallets_cantidad'] }}</td>
-                                <td>${{ number_format($corte['pallets_total'], 2, ',', '.') }}</td>
-                                </tr>
-                                <tr class="font-weight-bold">
-                                <td>Total</td>
-                                <td>{{ $corte['bultos_cantidad'] + $corte['pallets_cantidad'] }}</td>
-                                <td>${{ number_format($corte['total'], 2, ',', '.') }}</td>
-                                </tr>
-                            </tbody>
-                            </table>
-                            <p class="mb-1"><strong>Remitos</strong>:</p>
-                            @foreach($corte['remitos'] as $remito)
-                                <p>N° de remito:{{ $remito->numero }}</p>
-                            @endforeach
-                        </div>
-
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                        </div>
+                    <div class="modal-body">
+                        <p class="mb-1"><strong>Cliente:</strong> {{ $corte['cliente'] }}</p>
+                        <p class="mb-3"><strong>Corte al:</strong> {{ $corte['fecha'] }}</p>
+                        <table class="table table-bordered text-center">
+                        <thead class="bg-danger">
+                            <tr>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td>Bultos</td>
+                            <td>{{ $corte['bultos_cantidad'] }}</td>
+                            <td>${{ number_format($corte['bultos_total'], 2, ',', '.') }}</td>
+                            </tr>
+                            <tr>
+                            <td>Pallets</td>
+                            <td>{{ $corte['pallets_cantidad'] }}</td>
+                            <td>${{ number_format($corte['pallets_total'], 2, ',', '.') }}</td>
+                            </tr>
+                            <tr class="font-weight-bold">
+                            <td>Total</td>
+                            <td>{{ $corte['bultos_cantidad'] + $corte['pallets_cantidad'] }}</td>
+                            <td>${{ number_format($corte['total'], 2, ',', '.') }}</td>
+                            </tr>
+                        </tbody>
+                        </table>
+                        <p class="mb-1"><strong>Remitos</strong>:</p>
+                        @foreach($corte['remitos'] as $remito)
+                            <p>N° de remito:{{ $remito->numero }}</p>
+                        @endforeach
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
+        </div>   
+    @endisset 
 
-       
-        @endisset   
+   
 @stop
 @section('css')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

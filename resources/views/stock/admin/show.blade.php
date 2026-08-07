@@ -103,10 +103,8 @@
                 <td>{{ $carga->estado_de_envio }}</td>
                 <td>{{ $carga->motivo ?? '-'}}</td>
                 <td>
-                   <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">
-                    Editar
-                </button>
-                    <a href="{{ Route('deletestock', $carga->id) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro?')">Eliminar</a>
+                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">Editar</button>
+                    
                 </td>
             </tr>
         </tbody>

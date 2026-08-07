@@ -185,7 +185,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/stock/show/{id}', [StockController::class, 'show'])->name('showcarga');
     Route::post('/stock/generate', [StockController::class, 'generate'])->name('generatestock');
     Route::post('/stock/edit', [StockController::class, 'edit'])->name('editstock');
-    Route::get('/stock/delete/{id}', [StockController::class, 'delete'])->name('deletestock');
+    Route::delete('/stock/delete/{id}', [StockController::class, 'delete'])->name('deletestock');
     Route::post('/stock/update/price', [StockController::class, 'updateprice'])->name('updateprice');
     Route::post('/stock/remitos', [StockController::class, 'storeRemito'])->name('storeRemito');
     Route::delete('/stock/contacto3rodel/{contacto}/{tercero}', [StockController::class, 'eliminarContactoTercero'])->name('eliminarContactoTercero');
