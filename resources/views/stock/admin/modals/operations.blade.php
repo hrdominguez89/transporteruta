@@ -1,7 +1,7 @@
 <div class="modal fade" id="buscarcortedeoperaciones" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form action="{{ route('cortedeoperaciones') }}" method="POST">
+      <form action="{{ route('cortedeoperaciones') }}" method="POST" target="_blank">
         @csrf
 
         <div class="modal-header bg-danger">

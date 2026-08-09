@@ -4,14 +4,15 @@
 
 @section('content_header')
     <div class="row">
-        <h1 class="col-6">Cargas</h1>
+        <h1 class="col-5">Cargas</h1>
         <button class="btn btn-sm btn-danger col-1" data-toggle="modal" data-target="#storeModal">Agregar carga</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#pricemodal">Precios</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#buscarcortedeoperaciones">Corte de op.</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#storeClienteTercero">Agregar 3ro</button>
         <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#editClienteTercero">Editar 3ro</button>
+        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#deleteClienteTercero">Eliminar 3ro</button>
         <form action="{{ route('stock') }}" method="GET" class="form-inline mb-3">
-            <select name="client_id" id="client_id" class="form-control mr-2">
+            <select name="client_id" id="client_id" class="form-control mr-2" required style="width: 2  50px;">
                 <option value="">Todos los clientes</option>
                 @foreach ($clients as $client)
                     <option value="{{ $client->id }}"
@@ -20,6 +21,18 @@
                     </option>
                 @endforeach
             </select>
+            <div id="wrapper_tercero" style="display: none;">
+                <select id="filtro_tercero" name="cliente_tercero_id" class="   ">
+                    <option value="">---- Todos ----</option>
+                    @foreach ($clientes_terceros as $tercero)
+                        <option value="{{ $tercero->id }}" data-client="{{ $tercero->client_id }}"
+                            {{ request('cliente_tercero_id') == $tercero->id ? 'selected' : '' }}>
+                            {{ $tercero->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
             <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
         </form>
     </div>
@@ -28,6 +41,7 @@
     @include('stock.admin.modals.price')
     @include('stock.admin.modals.operations')
     @include('stock.admin.modals.storeClienteTercero')
+    @include('stock.admin.modals.deleteClienteTercero')
     @if($errors->any())
     <div id="errorAlert" class="alert alert-danger alert-dismissible fade show">
         <ul class="mb-0">
@@ -155,7 +169,7 @@
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-$(document).ready(function() {
+    $(document).ready(function() {
     $('.data-table').DataTable({
         language: {
             url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
@@ -167,9 +181,68 @@ $(document).ready(function() {
         allowClear: true
     });
 
+    $('#client_id').on('change', function () {
+        const clienteId = $(this).val();
+        const $wrapper = $('#wrapper_tercero');
+        const $tercero = $('#filtro_tercero');
+
+        if (!clienteId) {
+            $wrapper.hide();
+            $tercero.val('');
+            return;
+        }
+
+        $wrapper.show();
+        $tercero.find('option[data-client]').each(function () {
+            const visible = $(this).data('client') == clienteId;
+            $(this).prop('hidden', !visible);
+            if (!visible && $(this).is(':selected')) {
+                $tercero.val('');
+            }
+        });
+    }).trigger('change');
+
     @isset($corte)
         $('#cortedeoperaciones').modal('show');
     @endisset
+    $('#del_cliente').on('change', function () {
+    const clienteId = $(this).val();
+    const $wrapper = $('#del_wrapper_tercero');
+    const $tercero = $('#del_tercero');
+
+    $('#del_info_tercero').hide();
+    $('#del_cliente_tercero_id').val('');
+    $('#del_btn_eliminar').prop('disabled', true);
+    $tercero.val('');
+
+    if (!clienteId) {
+        $wrapper.hide();
+        return;
+    }
+
+    $wrapper.show();
+    $tercero.find('option[data-client]').each(function () {
+        $(this).prop('hidden', $(this).data('client') != clienteId);
+    });
+});
+
+$('#del_tercero').on('change', function () {
+    const $opt = $(this).find('option:selected');
+    const id = $(this).val();
+
+    if (!id) {
+        $('#del_info_tercero').hide();
+        $('#del_cliente_tercero_id').val('');
+        $('#del_btn_eliminar').prop('disabled', true);
+        return;
+    }
+
+    $('#del_nombre_tercero').text($opt.data('nombre'));
+    $('#del_info_tercero').show();
+    $('#del_cliente_tercero_id').val(id);
+    $('#del_btn_eliminar').prop('disabled', false);
+});
 });
 </script>
+    
 @stop

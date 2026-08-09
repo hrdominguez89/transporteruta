@@ -44,9 +44,22 @@ class StockController extends Controller
         if (!auth()->user()->isAdmin() && $carga->client_id !== auth()->user()->client_id) {
             abort(403);
         }
+
+       $itemsConstraint = function ($q) use ($carga) {
+            $q->where(function ($inner) use ($carga) {
+                $inner->whereIn('type', ['PALLET', 'BULTO'])
+                    ->orWhere(function ($q2) use ($carga) {
+                        $q2->where('type', 'REMITO')
+                            ->where('remito_number', $carga->remito?->numero);
+                    });
+            });
+        };
+
         $travelCertificates = TravelCertificate::where('clientId', $carga->client_id)
-        ->where('invoiced', 'NO')
-        ->get();
+            ->where('invoiced', 'NO')
+            ->whereHas('travelItems', $itemsConstraint)
+            ->with(['travelItems' => $itemsConstraint])
+            ->get();
 
         if (auth()->user()->isAdmin()) {
             $clientes_tercero =  ClienteTercero::where('client_id', $carga->client_id)->get();
@@ -75,7 +88,7 @@ class StockController extends Controller
             'cliente_tercero_id'        => 'nullable|integer',
             'motivo'                => 'nullable|string|max:255',
             'liquidado'             => 'nullable|boolean',
-            'travel_certificate_id' => 'nullable|exists:travel_certificates,id',
+            'travel_certificate_id' => 'nullable',
         ]);
         
         $carga->update($data);
@@ -392,5 +405,22 @@ class StockController extends Controller
         ]);
 
         return $pdf->download('remito-' . $remito->numero . '.pdf');
+    }
+    public function deleteClienteTercero(Request $request)
+    {
+        if (auth()->user()->isAdmin()) {
+        $clienteTercero = ClienteTercero::findOrFail($request->cliente_tercero_id);
+        $clienteTercero->delete();
+            $cargas = Carga::when($request->client_id, function ($query, $clientId) {
+                $query->where('client_id', $clientId);
+            })->get();
+
+            return view('stock.admin.index', [
+                'cargas'            => $cargas,
+                'clients'           => Client::all(),
+                'clientes_terceros' => ClienteTercero::all(),
+                'prices'            => Price::all()
+            ])->with('success', 'Eliminado');;
+        }
     }
 }

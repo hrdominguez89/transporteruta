@@ -27,7 +27,8 @@ class Carga extends Model
         'notificacion_de_recepcion',
         'notificacion_de_entrega',
         'cliente_tercero_id',
-        'motivo'
+        'motivo',
+        'travel_certificate_id'
     ];
 
     protected $casts = [

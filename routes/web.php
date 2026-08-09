@@ -193,4 +193,6 @@ Route::group(['middleware' => 'auth'], function () {
     ->middleware('auth')->name('remitoPdf');
     Route::post('/cliente-tercero/update', [StockController::class, 'updateClienteTercero'])->name('updateClientTercero');
     Route::post('/remito/update', [StockController::class, 'updateRemito'])->name('updateRemito');
+    Route::delete('/cliente-tercero', [StockController::class, 'deleteClienteTercero'])
+    ->name('clienteTercero.destroy');
 });

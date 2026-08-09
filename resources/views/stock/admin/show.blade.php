@@ -92,7 +92,7 @@
                 <td>{{ $carga->cliente_tercero?->nombre }}</td>
                 <td>{{ $carga->cantidad }}</td>
                 <td>{{ $carga->liquidado ? 'Sí' : 'No' }}</td>
-                <td>{{ $carga->travel_certificate?->number ?? '-' }}</td>
+                <td>{{ $carga->travel_certificate?->id ?? '-' }}</td>
                 
                 <td>{{ $carga->fecha_de_recepcion }}</td>
                 <td>{{ $carga->fecha_de_entrega }}</td>
