@@ -6,43 +6,25 @@
     <div class="row align-items-center">
         <a href="{{ Route('stock') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col">Cliente: <strong>{{ $carga->client->name }}</strong></h1>
-
         <div class="ml-auto d-flex">
-       @if ($carga?->remito)
-            <button class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editRemitoModal">
-                Editar remito
-            </button>
-        @else
-            <button class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#remitoModal">
-                Cargar remito
-            </button>
-        @endif
-            <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#storeContacto">
-                Crear contacto
-            </button>
-             <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#editPrice-{{ $carga->id }}">
-                Editar precio
-            </button>
-            <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#editType-{{ $carga->id }}">
-                Editar tipo y cantidad
-            </button>
-            @if ($carga->cliente_tercero?->contacto)
-                <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#updateContacto-{{ $carga->cliente_tercero->contacto->id }}-{{ $carga->cliente_tercero->id }}">
-                Editar contacto
-            </button>
-                <button class="btn btn-sm btn-danger mr-2" data-toggle="modal" data-target="#deleteContacto-{{ $carga->cliente_tercero->contacto->id }}-{{ $carga->cliente_tercero->id }}">
-                Eliminar contacto
-            </button>
+            {{-- <button class="btn btn-sm btn-danger mr-2" data-toggle="modal" data-target="#editPrice-{{ $carga->id }}">Editar precio</button>
+            <button class="btn btn-sm btn-danger mr-2" data-toggle="modal" data-target="#editType-{{ $carga->id }}">Cantidades</button>
+            @if ($carga?->remito)
+                <button class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editRemitoModal">Editar remito</button>
+            @else
+                <button class="btn btn-sm btn-light mr-2" data-toggle="modal" data-target="#remitoModal">Cargar remito</button>
             @endif
+            <button class="btn btn-sm btn-outline-danger mr-2" data-toggle="modal" data-target="#storeContacto">Crear contacto</button> --}}
         </div>
         @include('stock.admin.modals.edit')
         @include('stock.admin.modals.editPrice')
         @include('stock.admin.modals.editType')
-        @include('stock.admin.modals.editRemito')
-        @include('stock.admin.modals.uploadRemito')
-        @include('stock.admin.modals.storeContacto')
-        @include('stock.admin.modals.updateContacto')
-        @include('stock.admin.modals.deleteContacto')
+        @include('stock.admin.modals.estadoEnvio')
+        @include('stock.admin.modals.remito.editRemito')
+        @include('stock.admin.modals.remito.uploadRemito')
+        @include('stock.admin.modals.contacto.storeContacto')
+        @include('stock.admin.modals.contacto.updateContacto')
+        @include('stock.admin.modals.contacto.deleteContacto')
     
        @if($errors->any())
     <div id="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -71,48 +53,76 @@
         <thead class="bg-danger">
             <tr>
                 <th>Nombre</th>
-                <th>Cliente destino</th>
-                <th>Cantidad</th>
-                <th>Liquidado</th>
-                <th>Constancia</th>
-                <th>Fecha de recepcion T.R.</th>
-                <th>Fecha de entrega</th>
+                <th>Bultos</th>
+                <th>Pallets normales</th>
+                <th>Pallets grandes</th>   
                 <th>Precio</th>
-                <th>Tipo</th>
-                <th>Tamaño</th>
-                <th>Destino</th>
                 <th>Estado de envio</th>
-                <th>Motivo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-               <td>{{ $carga->nombre }}</td>
-                <td>{{ $carga->cliente_tercero?->nombre }}</td>
-                <td>{{ $carga->cantidad }}</td>
-                <td>{{ $carga->liquidado ? 'Sí' : 'No' }}</td>
-                <td>{{ $carga->travel_certificate?->id ?? '-' }}</td>
-                
-                <td>{{ $carga->fecha_de_recepcion }}</td>
-                <td>{{ $carga->fecha_de_entrega }}</td>
+                <td>{{ $carga->nombre }}</td>
+                <td>{{ $carga->cantidad_bulto }}</td>
+                <td>{{ $carga->cantidad_pallet_normal }}</td>
+                <td>{{ $carga->cantidad_pallet_grande }}</td>
                 <td>${{ $carga->precio }}</td>
-                <td>{{ $carga->tipo }}</td>
-                <td>{{ $carga->espacio }}</td>
-                <td>{{ $carga->destino }}</td>
-                <td>{{ $carga->estado_de_envio }}</td>
-                <td>{{ $carga->motivo ?? '-'}}</td>
                 <td>
-                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">Editar</button>
-                    
+                    <span class="badge badge-success p-2" style="font-size: 1rem;">{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} 
+                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateEstadoEnvioModal{{ $carga->id }}">Actualizar</button>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Acciones
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" data-toggle="modal" data-target="#updateModal{{ $carga->id }}">Editar carga</button>
+                            <button class="dropdown-item" data-toggle="modal" data-target="#editPrice-{{ $carga->id }}">Editar precio</button>
+                            <button class="dropdown-item" data-toggle="modal" data-target="#editType-{{ $carga->id }}">Cantidades</button>
+                            @if ($carga?->remito)
+                                <button class="dropdown-item" data-toggle="modal" data-target="#editRemitoModal">Editar remito</button>
+                            @else
+                                <button class="dropdown-item" data-toggle="modal" data-target="#remitoModal">Cargar remito</button>
+                            @endif
+                            <button class="dropdown-item" data-toggle="modal" data-target="#storeContacto">Crear contacto</button>
+                        </div>
+                    </div>
                 </td>
             </tr>
         </tbody>
     </table>
     <br>
+    <table class="table table-bordered text-center">
+        <thead class="bg-dark">
+            <tr>
+                <th>Chofer</th>
+                <th>Cliente destino</th>
+                <th>Destino</th>
+                <th>Fecha de recepcion T.R.</th>
+                <th>Fecha de entrega</th>
+                <th>Constancia</th>
+                <th>Liquidado</th>
+                <th>Motivo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ $carga->driver?->name ?? 'sin asignar'}}</td>
+                <td>{{ $carga->cliente_tercero?->nombre }}</td>
+                <td>{{ $carga->destino }}</td>
+                <td>{{ $carga->fecha_de_recepcion }}</td>
+                <td>{{ $carga->fecha_de_entrega ?? '---'}}</td>
+                <td>{{ $carga->travel_certificate?->id ?? '---' }}</td>
+                <td>{{ $carga->liquidado ? 'Sí' : 'No' }}</td>
+                <td>{{ $carga->motivo ?? '---'}}</td>
+            </tr>
+        </tbody>
+    </table>
     <h4>Remito</h4>
     <table class="table table-bordered text-center">
-        <thead class="bg-danger">
+        <thead class="thead-light">
             <tr>
                 <th>Numero</th>
                 <th>Valor declarado</th>
@@ -149,7 +159,7 @@
     <br>
     <h4>Datos del cliente 3ro</h4>
     <table class="table table-bordered text-center">
-        <thead class="bg-danger">
+        <thead style="background-color: #f8d7da;">
             <tr>
                 <th>Nombre</th>
                 <th>N° de cliente</th>
@@ -173,32 +183,55 @@
         </tbody>
     </table>
     <br>
-    <h4>Datos del contacto</h4>
+   <h4>Contactos</h4>
     <table class="table table-bordered text-center">
-        <thead class="bg-danger">
+        <thead class="thead-rojo">
             <tr>
                 <th>Nombre</th>
                 <th>Departamento</th>
                 <th>mail</th>
                 <th>telefono</th>
                 <th>observacion</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>{{ $carga->cliente_tercero?->contacto?->nombre }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->categoria }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->mail }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->telefono }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->comentario }}</td>
-            </tr>
+            @forelse ($carga->cliente_tercero?->contactos ?? [] as $contacto)
+                <tr>
+                    <td>{{ $contacto->nombre }}</td>
+                    <td>{{ $contacto->categoria }}</td>
+                    <td>{{ $contacto->mail }}</td>
+                    <td>{{ $contacto->telefono }}</td>
+                    <td>{{ $contacto->comentario }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#updateContacto-{{ $contacto->id }}-{{ $carga->cliente_tercero->id }}">
+                            Editar contacto
+                        </button>
+                        <button class="btn btn-sm btn-danger mr-2" data-toggle="modal" data-target="#deleteContacto-{{ $contacto->id }}-{{ $carga->cliente_tercero->id }}">
+                            Eliminar contacto
+                        </button>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="text-muted">Sin contactos</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 
    
     
-   
 @stop
+@section('css')
+<style>
+.thead-rojo th {
+    background-color: #ffffff;
+    border: 1px solid #dc3545;
+    border-bottom: 1px solid #dc3545 !important;
+}
+</style>
+@endsection
 @section('js')
     <script>
         $(document).ready(function() {

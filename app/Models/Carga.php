@@ -28,7 +28,15 @@ class Carga extends Model
         'notificacion_de_entrega',
         'cliente_tercero_id',
         'motivo',
-        'travel_certificate_id'
+        'travel_certificate_id',
+        'cantidad_bulto',
+        'cantidad_pallet_normal',
+        'cantidad_pallet_grande',
+        'rechazado_bulto',
+        'rechazado_pallet_normal',
+        'rechazado_pallet_grande',  
+        'driver_id',
+        'estado_envio_id'
     ];
 
     protected $casts = [
@@ -50,6 +58,10 @@ class Carga extends Model
     {
         return $this->belongsTo(Remito::class, 'remito_id');
     }
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class, 'driver_id');
+    }
     public function cliente_tercero()
     {
         return $this->belongsTo(ClienteTercero::class, 'cliente_tercero_id');
@@ -57,5 +69,14 @@ class Carga extends Model
     public function travel_certificate()
     {
         return $this->belongsTo(TravelCertificate::class, 'travel_certificate_id');
+    }
+    public function estadoEnvios()
+    {
+        return $this->hasMany(EstadoEnvio::class);
+    }
+
+    public function estadoActual()
+    {
+        return $this->hasOne(EstadoEnvio::class)->where('estado_actual', true);
     }
 }

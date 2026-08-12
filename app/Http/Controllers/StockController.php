@@ -7,6 +7,8 @@ use App\Models\Carga;
 use App\Models\Client;
 use App\Models\ClienteTercero;
 use App\Models\Contacto;
+use App\Models\Driver;
+use App\Models\EstadoEnvio;
 use App\Models\Price;
 use App\Models\Remito;
 use App\Models\TravelCertificate;
@@ -34,7 +36,7 @@ class StockController extends Controller
 
         return view('stock.client.index', [
             'cargas' => $cargas,
-            'client' => auth()->user()->client,
+            'client' => auth()->user()->client
         ]);
     }
     public function show(Request $request)
@@ -61,14 +63,65 @@ class StockController extends Controller
             ->with(['travelItems' => $itemsConstraint])
             ->get();
 
+        $estado_envio = $carga?->estadoActual;
+
         if (auth()->user()->isAdmin()) {
             $clientes_tercero =  ClienteTercero::where('client_id', $carga->client_id)->get();
-            return view('stock.admin.show', ['carga' => $carga,'clientes_terceros' => $clientes_tercero,'travel_certificates' => $travelCertificates ]);
+            return view('stock.admin.show', [
+                'carga' => $carga,
+                'clientes_terceros' => $clientes_tercero,
+                'travel_certificates' => $travelCertificates,
+                'estado_envio' => $estado_envio,
+                'drivers' => Driver::all() ]);
         }
         return view('stock.client.show', [
             'carga' => $carga,
-            'client' => auth()->user()->client
+            'client' => auth()->user()->client,
+            'estado_envio' => $estado_envio
             ]);
+    }
+    public function generate(Request $request)
+    {
+        if (!auth()->user()->isAdmin() ) {  
+            abort(403);
+        }
+        $data = $request->validate([
+            'nombre'             => 'required|string|max:255',
+            'fecha_de_recepcion' => 'required|date',
+            'cantidad_bulto'     => 'nullable|integer',
+            'cantidad_pallet_normal'   => 'nullable|integer',
+            'cantidad_pallet_grande'   => 'nullable|integer',
+            'destino'            => 'nullable|string|max:255',
+            'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
+            'cliente_tercero_id' => ['nullable'],
+        ]);
+
+        $data['client_id'] = auth()->user()->isAdmin()
+            ? $data['client_id']
+            : auth()->user()->client_id;
+
+        if($data['cantidad_bulto'])
+        {
+            $data['precio'] = $data['cantidad_bulto'] * Price::where('type', 'BULTO')->value('price');
+        }
+         if($data['cantidad_pallet_normal'])
+        {
+            $data['precio'] += $data['cantidad_pallet_normal'] * Price::where('type', 'PALLET')->value('price');
+        }
+         if($data['cantidad_pallet_grande'])
+        {
+            $data['precio'] += $data['cantidad_pallet_grande'] * (Price::where('type', 'PALLET')->value('price') * 1.5);
+        }
+        
+        $c = Carga::create($data);
+
+        $estadoEnvio = new EstadoEnvio();
+        $estadoEnvio->horario = $data['fecha_de_recepcion'];
+        $estadoEnvio->estado_actual = true;
+        $estadoEnvio->carga_id = $c->id;
+        $estadoEnvio->save();
+      
+        return redirect()->route('stock')->with('success', 'Carga generada correctamente.');
     }
     public function edit(Request $request)
     {      
@@ -82,13 +135,13 @@ class StockController extends Controller
             'fecha_de_recepcion'        => 'sometimes|date',
             'fecha_de_entrega'          => 'nullable|date',
             'destino'                   => 'nullable|string|max:255',
-            'estado_de_envio'           => 'sometimes',
             'notificacion_de_recepcion' => 'sometimes|boolean',
             'notificacion_de_entrega'   => 'sometimes|boolean',
             'cliente_tercero_id'        => 'nullable|integer',
             'motivo'                => 'nullable|string|max:255',
             'liquidado'             => 'nullable|boolean',
             'travel_certificate_id' => 'nullable',
+            'driver_id'             => 'nullable'
         ]);
         
         $carga->update($data);
@@ -104,24 +157,28 @@ class StockController extends Controller
         $carga = Carga::findOrFail($request->id);
         
         $data = $request->validate([
-            'cantidad'                  => 'sometimes|integer',
-            'tipo'                      => 'sometimes|in:PALLET,BULTO',
-            'espacio'                   => 'nullable|string|max:255',
+            'cantidad_bulto'                  => 'sometimes|integer',
+            'cantidad_pallet_normal'          => 'sometimes|integer',
+            'cantidad_pallet_grande'          => 'sometimes|integer',
             ]);
             
-            $price = Price::where('type',$data['tipo'])->value('price');
-            
-        if($data['tipo'] == 'PALLET' & $data['espacio'] == 'EXTRA')
+        if($data['cantidad_bulto'])
         {
-            $price = $price * 1.5;
+            $data['precio'] = $data['cantidad_bulto'] * Price::where('type', 'BULTO')->value('price');
+        }
+         if($data['cantidad_pallet_normal'])
+        {
+            $data['precio'] += $data['cantidad_pallet_normal'] * Price::where('type', 'PALLET')->value('price');
+        }
+         if($data['cantidad_pallet_grande'])
+        {
+            $data['precio'] += $data['cantidad_pallet_grande'] * (Price::where('type', 'PALLET')->value('price') * 1.5);
         }
 
-        $data['precio'] = $price * $data['cantidad'];
         $carga->update($data);
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
     }
-
     public function editpriceoncarga(Request $request )
     {
         if (!auth()->user()->isAdmin()) {
@@ -130,6 +187,29 @@ class StockController extends Controller
         $carga = Carga::findOrFail($request->id);
         $data = $request->validate(['precio' => 'required|decimal:0,2']);
         $carga->update($data);
+
+        return redirect()->route('showcarga', $carga->id)
+            ->with('success', 'Carga actualizada correctamente.');
+    }
+    public function editEstadoEnviostock(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $carga = Carga::findOrFail($request->id);
+
+        // desmarco el actual anterior (si había)
+        $carga->estadoEnvios()->update(['estado_actual' => false]);
+
+        // busco un estado con ese enum; si existe actualizo horario, si no lo creo
+        $carga->estadoEnvios()->updateOrCreate(
+            ['estado' => $request->estado_de_envio],
+            [
+                'horario'       => $request->horario,
+                'estado_actual' => true,
+            ]
+        );
 
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
@@ -150,39 +230,6 @@ class StockController extends Controller
         $tercero->update($request->except(['_token', 'id']));
 
         return redirect()->route('stock')->with('success', 'Cliente 3ro actualizado.');
-    }
-    public function generate(Request $request)
-    {
-        if (!auth()->user()->isAdmin() ) {  
-            abort(403);
-        }
-        $data = $request->validate([
-            'nombre'             => 'required|string|max:255',
-            'cantidad'           => 'required|integer',
-            'fecha_de_recepcion' => 'required|date',
-            'fecha_de_entrega'   => 'nullable|date',
-            'espacio'            => 'nullable|string|max:255',
-            'tipo'               => 'required|in:PALLET,BULTO',
-            'destino'            => 'nullable|string|max:255',
-            'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
-            'cliente_tercero_id' => ['nullable'],
-        ]);
-
-        $data['client_id'] = auth()->user()->isAdmin()
-            ? $data['client_id']
-            : auth()->user()->client_id;
-
-        $price = Price::where('type', $data['tipo'])->value('price');
-
-        if ($data['tipo'] === 'PALLET' && ($data['espacio'] ?? null) === 'EXTRA') {
-            $price = $price * 1.5;
-        }
-
-        $data['precio'] = $price * $data['cantidad'];
-
-        Carga::create($data);
-
-        return redirect()->route('stock')->with('success', 'Carga generada correctamente.');
     }
     public function delete(Request $request,$id)
     {
@@ -216,7 +263,7 @@ class StockController extends Controller
             abort(403);
         }
         $data = $request->validate([
-            'numero' => 'required|string|max:50|unique:remitos,numero',
+            'numero' => 'required|string|max:50',
             'image'  => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
             'carga_id' => 'required|exists:cargas,id',
             'valor_declarado' => 'nullable|string'
@@ -259,46 +306,6 @@ class StockController extends Controller
 
         return back()->with('success', 'Remito actualizado.');
     }
-    public function corteDeOperaciones(Request $request)
-    {
-         if (!auth()->user()->isAdmin() ) {
-            abort(403);
-        }
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'fecha'     => 'required|date',
-        ]);
-
-       $cargas = Carga::where('client_id', $data['client_id'])
-        ->whereIn('estado_de_envio', ['ENTREGADO', 'RECHAZADO'])
-        ->whereDate('fecha_de_entrega', $data['fecha'])
-        ->get();
-        $bultos  = $cargas->where('tipo', 'BULTO');
-        $pallets = $cargas->where('tipo', 'PALLET');
-        $remitos = $cargas->pluck('remito')->filter();
-        $corte = [
-            'cliente'          => Client::find($data['client_id'])->name,
-            'fecha'            => $data['fecha'],
-            'bultos_cantidad'  => $bultos->sum('cantidad'),
-            'bultos_total'     => $bultos->sum('precio'),
-            'pallets_cantidad' => $pallets->sum('cantidad'),
-            'pallets_total'    => $pallets->sum('precio'),
-            'total'            => $cargas->sum('precio'),
-            'remitos'          => $remitos
-        ];
-
-        $clientes = Client::all();
-        $cargasIndex = Carga::all();
-
-
-        return view('stock.admin.index', [
-            'cargas'  => $cargasIndex,
-            'clients' => $clientes,
-            'corte'   => $corte,
-            'clientes_terceros' => ClienteTercero::all(),
-            'prices'            => Price::all()
-        ]);
-    }
     public function storeClientTercero(Request $request)
     {
          if (!auth()->user()->isAdmin() ) {
@@ -324,8 +331,11 @@ class StockController extends Controller
          if (!auth()->user()->isAdmin()) {
             abort(403);
         }
-        $tercero = ClienteTercero::findOrFail($terceroId);
 
+        $tercero = ClienteTercero::findOrFail($terceroId);
+        if ($tercero->contactos()->count() >= 10) {
+            return redirect()->back()->withErrors(['contacto' => 'Este cliente ya alcanzó el máximo de 10 contactos.']);
+        }
        
         $data = $request->validate([
             'name'        => 'required|string|max:255',
@@ -336,17 +346,15 @@ class StockController extends Controller
             'comentarios' => 'nullable|string|max:500',
         ]);
 
-        $contacto = Contacto::create([
+        Contacto::create([
             'nombre'     => $data['name'],
             'apellido'   => $data['lastname'] ?? null,
             'categoria'  => $data['category'] !== '-' ? $data['category'] : null,
             'mail'       => $data['mail'] ?? null,
             'telefono'   => $data['telefono'] ?? null,
             'comentario' => $data['comentarios'] ?? null,
+            'cliente_tercero_id' => $tercero->id
         ]);
-
-        $tercero->contacto_id = $contacto->id;
-        $tercero->save();
 
         return redirect()->back()->with('success', 'Contacto creado correctamente.');
     }
@@ -379,17 +387,10 @@ class StockController extends Controller
     }
     public function eliminarContactoTercero(Request $request, $contactoId, $terceroId)
     {
-         if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             abort(403);
         }
         $contacto = Contacto::findOrFail($contactoId);
-        $tercero  = ClienteTercero::findOrFail($terceroId);
-
-        // Desvincular del tercero antes de borrar, para no dejar contacto_id colgado
-        if ($tercero->contacto_id == $contacto->id) {
-            $tercero->contacto_id = null;
-            $tercero->save();
-        }
 
         $contacto->delete();
 
@@ -401,7 +402,7 @@ class StockController extends Controller
 
         $pdf = Pdf::loadView('stock.admin.remitopdf', [
             'remito' => $remito,
-            'imagen' => $path,   // ruta absoluta para embeber en el PDF
+            'imagen' => $path,   
         ]);
 
         return $pdf->download('remito-' . $remito->numero . '.pdf');
@@ -422,5 +423,84 @@ class StockController extends Controller
                 'prices'            => Price::all()
             ])->with('success', 'Eliminado');;
         }
+    }
+    public function corteDeOperaciones(Request $request)
+    {
+        // if (!auth()->user()->isAdmin() ) {
+        //     abort(403);
+        // }
+
+        $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'fecha'     => 'required|date',
+        ]);
+
+        $cargas = Carga::where('client_id', $data['client_id'])
+        ->where('estado_de_envio', ['ENTREGADO', 'RECHAZADO'])// busco estados de entregado y rechazado anteriores a la fecha ingresada
+        ->where('travel_certificate_id', null)
+        ->get();   
+        $cargasagrupadas = $cargas->groupBy('driver_id');
+        $preconstancias=[];
+        foreach($cargasagrupadas as $driver_id => $grupo)
+        {
+            foreach($grupo as $e)
+            {
+                $fecha = $e->fecha_de_recepcion?->format('Y-m-d') ?? 'sin_fecha';
+                $preconstancias[$driver_id][$fecha][] = $e;
+                //remito
+                //bultos
+                //bultos_monto
+                //pallet_normal
+                //pallet_normal_monto
+                //pallet_grande
+                //pallet_grande_monto
+                //total
+            }
+        }
+                
+        dd($preconstancias);
+        return view('stock.admin.operations', ['cargas'=>$preconstancias]);
+    }
+    public function generartc(Request $request,$id_carga)
+    {
+        $carga = Carga::findOrFail($id_carga);
+
+        $date = $carga->fecha_de_recepcion;// QUE FECHA? NOW|RECEPCION|ENTREGA|PERSONALIZADA
+        $destiny = $carga->destino;
+        $clientId = $carga->client_id;
+        $driverId = $carga->driver_id;
+        $TC = TravelCertificate::where([
+                ['date', '=', $date],
+                ['destiny', '=', $destiny],
+                ['driverId', '=', $driverId],
+                ['clientId', '=', $clientId],
+        ])->first();
+        if($TC)
+        {
+            return redirect()->route('stock')->with('warning', 'Ya se registró esta constancia de viaje. El id de la constancia es: ' . $TC->id);
+            return redirect()->back()->with('warning', 'Ya se registró esta constancia de viaje. El id de la constancia es: ' . $TC->id);
+        }
+        if(!$carga->driver)
+        {
+            return redirect()->route('stock')->with('warning', 'Ingresachofer');
+            // return redirect()->back()->with('warning', 'Debe asignar un chofer antes');
+        }
+        // Crear una nueva instancia de TravelCertificate
+        $newTravelCertificate = new TravelCertificate;
+        $newTravelCertificate->date = $date;
+        $newTravelCertificate->destiny = $destiny;
+        $newTravelCertificate->clientId = $clientId;
+        $newTravelCertificate->driverId = $driverId;
+        $newTravelCertificate->commission_type =  'porcentaje pactado';
+        $newTravelCertificate->percent         =  $carga->driver->percent;
+        
+        $newTravelCertificate->total = 0.00; //$carga->price;
+        $newTravelCertificate->iva = 0.00; //$carga->price * 0.21;
+        // ahora hay que asignarle los items de la carga.
+
+        $newTravelCertificate->save();
+        //asignarle a la carga la tc.
+        return redirect()->route('stock')->with('success', 'Constancia generada correctamente. ID: '.$newTravelCertificate->id);
+        return redirect()->back()->with('success', 'Operación realizada correctamente.');
     }
 }

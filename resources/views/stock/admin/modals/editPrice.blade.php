@@ -12,7 +12,7 @@
                 </div>
                 <div class="modal-body">
                     <label>Ingrese el precio de la carga</label>
-                    <input type="number" name="precio" class="form-control mb-2">
+                    <input type="number" name="precio" class="form-control mb-2"  value="{{ old('precio', $carga->precio) }}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
