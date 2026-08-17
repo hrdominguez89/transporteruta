@@ -11,8 +11,13 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <label>Ingrese el precio de la carga</label>
-                    <input type="number" name="precio" class="form-control mb-2"  value="{{ old('precio', $carga->precio) }}">
+                    <label for="precio_bulto{{ $carga->id }}">Precio por bulto:</label>
+                    <input id="precio_bulto{{ $carga->id }}" type="number" step="0.01" name="precio_bulto" class="form-control mb-2" 
+                    value="{{ old('precio_bulto', $precio_bulto) }}">
+
+                    <label for="precio_pallet{{ $carga->id }}">Precio por pallet:</label>
+                    <input id="precio_pallet{{ $carga->id }}" type="number" step="0.01" name="precio_pallet" class="form-control mb-2" 
+                    value="{{ old('precio_pallet', $precio_pallet) }}"  >
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

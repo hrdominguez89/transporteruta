@@ -6,7 +6,7 @@
                 <input type="hidden" name="id" value="{{ $carga->id }}">
 
                 <div class="modal-header bg-danger">
-                    <h5 class="modal-title">Actualizar estado de envio de mercaderia</h5>
+                    <h5 class="modal-title">Actualizar estado de envio de mercaderia22</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

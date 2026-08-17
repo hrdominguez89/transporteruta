@@ -5,7 +5,7 @@
                 @csrf
                 <input type="hidden" name="id" value="{{ $carga->id }}">
                 <div class="modal-header bg-danger">
-                    <h5 class="modal-title">Actualizar carga (se modificara el precio)</h5>
+                    <h5 class="modal-title">Actualizar carga (se modificara el precio segun lo guardado en base de datos)</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

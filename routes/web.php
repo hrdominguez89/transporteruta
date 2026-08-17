@@ -195,5 +195,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::delete('/cliente-tercero', [StockController::class, 'deleteClienteTercero'])->name('clienteTercero.destroy');//editEstadoEnviostock
         Route::post('/edit-estado', [StockController::class, 'editEstadoEnviostock'])->name('editEstadoEnviostock');//generartc
         Route::post('/stock/cortedeoperaciones', [StockController::class, 'corteDeOperaciones'])->name('cortedeoperaciones');//crearContactoTercero
-        Route::get('/generar-tc/{id}', [StockController::class, 'generartc'])->name('generartc');
+        Route::post('/generar-tc', [StockController::class, 'generartc'])->name('generartc');//generatealltcoperaciones
+        Route::post('/generar-tc/all', [StockController::class, 'generartodastc'])->name('generatealltcoperaciones');//
 });

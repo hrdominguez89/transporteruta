@@ -2,7 +2,8 @@
 @section('title', 'Corte operaciones')
 @section('content_header')
     <div class="row">
-        <h1 class="col-5">Cargas</h1>
+        <a href="{{ Route('stock') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
+        <h1 class="col-5">Corte de operaciones</h1>
     </div>
     @if($errors->any())
         <div id="errorAlert" class="alert alert-danger alert-dismissible fade show">
@@ -20,45 +21,122 @@
     @endif
 @stop
 @section('content')
-    <table class="table table-sm table-bordered text-center data-table">
+    <div class="row">
+        <form action="{{ route('generatealltcoperaciones') }}" method="POST" class="w-100">
+            <input type="hidden" value="{{ $data['fecha'] }}" name="fecha_de_corte">
+            <input type="hidden" value="{{ $data['client_id'] }}" name="client_id">
+            @csrf
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-primary" type="submit">Generar todos los viajes</button>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-lg-9">
+            <table class="table table-sm table-bordered text-center">
         <thead class="bg-danger">
-             <tr>
-                <th>cliente_tercero</th>
-                <th>fecha_recepcion</th>
-                <th>carga_remito(link)</th>
+            <tr>
+                <th>Cliente 3ro</th>
+                <th>Fecha recepción</th>
+                <th>Remito</th>
                 <th>Destino</th>
-                <th>carga_nombre</th>
-                <th>bulto</th>
-                <th>pallet_normal</th>
-                <th>pallet_grande</th>
-                <th>precio</th>
-                <th>Generar constancia</th>             
+                <th>Bultos</th>
+                <th>Pallet normal</th>
+                <th>Pallet grande</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Carga</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($cargas as $driver_id => $grupo)
-                <tr class="bg-secondary text-white">
-                    <td colspan="10" class="text-left font-weight-bold">
-                        Chofer: {{ $grupo->first()->driver?->name ?? 'Sin asignar' }}
+          @foreach ($cargasagrupadas as $driver_id => $fechas)
+            <tr class="bg-secondary text-white">
+                <td colspan="10" class="text-left font-weight-bold">
+                    Chofer: {{ $driver_id ?: 'Sin asignar' }}
+                </td>
+            </tr>
+
+            @foreach ($fechas as $fecha => $cargas)
+                @php
+                    $valor_total = 0; 
+                    $bultos = 0;
+                    $bultos_total = 0;
+                    $pallets_normales = 0;
+                    $pallets_normales_total = 0;
+                    $pallets_grandes = 0;
+                    $pallets_grandes_total = 0;
+                    $valor_declarado = 0;
+                @endphp
+                <tr class="bg-light">
+                    <td colspan="7" class="text-left font-weight-bold">
+                        Fecha de entrega: {{ $fecha ?: 'Sin fecha' }}
+                    </td>
+                    <td colspan="2">
+                        <form action="{{ route('generartc', $fecha) }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="driver_id" value="{{ $driver_id }}">
+                            <input type="hidden" name="fecha" value="{{ $fecha }}">
+                            <button type="submit" class="btn btn-sm btn-info">Generar constancia</button>
+                        </form>
                     </td>
                 </tr>
-                @foreach ($grupo as $carga)
+                @foreach ($cargas as $carga)
+                    @php
+                        $valor_total += $carga->precio; 
+                        $bultos += $carga->cantidad_bulto;
+                        $bultos_total += $carga->cantidad_bulto *  \App\Models\Price::where('type','BULTO')->value  ('price');
+                        $pallets_normales += $carga->cantidad_pallet;
+                        $pallets_normales_total += $carga->cantidad_pallet__normal* \App\Models\Price::where('type','PALLET')->value    ('price');
+                        $pallets_grandes += $carga->cantidad_pallet_grande;
+                        $pallets_grandes_total += $carga->cantidad_pallet_grande * (\App\Models\Price   ::where('type','PALLET')->value ('price') * 1.5);
+                        $valor_declarado += $carga->remito->valor_declarado;
+                    @endphp
                     <tr>
-                        <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
-                        <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
-                        <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
+                        <td>{{ $carga->cliente_tercero_name ?? 'no asignado' }}</td>
+                        <td>{{ $carga->fecha_de_recepcion ?? '-' }}</td>
+                        <td>{{ $carga->remito->numero ?? 'no asignado' }}</td>
                         <td>{{ $carga->destino }}</td>
-                        <td>{{ $carga->nombre }}</td>
                         <td>{{ $carga->cantidad_bulto }}</td>
                         <td>{{ $carga->cantidad_pallet_normal }}</td>
                         <td>{{ $carga->cantidad_pallet_grande }}</td>
+                        <td>{{ $carga->nombre }}</td>
                         <td>{{ $carga->precio }}</td>
                         <td>
-                            <a href="{{ Route('generartc', $carga->id) }}" class="btn btn-sm btn-info">Generar</a>
+                            <a href="{{ route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">{{ $carga->id }}</a>
                         </td>
                     </tr>
-                @endforeach
+                    @endforeach
+                    <tr class="bg-primary text-white ">
+                        <td >Valor declarado :${{ $valor_declarado }}</td>
+                        <td>Total bultos :{{ $bultos_total }}</td>
+                        <td>Total pallets normales :{{ $pallets_normales_total }}</td>
+                        <td>Total pallets grandes :{{  $pallets_grandes_total}}</td>
+                        <td>Bultos :{{ $bultos }}</td>
+                        <td>Pallets normales :{{ $pallets_normales }}</td>
+                        <td>Pallets grandes :{{  $pallets_grandes}}</td>
+                        <td  colspan="3">Valor total:${{ $valor_total }} </td>
+                    </tr>
+            @endforeach
+        @endforeach
+        </tbody>
+    </table>
+        </div>
+        <div class="col-lg-3">
+            <h4>Remitos no vinculados</h4>
+            <table class="table table-sm table-bordered text-center">
+        <thead class="bg-danger">
+            <tr><th>Numero de remito</th>
+            <th>Valor declarado</th></tr>
+        </thead>
+        <tbody>
+            @foreach ($remitos as $r )
+            <tr>
+                <th>{{ $r->numero ?? 'sin asignar'}}</th>                
+                <th>${{ $r?->valor_declarado  ?? 'sin asignar'}}</th>                
+            </tr>
             @endforeach
         </tbody>
     </table>
-@stop
+        </div>
+    </div>
+    @stop
