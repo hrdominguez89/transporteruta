@@ -29,7 +29,7 @@
         $cargas = \app\Models\Carga::where('client_id',$data['client_id'])->get();
         foreach ($cargas as $carga)
         {
-            $valor_declarado += $carga->remito->valor_declarado;
+            $valor_declarado += $carga->remito?->valor_declarado;
             $valor_viajes += $carga->precio;
         }
         
@@ -90,12 +90,13 @@
                 @endphp
                 <tr class="bg-light">
                     <td colspan="7" class="text-left font-weight-bold">
-                        Fecha de entrega: {{ $fecha ?: 'Sin fecha' }}
+                        Fecha de recepcion: {{ $fecha ?: 'Sin fecha' }}
                     </td>
                     <td colspan="2">
                         <form action="{{ route('generartc', $fecha) }}" method="POST" class="d-inline">
                             @csrf
                             <input type="hidden" name="driver_id" value="{{ $driver_id }}">
+                            <input type="hidden" name="client_id" value="{{ $data['client_id'] }}">
                             <input type="hidden" name="fecha" value="{{ $fecha }}">
                             <button type="submit" class="btn btn-sm btn-info">Generar constancia</button>
                         </form>
@@ -105,11 +106,11 @@
                     @php
                         $valor_total += $carga->precio; 
                         $bultos += $carga->cantidad_bulto;
-                        $bultos_total += $carga->cantidad_bulto *  \App\Models\Price::where('type','BULTO')->value  ('price');
-                        $pallets_normales += $carga->cantidad_pallet;
-                        $pallets_normales_total += $carga->cantidad_pallet_normal* \App\Models\Price::where('type','PALLET')->value    ('price');
+                        $bultos_total += $carga->cantidad_bulto * $carga->bulto_costo;//  \App\Models\Price::where('type','BULTO')->value('price');
+                        $pallets_normales += $carga->cantidad_pallet_normal;
+                        $pallets_normales_total += $carga->cantidad_pallet_normal* $carga->pallet_costo;//\App\Models\Price::where('type','PALLET')->value('price');
                         $pallets_grandes += $carga->cantidad_pallet_grande;
-                        $pallets_grandes_total += $carga->cantidad_pallet_grande * (\App\Models\Price   ::where('type','PALLET')->value ('price') * 1.5);
+                        $pallets_grandes_total += $carga->cantidad_pallet_grande * ($carga->pallet_costo * 1.5);
                         $valor_declarado += $carga->remito->valor_declarado;
                     @endphp
                     <tr>
