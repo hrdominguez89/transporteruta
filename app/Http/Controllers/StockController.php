@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 
 class StockController extends Controller
 {
+    //tabla inicial
     public function index(Request $request)
     {
        if (auth()->user()->isAdmin()) {
@@ -29,7 +30,8 @@ class StockController extends Controller
                 'cargas'            => $cargas,
                 'clients'           => Client::all(),
                 'clientes_terceros' => ClienteTercero::all(),
-                'prices'            => Price::all()
+                'prices'            => Price::all(),
+                'drivers'           => Driver::all() 
             ]);
         }
 
@@ -40,6 +42,7 @@ class StockController extends Controller
             'client' => auth()->user()->client
         ]);
     }
+    //vista individual
     public function show(Request $request)
     {
         $carga = Carga::findOrFail($request->id);
@@ -84,6 +87,7 @@ class StockController extends Controller
             'estado_envio' => $estado_envio
             ]);
     }
+    //store o generate
     public function generate(Request $request)
     {
         if (!auth()->user()->isAdmin() ) {  
@@ -98,25 +102,27 @@ class StockController extends Controller
             'destino'            => 'nullable|string|max:255',
             'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
             'cliente_tercero_id' => ['nullable'],
+            'driver_id' =>'nullable'
         ]);
 
         $data['client_id'] = auth()->user()->isAdmin()
             ? $data['client_id']
             : auth()->user()->client_id;
 
-        if($data['cantidad_bulto'])
-        {
-            $data['precio'] = $data['cantidad_bulto'] * Price::where('type', 'BULTO')->value('price');
+        $data['bulto_costo']  = Price::where('type', 'BULTO')->value('price');
+        $data['pallet_costo'] = Price::where('type', 'PALLET')->value('price');
+
+        $data['precio'] = 0;
+        if ($data['cantidad_bulto']) {
+            $data['precio'] += $data['cantidad_bulto'] * $data['bulto_costo'];
         }
-         if($data['cantidad_pallet_normal'])
-        {
-            $data['precio'] += $data['cantidad_pallet_normal'] * Price::where('type', 'PALLET')->value('price');
+        if ($data['cantidad_pallet_normal']) {
+            $data['precio'] += $data['cantidad_pallet_normal'] * $data['pallet_costo'];
         }
-         if($data['cantidad_pallet_grande'])
-        {
-            $data['precio'] += $data['cantidad_pallet_grande'] * (Price::where('type', 'PALLET')->value('price') * 1.5);
+        if ($data['cantidad_pallet_grande']) {
+            $data['precio'] += $data['cantidad_pallet_grande'] * ($data['pallet_costo'] * 1.5);
         }
-        
+
         $c = Carga::create($data);
 
         $estadoEnvio = new EstadoEnvio();
@@ -124,7 +130,7 @@ class StockController extends Controller
         $estadoEnvio->estado_actual = true;
         $estadoEnvio->carga_id = $c->id;
         $estadoEnvio->save();
-      
+
         return redirect()->route('stock')->with('success', 'Carga generada correctamente.');
     }
     public function edit(Request $request)
@@ -159,50 +165,52 @@ class StockController extends Controller
             abort(403);
         }
         $carga = Carga::findOrFail($request->id);
-        
+
         $data = $request->validate([
-            'cantidad_bulto'                  => 'sometimes|integer',
-            'cantidad_pallet_normal'          => 'sometimes|integer',
-            'cantidad_pallet_grande'          => 'sometimes|integer',
-            ]);
-            
-        if($data['cantidad_bulto'])
-        {
-            $data['precio'] = $data['cantidad_bulto'] * Price::where('type', 'BULTO')->value('price');
+            'cantidad_bulto'         => 'sometimes|integer',
+            'cantidad_pallet_normal' => 'sometimes|integer',
+            'cantidad_pallet_grande' => 'sometimes|integer',
+        ]);
+
+        $data['precio'] = 0;
+        if ($data['cantidad_bulto']) {
+            $data['precio'] += $data['cantidad_bulto'] * $carga->bulto_costo;
         }
-         if($data['cantidad_pallet_normal'])
-        {
-            $data['precio'] += $data['cantidad_pallet_normal'] * Price::where('type', 'PALLET')->value('price');
+        if ($data['cantidad_pallet_normal']) {
+            $data['precio'] += $data['cantidad_pallet_normal'] * $carga->pallet_costo;
         }
-         if($data['cantidad_pallet_grande'])
-        {
-            $data['precio'] += $data['cantidad_pallet_grande'] * (Price::where('type', 'PALLET')->value('price') * 1.5);
+        if ($data['cantidad_pallet_grande']) {
+            $data['precio'] += $data['cantidad_pallet_grande'] * ($carga->pallet_costo * 1.5);
         }
-        if($carga->estadoActual()=='RECHAZADO')
-        {
+        if ($carga->estadoActual?->estado === 'RECHAZADO') {
             $data['precio'] = $data['precio'] * 1.3;
         }
+
         $carga->update($data);
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
     }
-    public function editpriceoncarga(Request $request )
+    public function editpriceoncarga(Request $request)
     {
         if (!auth()->user()->isAdmin()) {
             abort(403);
         }
-        
-        $carga   =   Carga::findOrFail($request->id);
-        $precio  =   $carga->cantidad_bulto         * $request->precio_bulto;
-        $precio  +=  $carga->cantidad_pallet_normal * $request->precio_pallet;
-        $precio  +=  $carga->cantidad_pallet_grande * ($request->precio_pallet * 1.5);
 
-        if($carga->estadoActual()=='RECHAZADO')
-        {
+        $carga = Carga::findOrFail($request->id);
+
+        $carga->bulto_costo  = $request->precio_bulto;
+        $carga->pallet_costo = $request->precio_pallet;
+
+        $precio  =  $carga->cantidad_bulto         * $request->precio_bulto;
+        $precio  += $carga->cantidad_pallet_normal * $request->precio_pallet;
+        $precio  += $carga->cantidad_pallet_grande * ($request->precio_pallet * 1.5);
+
+        if ($carga->estadoActual?->estado === 'RECHAZADO') {
             $precio = $precio * 1.3;
         }
-        
+
         $carga->precio = $precio;
+        $carga->save();
 
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
@@ -476,7 +484,7 @@ class StockController extends Controller
         ->get();
         $cargasagrupadas = $cargas->groupBy(['driver_id', 'fecha_de_recepcion']);
         
-        $cargaspararemito = Carga::with('remito:id,numero')
+        $cargaspararemito = Carga::with('remito:id,numero,valor_declarado')
         ->where('client_id', $data['client_id'])
         ->whereNull('travel_certificate_id')
         ->get();
@@ -488,7 +496,7 @@ class StockController extends Controller
                 $remnovinculados[] = $c->remito;
             }
         }
-       
+        $porcentajes=0;
         return view('stock.admin.operations', 
         [
             'cargasagrupadas'=>$cargasagrupadas,
@@ -560,6 +568,7 @@ class StockController extends Controller
                 $itemc->save();
             }
             $carga->travel_certificate_id = $newTravelCertificate->id;
+            $carga->liquidado = true;
             $carga->save();
         }
 
@@ -579,29 +588,26 @@ class StockController extends Controller
             'fecha'     => 'required|date',
         ]);
 
-        $cargas = Carga::with('estado_envios')
-            ->where('client_id', $data['client_id'])
-            ->whereNull('travel_certificate_id')
-            ->whereDate('fecha_de_entrega', '<=', $data['fecha'])
-            ->whereHas('estado_envios', function ($query) {
-                $query->where('estado_activo', true)
-                    ->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
-            })
-            ->get();
+        $cargas = Carga::with('estadoActual')
+        ->where('client_id', $data['client_id'])
+        ->whereNull('travel_certificate_id')
+        ->whereNotNull('driver_id')
+        ->whereDate('fecha_de_recepcion', '<=', $data['fecha'])   // ← ¿recepción o entrega?
+        ->whereHas('estadoActual', function ($query) {
+            $query->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
+        })
+        ->get();
 
         if ($cargas->isEmpty()) {
             return redirect()->route('stock')->with('error', 'No hay cargas para generar constancias.');
         }
-
-        $precioBulto  = Price::where('type', 'BULTO')->value('price');
-        $precioPallet = Price::where('type', 'PALLET')->value('price');
 
         $cargasagrupadas = $cargas->groupBy(['driver_id', 'fecha_de_entrega']);
 
         $generados = 0;
 
         foreach ($cargasagrupadas as $driverId => $fechas) {
-            $driver = Driver::find($driverId);
+            $driver = Driver::findOrFail($driverId);
 
             foreach ($fechas as $fecha => $cargasDelGrupo) {
                 
@@ -610,14 +616,15 @@ class StockController extends Controller
                 }
 
                 $primera = $cargasDelGrupo->first();
-
                 $newTravelCertificate = new TravelCertificate;
                 $newTravelCertificate->date            = $primera->fecha_de_recepcion;
                 $newTravelCertificate->destiny         = $primera->destino;
                 $newTravelCertificate->clientId        = $data['client_id'];
-                $newTravelCertificate->driverId        = $driver?->id;
+                $newTravelCertificate->driverId        = $driverId;
                 $newTravelCertificate->commission_type = 'porcentaje pactado';
                 $newTravelCertificate->percent         = $driver?->percent;
+                $newTravelCertificate->total         = 0;
+                $newTravelCertificate->iva         = 0;
                 $newTravelCertificate->save();
 
                 foreach ($cargasDelGrupo as $carga) {
@@ -626,7 +633,7 @@ class StockController extends Controller
                         $item->travelCertificateId = $newTravelCertificate->id;
                         $item->type        = 'BULTO';
                         $item->description = 'Bultos';
-                        $item->price       = $carga->cantidad_bulto * $precioBulto;
+                        $item->price  = $carga->cantidad_bulto * $carga->bulto_costo;
                         $item->distance    = $carga->cantidad_bulto;
                         $item->save();
                     }
@@ -635,7 +642,7 @@ class StockController extends Controller
                         $itemb->travelCertificateId = $newTravelCertificate->id;
                         $itemb->type        = 'PALLET';
                         $itemb->description = 'Pallets normales';
-                        $itemb->price       = $carga->cantidad_pallet_normal * $precioPallet;
+                        $itemb->price = $carga->cantidad_pallet_normal * $carga->pallet_costo;
                         $itemb->distance    = $carga->cantidad_pallet_normal;
                         $itemb->save();
                     }
@@ -644,12 +651,13 @@ class StockController extends Controller
                         $itemc->travelCertificateId = $newTravelCertificate->id;
                         $itemc->type        = 'PALLET';
                         $itemc->description = 'Pallets grandes';
-                        $itemc->price       = $carga->cantidad_pallet_grande * (1.5 * $precioPallet);
+                        $itemc->price = $carga->cantidad_pallet_grande * (1.5 * $carga->pallet_costo);
                         $itemc->distance    = $carga->cantidad_pallet_grande;
                         $itemc->save();
                     }
 
                     $carga->travel_certificate_id = $newTravelCertificate->id;
+                    $carga->liquidado = true;
                     $carga->save();
                 }
 

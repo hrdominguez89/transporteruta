@@ -64,6 +64,17 @@
             setTimeout(function () { $('#warningAlert').alert('close'); }, 5000);
         </script>
     @endif
+    @if (session('error'))
+        <div id="warningAlert" class="alert alert-warning alert-dismissible fade show">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <script>
+            setTimeout(function () { $('#warningAlert').alert('close'); }, 5000);
+        </script>
+    @endif
 @stop
 
 @section('content')

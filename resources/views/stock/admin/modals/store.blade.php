@@ -61,13 +61,15 @@
                         <option value="BULTO">Bulto</option>
                     </select>
                     <div id="tamaño_pallet_div" style="display: none">
-                        <label for="tamaño_pallet">Tamaño del pallet<span class="text-danger"> *</span></label>
-                        <select id="tamaño_pallet" name="espacio" class="form-control">
-                            <option>Seleccione una opcion</option>
-                            <option value="ESTANDAR">Estandar</option>
-                            <option value="EXTRA">Extra</option>
-                        </select>
                     </div> --}}
+                    <label for="driver">Chofer:<span class="text-danger"> *</span></label>
+                    <select id="driver" name="driver_id" class="form-control">
+                        <option>Seleccione una opcion</option>
+                        @foreach ($drivers as $d )
+                            <option value="{{ $d->id }}">{{ $d->name }}</option>
+                        @endforeach
+                        
+                    </select>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>

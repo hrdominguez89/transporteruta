@@ -1,9 +1,12 @@
 @extends('adminlte::page')
 @section('title', 'Corte operaciones')
 @section('content_header')
+
     <div class="row">
         <a href="{{ Route('stock') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
-        <h1 class="col-5">Corte de operaciones</h1>
+        <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#costosModal">
+        Ver costos
+    </button>
     </div>
     @if($errors->any())
         <div id="errorAlert" class="alert alert-danger alert-dismissible fade show">
@@ -19,13 +22,31 @@
             }, 5000);
         </script>
     @endif
+    @php
+        $valor_declarado = 0;
+        $valor_viajes = 0;
+        $porcentaje = 0;
+        $cargas = \app\Models\Carga::where('client_id',$data['client_id'])->get();
+        foreach ($cargas as $carga)
+        {
+            $valor_declarado += $carga->remito->valor_declarado;
+            $valor_viajes += $carga->precio;
+        }
+        
+        $porcentaje = (100 * $valor_viajes) / $valor_declarado;
+
+    @endphp
+    
 @stop
 @section('content')
+        <h1 class="col-5">Corte de operaciones</h1>
+
     <div class="row">
         <form action="{{ route('generatealltcoperaciones') }}" method="POST" class="w-100">
-            <input type="hidden" value="{{ $data['fecha'] }}" name="fecha_de_corte">
+            <input type="hidden" value="{{ $data['fecha'] }}" name="fecha">
             <input type="hidden" value="{{ $data['client_id'] }}" name="client_id">
             @csrf
+            @method('POST')
             <div class="d-flex justify-content-end">
                 <button class="btn btn-sm btn-primary" type="submit">Generar todos los viajes</button>
             </div>
@@ -52,7 +73,7 @@
           @foreach ($cargasagrupadas as $driver_id => $fechas)
             <tr class="bg-secondary text-white">
                 <td colspan="10" class="text-left font-weight-bold">
-                    Chofer: {{ $driver_id ?: 'Sin asignar' }}
+                    Chofer: {{ $fechas->first()->first()?->driver?->name  ?: 'Sin asignar' }}
                 </td>
             </tr>
 
@@ -86,13 +107,13 @@
                         $bultos += $carga->cantidad_bulto;
                         $bultos_total += $carga->cantidad_bulto *  \App\Models\Price::where('type','BULTO')->value  ('price');
                         $pallets_normales += $carga->cantidad_pallet;
-                        $pallets_normales_total += $carga->cantidad_pallet__normal* \App\Models\Price::where('type','PALLET')->value    ('price');
+                        $pallets_normales_total += $carga->cantidad_pallet_normal* \App\Models\Price::where('type','PALLET')->value    ('price');
                         $pallets_grandes += $carga->cantidad_pallet_grande;
                         $pallets_grandes_total += $carga->cantidad_pallet_grande * (\App\Models\Price   ::where('type','PALLET')->value ('price') * 1.5);
                         $valor_declarado += $carga->remito->valor_declarado;
                     @endphp
                     <tr>
-                        <td>{{ $carga->cliente_tercero_name ?? 'no asignado' }}</td>
+                        <td>{{ $carga->cliente_tercero->nombre ?? 'no asignado' }}</td>
                         <td>{{ $carga->fecha_de_recepcion ?? '-' }}</td>
                         <td>{{ $carga->remito->numero ?? 'no asignado' }}</td>
                         <td>{{ $carga->destino }}</td>
@@ -139,4 +160,37 @@
     </table>
         </div>
     </div>
+    <div class="modal fade" id="costosModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title">Costos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sm table-bordered text-center">
+                    <thead class="bg-danger">
+                        <tr>
+                            <th>Total de valor declarado</th>
+                            <th>Total de viajes</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ number_format($valor_declarado, 2, ',', '.') }}</td>
+                            <td>{{ number_format($valor_viajes, 2, ',', '.') }}</td>
+                            <td>%{{ number_format($porcentaje, 2, ',', '.') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
     @stop

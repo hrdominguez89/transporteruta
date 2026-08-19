@@ -14,29 +14,31 @@ class Carga extends Model
 
     protected $fillable = [
         'nombre',
-        'cantidad',
+        'cantidad',//SE VA 
         'fecha_de_recepcion',
-        'fecha_de_entrega',
+        'fecha_de_entrega',// SE VA 
         'precio',
-        'espacio',
-        'tipo',
+        'espacio',//SE VA 
+        'tipo', // SE VA 
         'destino',
         'client_id',
         'remito_id',
-        'estado_de_envio',
-        'notificacion_de_recepcion',
-        'notificacion_de_entrega',
+        'estado_de_envio',// SE VA 
+        'notificacion_de_recepcion',// PROXIMAMENTE SE USARA?
+        'notificacion_de_entrega',// PROXIMAMENTE SE USARA?
         'cliente_tercero_id',
         'motivo',
         'travel_certificate_id',
         'cantidad_bulto',
         'cantidad_pallet_normal',
         'cantidad_pallet_grande',
-        'rechazado_bulto',
-        'rechazado_pallet_normal',
-        'rechazado_pallet_grande',  
+        'rechazado_bulto',// PROXIMAMENTE SE USARA?
+        'rechazado_pallet_normal',// PROXIMAMENTE SE USARA?
+        'rechazado_pallet_grande',  // PROXIMAMENTE SE USARA?
         'driver_id',
-        'estado_envio_id'
+        'estado_envio_id',// PROXIMAMENTE SE USARA?
+        'pallet_costo',
+        'bulto_costo',
     ];
 
     protected $casts = [
