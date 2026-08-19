@@ -38,4 +38,8 @@ class ClienteTercero extends Model
     {
         return $this->hasMany(Carga::class, 'cliente_tercero_id');
     }
+    public function contactos()
+    {
+        return $this->hasMany(Contacto::class, 'cliente_tercero_id');
+    }
 }

@@ -1,4 +1,3 @@
-@if ($carga->cliente_tercero && ! $carga->cliente_tercero->contacto)
 <div class="modal fade" id="storeContacto" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -41,4 +40,3 @@
     </div>
   </div>
 </div>
-@endif

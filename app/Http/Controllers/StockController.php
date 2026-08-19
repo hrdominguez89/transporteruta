@@ -7,15 +7,19 @@ use App\Models\Carga;
 use App\Models\Client;
 use App\Models\ClienteTercero;
 use App\Models\Contacto;
+use App\Models\Driver;
+use App\Models\EstadoEnvio;
 use App\Models\Price;
 use App\Models\Remito;
 use App\Models\TravelCertificate;
+use App\Models\TravelItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class StockController extends Controller
 {
+    //tabla inicial
     public function index(Request $request)
     {
        if (auth()->user()->isAdmin()) {
@@ -26,7 +30,8 @@ class StockController extends Controller
                 'cargas'            => $cargas,
                 'clients'           => Client::all(),
                 'clientes_terceros' => ClienteTercero::all(),
-                'prices'            => Price::all()
+                'prices'            => Price::all(),
+                'drivers'           => Driver::all() 
             ]);
         }
 
@@ -34,9 +39,10 @@ class StockController extends Controller
 
         return view('stock.client.index', [
             'cargas' => $cargas,
-            'client' => auth()->user()->client,
+            'client' => auth()->user()->client
         ]);
     }
+    //vista individual
     public function show(Request $request)
     {
         $carga = Carga::findOrFail($request->id);
@@ -44,18 +50,88 @@ class StockController extends Controller
         if (!auth()->user()->isAdmin() && $carga->client_id !== auth()->user()->client_id) {
             abort(403);
         }
+
+       $itemsConstraint = function ($q) use ($carga) {
+            $q->where(function ($inner) use ($carga) {
+                $inner->whereIn('type', ['PALLET', 'BULTO'])
+                    ->orWhere(function ($q2) use ($carga) {
+                        $q2->where('type', 'REMITO')
+                            ->where('remito_number', $carga->remito?->numero);
+                    });
+            });
+        };
+
         $travelCertificates = TravelCertificate::where('clientId', $carga->client_id)
-        ->where('invoiced', 'NO')
-        ->get();
+            ->where('invoiced', 'NO')
+            ->whereHas('travelItems', $itemsConstraint)
+            ->with(['travelItems' => $itemsConstraint])
+            ->get();
+
+        $estado_envio = $carga?->estadoActual;
 
         if (auth()->user()->isAdmin()) {
             $clientes_tercero =  ClienteTercero::where('client_id', $carga->client_id)->get();
-            return view('stock.admin.show', ['carga' => $carga,'clientes_terceros' => $clientes_tercero,'travel_certificates' => $travelCertificates ]);
+            return view('stock.admin.show', [
+                'carga' => $carga,
+                'clientes_terceros' => $clientes_tercero,
+                'travel_certificates' => $travelCertificates,
+                'estado_envio' => $estado_envio,
+                'drivers' => Driver::all(),
+                'precio_bulto' =>Price::where('type','BULTO')->value('price'),
+                'precio_pallet' =>Price::where('type','PALLET')->value('price')
+                ]);
         }
         return view('stock.client.show', [
             'carga' => $carga,
-            'client' => auth()->user()->client
+            'client' => auth()->user()->client,
+            'estado_envio' => $estado_envio
             ]);
+    }
+    //store o generate
+    public function generate(Request $request)
+    {
+        if (!auth()->user()->isAdmin() ) {  
+            abort(403);
+        }
+        $data = $request->validate([
+            'nombre'             => 'required|string|max:255',
+            'fecha_de_recepcion' => 'required|date',
+            'cantidad_bulto'     => 'nullable|integer',
+            'cantidad_pallet_normal'   => 'nullable|integer',
+            'cantidad_pallet_grande'   => 'nullable|integer',
+            'destino'            => 'nullable|string|max:255',
+            'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
+            'cliente_tercero_id' => ['nullable'],
+            'driver_id' =>'nullable'
+        ]);
+
+        $data['client_id'] = auth()->user()->isAdmin()
+            ? $data['client_id']
+            : auth()->user()->client_id;
+
+        $data['bulto_costo']  = Price::where('type', 'BULTO')->value('price');
+        $data['pallet_costo'] = Price::where('type', 'PALLET')->value('price');
+
+        $data['precio'] = 0;
+        if ($data['cantidad_bulto']) {
+            $data['precio'] += $data['cantidad_bulto'] * $data['bulto_costo'];
+        }
+        if ($data['cantidad_pallet_normal']) {
+            $data['precio'] += $data['cantidad_pallet_normal'] * $data['pallet_costo'];
+        }
+        if ($data['cantidad_pallet_grande']) {
+            $data['precio'] += $data['cantidad_pallet_grande'] * ($data['pallet_costo'] * 1.5);
+        }
+
+        $c = Carga::create($data);
+
+        $estadoEnvio = new EstadoEnvio();
+        $estadoEnvio->horario = $data['fecha_de_recepcion'];
+        $estadoEnvio->estado_actual = true;
+        $estadoEnvio->carga_id = $c->id;
+        $estadoEnvio->save();
+
+        return redirect()->route('stock')->with('success', 'Carga generada correctamente.');
     }
     public function edit(Request $request)
     {      
@@ -69,13 +145,13 @@ class StockController extends Controller
             'fecha_de_recepcion'        => 'sometimes|date',
             'fecha_de_entrega'          => 'nullable|date',
             'destino'                   => 'nullable|string|max:255',
-            'estado_de_envio'           => 'sometimes',
             'notificacion_de_recepcion' => 'sometimes|boolean',
             'notificacion_de_entrega'   => 'sometimes|boolean',
             'cliente_tercero_id'        => 'nullable|integer',
             'motivo'                => 'nullable|string|max:255',
             'liquidado'             => 'nullable|boolean',
-            'travel_certificate_id' => 'nullable|exists:travel_certificates,id',
+            'travel_certificate_id' => 'nullable',
+            'driver_id'             => 'nullable'
         ]);
         
         $carga->update($data);
@@ -89,34 +165,87 @@ class StockController extends Controller
             abort(403);
         }
         $carga = Carga::findOrFail($request->id);
-        
+
         $data = $request->validate([
-            'cantidad'                  => 'sometimes|integer',
-            'tipo'                      => 'sometimes|in:PALLET,BULTO',
-            'espacio'                   => 'nullable|string|max:255',
-            ]);
-            
-            $price = Price::where('type',$data['tipo'])->value('price');
-            
-        if($data['tipo'] == 'PALLET' & $data['espacio'] == 'EXTRA')
-        {
-            $price = $price * 1.5;
+            'cantidad_bulto'         => 'sometimes|integer',
+            'cantidad_pallet_normal' => 'sometimes|integer',
+            'cantidad_pallet_grande' => 'sometimes|integer',
+        ]);
+
+        $data['precio'] = 0;
+        if ($data['cantidad_bulto']) {
+            $data['precio'] += $data['cantidad_bulto'] * $carga->bulto_costo;
+        }
+        if ($data['cantidad_pallet_normal']) {
+            $data['precio'] += $data['cantidad_pallet_normal'] * $carga->pallet_costo;
+        }
+        if ($data['cantidad_pallet_grande']) {
+            $data['precio'] += $data['cantidad_pallet_grande'] * ($carga->pallet_costo * 1.5);
+        }
+        if ($carga->estadoActual?->estado === 'RECHAZADO') {
+            $data['precio'] = $data['precio'] * 1.3;
         }
 
-        $data['precio'] = $price * $data['cantidad'];
         $carga->update($data);
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
     }
-
-    public function editpriceoncarga(Request $request )
+    public function editpriceoncarga(Request $request)
     {
         if (!auth()->user()->isAdmin()) {
             abort(403);
         }
+
         $carga = Carga::findOrFail($request->id);
-        $data = $request->validate(['precio' => 'required|decimal:0,2']);
-        $carga->update($data);
+
+        $carga->bulto_costo  = $request->precio_bulto;
+        $carga->pallet_costo = $request->precio_pallet;
+
+        $precio  =  $carga->cantidad_bulto         * $request->precio_bulto;
+        $precio  += $carga->cantidad_pallet_normal * $request->precio_pallet;
+        $precio  += $carga->cantidad_pallet_grande * ($request->precio_pallet * 1.5);
+
+        if ($carga->estadoActual?->estado === 'RECHAZADO') {
+            $precio = $precio * 1.3;
+        }
+
+        $carga->precio = $precio;
+        $carga->save();
+
+        return redirect()->route('showcarga', $carga->id)
+            ->with('success', 'Carga actualizada correctamente.');
+    }
+    public function editEstadoEnviostock(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'id'              => 'required|exists:cargas,id',
+            'horario'         => 'required|date',
+            'estado_de_envio' => 'required|in:DEPOSITO,AVISADO,COORDINADO,TRANSITO,ENTREGADO,RECHAZADO',
+            'motivo'          => 'nullable|string|max:255',
+        ]);
+
+        $carga = Carga::findOrFail($data['id']);
+
+        if ($data['estado_de_envio'] === 'RECHAZADO') {
+            $carga->update([
+                'motivo' => $data['motivo'],
+                'precio' => $carga->precio * 1.30,
+            ]);
+        }
+
+        $carga->estadoEnvios()->update(['estado_actual' => false]);
+
+        $carga->estadoEnvios()->updateOrCreate(
+            ['estado' => $data['estado_de_envio']],
+            [
+                'horario'       => $data['horario'],
+                'estado_actual' => true,
+            ]
+        );
 
         return redirect()->route('showcarga', $carga->id)
             ->with('success', 'Carga actualizada correctamente.');
@@ -137,39 +266,6 @@ class StockController extends Controller
         $tercero->update($request->except(['_token', 'id']));
 
         return redirect()->route('stock')->with('success', 'Cliente 3ro actualizado.');
-    }
-    public function generate(Request $request)
-    {
-        if (!auth()->user()->isAdmin() ) {  
-            abort(403);
-        }
-        $data = $request->validate([
-            'nombre'             => 'required|string|max:255',
-            'cantidad'           => 'required|integer',
-            'fecha_de_recepcion' => 'required|date',
-            'fecha_de_entrega'   => 'nullable|date',
-            'espacio'            => 'nullable|string|max:255',
-            'tipo'               => 'required|in:PALLET,BULTO',
-            'destino'            => 'nullable|string|max:255',
-            'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
-            'cliente_tercero_id' => ['nullable'],
-        ]);
-
-        $data['client_id'] = auth()->user()->isAdmin()
-            ? $data['client_id']
-            : auth()->user()->client_id;
-
-        $price = Price::where('type', $data['tipo'])->value('price');
-
-        if ($data['tipo'] === 'PALLET' && ($data['espacio'] ?? null) === 'EXTRA') {
-            $price = $price * 1.5;
-        }
-
-        $data['precio'] = $price * $data['cantidad'];
-
-        Carga::create($data);
-
-        return redirect()->route('stock')->with('success', 'Carga generada correctamente.');
     }
     public function delete(Request $request,$id)
     {
@@ -203,7 +299,7 @@ class StockController extends Controller
             abort(403);
         }
         $data = $request->validate([
-            'numero' => 'required|string|max:50|unique:remitos,numero',
+            'numero' => 'required|string|max:50',
             'image'  => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
             'carga_id' => 'required|exists:cargas,id',
             'valor_declarado' => 'nullable|string'
@@ -246,46 +342,6 @@ class StockController extends Controller
 
         return back()->with('success', 'Remito actualizado.');
     }
-    public function corteDeOperaciones(Request $request)
-    {
-         if (!auth()->user()->isAdmin() ) {
-            abort(403);
-        }
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'fecha'     => 'required|date',
-        ]);
-
-       $cargas = Carga::where('client_id', $data['client_id'])
-        ->whereIn('estado_de_envio', ['ENTREGADO', 'RECHAZADO'])
-        ->whereDate('fecha_de_entrega', $data['fecha'])
-        ->get();
-        $bultos  = $cargas->where('tipo', 'BULTO');
-        $pallets = $cargas->where('tipo', 'PALLET');
-        $remitos = $cargas->pluck('remito')->filter();
-        $corte = [
-            'cliente'          => Client::find($data['client_id'])->name,
-            'fecha'            => $data['fecha'],
-            'bultos_cantidad'  => $bultos->sum('cantidad'),
-            'bultos_total'     => $bultos->sum('precio'),
-            'pallets_cantidad' => $pallets->sum('cantidad'),
-            'pallets_total'    => $pallets->sum('precio'),
-            'total'            => $cargas->sum('precio'),
-            'remitos'          => $remitos
-        ];
-
-        $clientes = Client::all();
-        $cargasIndex = Carga::all();
-
-
-        return view('stock.admin.index', [
-            'cargas'  => $cargasIndex,
-            'clients' => $clientes,
-            'corte'   => $corte,
-            'clientes_terceros' => ClienteTercero::all(),
-            'prices'            => Price::all()
-        ]);
-    }
     public function storeClientTercero(Request $request)
     {
          if (!auth()->user()->isAdmin() ) {
@@ -311,8 +367,11 @@ class StockController extends Controller
          if (!auth()->user()->isAdmin()) {
             abort(403);
         }
-        $tercero = ClienteTercero::findOrFail($terceroId);
 
+        $tercero = ClienteTercero::findOrFail($terceroId);
+        if ($tercero->contactos()->count() >= 10) {
+            return redirect()->back()->withErrors(['contacto' => 'Este cliente ya alcanzó el máximo de 10 contactos.']);
+        }
        
         $data = $request->validate([
             'name'        => 'required|string|max:255',
@@ -323,17 +382,15 @@ class StockController extends Controller
             'comentarios' => 'nullable|string|max:500',
         ]);
 
-        $contacto = Contacto::create([
+        Contacto::create([
             'nombre'     => $data['name'],
             'apellido'   => $data['lastname'] ?? null,
             'categoria'  => $data['category'] !== '-' ? $data['category'] : null,
             'mail'       => $data['mail'] ?? null,
             'telefono'   => $data['telefono'] ?? null,
             'comentario' => $data['comentarios'] ?? null,
+            'cliente_tercero_id' => $tercero->id
         ]);
-
-        $tercero->contacto_id = $contacto->id;
-        $tercero->save();
 
         return redirect()->back()->with('success', 'Contacto creado correctamente.');
     }
@@ -366,17 +423,10 @@ class StockController extends Controller
     }
     public function eliminarContactoTercero(Request $request, $contactoId, $terceroId)
     {
-         if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             abort(403);
         }
         $contacto = Contacto::findOrFail($contactoId);
-        $tercero  = ClienteTercero::findOrFail($terceroId);
-
-        // Desvincular del tercero antes de borrar, para no dejar contacto_id colgado
-        if ($tercero->contacto_id == $contacto->id) {
-            $tercero->contacto_id = null;
-            $tercero->save();
-        }
 
         $contacto->delete();
 
@@ -388,9 +438,237 @@ class StockController extends Controller
 
         $pdf = Pdf::loadView('stock.admin.remitopdf', [
             'remito' => $remito,
-            'imagen' => $path,   // ruta absoluta para embeber en el PDF
+            'imagen' => $path,   
         ]);
 
         return $pdf->download('remito-' . $remito->numero . '.pdf');
+    }
+    public function deleteClienteTercero(Request $request)
+    {
+        if (!auth()->user()->isAdmin() ) {
+            abort(403);
+        }
+        if (auth()->user()->isAdmin()) {
+        $clienteTercero = ClienteTercero::findOrFail($request->cliente_tercero_id);
+        $clienteTercero->delete();
+            $cargas = Carga::when($request->client_id, function ($query, $clientId) {
+                $query->where('client_id', $clientId);
+            })->get();
+
+            return view('stock.admin.index', [
+                'cargas'            => $cargas,
+                'clients'           => Client::all(),
+                'clientes_terceros' => ClienteTercero::all(),
+                'prices'            => Price::all()
+            ])->with('success', 'Eliminado');;
+        }
+    }
+    public function corteDeOperaciones(Request $request)
+    {
+        if (!auth()->user()->isAdmin() ) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'fecha'     => 'required|date',
+        ]);
+
+        $cargas = Carga::with('estadoActual')
+        ->where('client_id', $data['client_id'])
+        ->whereNull('travel_certificate_id')
+        ->whereDate('fecha_de_recepcion', '<=', $data['fecha'])
+        ->whereHas('estadoActual', function ($query) {
+            $query->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
+        })
+        ->get();
+        $cargasagrupadas = $cargas->groupBy(['driver_id', 'fecha_de_recepcion']);
+        
+        $cargaspararemito = Carga::with('remito:id,numero,valor_declarado')
+        ->where('client_id', $data['client_id'])
+        ->whereNull('travel_certificate_id')
+        ->get();
+
+        $remnovinculados= [];
+        foreach($cargaspararemito as $c)
+        {
+            if ($c->remito) {
+                $remnovinculados[] = $c->remito;
+            }
+        }
+        $porcentajes=0;
+        return view('stock.admin.operations', 
+        [
+            'cargasagrupadas'=>$cargasagrupadas,
+            'data'=>$data,
+            'remitos' => $remnovinculados
+        ]);
+    }
+    public function generartc(Request $request)
+    {
+        $cargas = Carga::with('estado_envios')
+        ->where('client_id', $request->client_id)
+        ->where('driver_id', $request->driver_id)
+        ->whereNull('travel_certificate_id')
+        ->whereDate('fecha_de_recepcion','=', $request->fecha)
+        ->whereHas('estado_envios', function ($query) {
+            $query->where('estado_activo', true)
+                ->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
+        })
+        ->get();
+
+        if ($cargas->isEmpty()) {
+            return redirect()->route('stock')->with('error', 'No hay cargas para generar la constancia.');
+        }
+
+        $d = Driver::find($request->driver_id);
+        
+        $newTravelCertificate = new TravelCertificate;
+        $newTravelCertificate->date = $cargas[0]->fecha_de_recepcion;
+        $newTravelCertificate->destiny = $cargas[0]->destino;
+        $newTravelCertificate->clientId = $request->client_id;
+        $newTravelCertificate->driverId = $d->id;
+        $newTravelCertificate->commission_type =  'porcentaje pactado';
+        $newTravelCertificate->percent         =  $d->percent;
+        
+        $newTravelCertificate->save();
+        $precio_bulto = Price::where('type','BULTO')->value('price');
+        $precio_pallet = Price::where('type','PALLET')->value('price');
+ 
+        foreach($cargas as $carga)
+        {
+            if($carga->cantidad_bulto)
+            {
+                $item = new TravelItem();
+                $item->travelCertificateId = $newTravelCertificate->id;
+                $item->type        = 'BULTO';
+                $item->description = 'Bultos';
+                $item->price       = $carga->cantidad_bulto * $precio_bulto;
+                $item->distance    = $carga->cantidad_bulto;
+                $item->save();
+            }
+            if($carga->cantidad_pallet_normal)
+            {
+                $itemb = new TravelItem();
+                $itemb->travelCertificateId = $newTravelCertificate->id;
+                $itemb->type        = 'PALLET';
+                $itemb->description = 'Pallets normales';
+                $itemb->price       = $carga->cantidad_pallet_normal * $precio_pallet;
+                $itemb->distance    = $carga->cantidad_pallet_normal;
+                $itemb->save();
+            }
+            if($carga->cantidad_pallet_grande)
+            {
+                $itemc = new TravelItem();
+                $itemc->travelCertificateId = $newTravelCertificate->id;
+                $itemc->type        = 'PALLET';
+                $itemc->description = 'Pallets grandes';
+                $itemc->price       = $carga->cantidad_pallet_grande * (1.5 * $precio_pallet);
+                $itemc->distance    = $carga->cantidad_pallet_grande;
+                $itemc->save();
+            }
+            $carga->travel_certificate_id = $newTravelCertificate->id;
+            $carga->liquidado = true;
+            $carga->save();
+        }
+
+        $newTravelCertificate->recalcTotals();
+        $newTravelCertificate->save();
+        
+        return redirect()->route('stock')->with('success', 'Constancia generada correctamente. ID: '.$newTravelCertificate->id);
+    }
+    public function generartodastc(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'fecha'     => 'required|date',
+        ]);
+
+        $cargas = Carga::with('estadoActual')
+        ->where('client_id', $data['client_id'])
+        ->whereNull('travel_certificate_id')
+        ->whereNotNull('driver_id')
+        ->whereDate('fecha_de_recepcion', '<=', $data['fecha'])   // ← ¿recepción o entrega?
+        ->whereHas('estadoActual', function ($query) {
+            $query->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
+        })
+        ->get();
+
+        if ($cargas->isEmpty()) {
+            return redirect()->route('stock')->with('error', 'No hay cargas para generar constancias.');
+        }
+
+        $cargasagrupadas = $cargas->groupBy(['driver_id', 'fecha_de_entrega']);
+
+        $generados = 0;
+
+        foreach ($cargasagrupadas as $driverId => $fechas) {
+            $driver = Driver::findOrFail($driverId);
+
+            foreach ($fechas as $fecha => $cargasDelGrupo) {
+                
+                if ($fecha === '' || $fecha === null) {
+                    continue;
+                }
+
+                $primera = $cargasDelGrupo->first();
+                $newTravelCertificate = new TravelCertificate;
+                $newTravelCertificate->date            = $primera->fecha_de_recepcion;
+                $newTravelCertificate->destiny         = $primera->destino;
+                $newTravelCertificate->clientId        = $data['client_id'];
+                $newTravelCertificate->driverId        = $driverId;
+                $newTravelCertificate->commission_type = 'porcentaje pactado';
+                $newTravelCertificate->percent         = $driver?->percent;
+                $newTravelCertificate->total         = 0;
+                $newTravelCertificate->iva         = 0;
+                $newTravelCertificate->save();
+
+                foreach ($cargasDelGrupo as $carga) {
+                    if ($carga->cantidad_bulto) {
+                        $item = new TravelItem();
+                        $item->travelCertificateId = $newTravelCertificate->id;
+                        $item->type        = 'BULTO';
+                        $item->description = 'Bultos';
+                        $item->price  = $carga->cantidad_bulto * $carga->bulto_costo;
+                        $item->distance    = $carga->cantidad_bulto;
+                        $item->save();
+                    }
+                    if ($carga->cantidad_pallet_normal) {
+                        $itemb = new TravelItem();
+                        $itemb->travelCertificateId = $newTravelCertificate->id;
+                        $itemb->type        = 'PALLET';
+                        $itemb->description = 'Pallets normales';
+                        $itemb->price = $carga->cantidad_pallet_normal * $carga->pallet_costo;
+                        $itemb->distance    = $carga->cantidad_pallet_normal;
+                        $itemb->save();
+                    }
+                    if ($carga->cantidad_pallet_grande) {
+                        $itemc = new TravelItem();
+                        $itemc->travelCertificateId = $newTravelCertificate->id;
+                        $itemc->type        = 'PALLET';
+                        $itemc->description = 'Pallets grandes';
+                        $itemc->price = $carga->cantidad_pallet_grande * (1.5 * $carga->pallet_costo);
+                        $itemc->distance    = $carga->cantidad_pallet_grande;
+                        $itemc->save();
+                    }
+
+                    $carga->travel_certificate_id = $newTravelCertificate->id;
+                    $carga->liquidado = true;
+                    $carga->save();
+                }
+
+                $newTravelCertificate->recalcTotals();
+                $newTravelCertificate->save();
+
+                $generados++;
+            }
+        }
+
+        return redirect()->route('stock')
+            ->with('success', "Se generaron {$generados} constancias correctamente.");
     }
 }
