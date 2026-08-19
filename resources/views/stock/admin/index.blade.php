@@ -143,7 +143,7 @@
                         @endforeach
                     </select>
 
-                    <label for="corte_fecha">Fecha de entrega:</label>
+                    <label for="corte_fecha">Fecha de recepcion:</label>
                     <input type="date" name="fecha" id="corte_fecha" class="form-control mb-2" required>
                 </div>
                 <div class="modal-footer">

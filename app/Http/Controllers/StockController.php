@@ -506,17 +506,16 @@ class StockController extends Controller
     }
     public function generartc(Request $request)
     {
-        $cargas = Carga::with('estado_envios')
+        $cargas = Carga::with('estadoActual')
         ->where('client_id', $request->client_id)
         ->where('driver_id', $request->driver_id)
         ->whereNull('travel_certificate_id')
         ->whereDate('fecha_de_recepcion','=', $request->fecha)
-        ->whereHas('estado_envios', function ($query) {
-            $query->where('estado_activo', true)
-                ->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
+        ->whereHas('estadoActual', function ($query) {
+            $query->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
         })
         ->get();
-
+        // dd('cliente :'. $request->client_id, 'driver'.$request->driver_id);
         if ($cargas->isEmpty()) {
             return redirect()->route('stock')->with('error', 'No hay cargas para generar la constancia.');
         }
@@ -531,9 +530,10 @@ class StockController extends Controller
         $newTravelCertificate->commission_type =  'porcentaje pactado';
         $newTravelCertificate->percent         =  $d->percent;
         
+        $newTravelCertificate->total = 0;
+        $newTravelCertificate->iva = 0;
         $newTravelCertificate->save();
-        $precio_bulto = Price::where('type','BULTO')->value('price');
-        $precio_pallet = Price::where('type','PALLET')->value('price');
+
  
         foreach($cargas as $carga)
         {
@@ -543,7 +543,7 @@ class StockController extends Controller
                 $item->travelCertificateId = $newTravelCertificate->id;
                 $item->type        = 'BULTO';
                 $item->description = 'Bultos';
-                $item->price       = $carga->cantidad_bulto * $precio_bulto;
+                $item->price       = $carga->cantidad_bulto *  $carga->bulto_costo;
                 $item->distance    = $carga->cantidad_bulto;
                 $item->save();
             }
@@ -553,7 +553,7 @@ class StockController extends Controller
                 $itemb->travelCertificateId = $newTravelCertificate->id;
                 $itemb->type        = 'PALLET';
                 $itemb->description = 'Pallets normales';
-                $itemb->price       = $carga->cantidad_pallet_normal * $precio_pallet;
+                $itemb->price       = $carga->cantidad_pallet_normal * $carga->pallet_costo;
                 $itemb->distance    = $carga->cantidad_pallet_normal;
                 $itemb->save();
             }
@@ -563,7 +563,7 @@ class StockController extends Controller
                 $itemc->travelCertificateId = $newTravelCertificate->id;
                 $itemc->type        = 'PALLET';
                 $itemc->description = 'Pallets grandes';
-                $itemc->price       = $carga->cantidad_pallet_grande * (1.5 * $precio_pallet);
+                $itemc->price       = $carga->cantidad_pallet_grande * (1.5 * $carga->pallet_costo);
                 $itemc->distance    = $carga->cantidad_pallet_grande;
                 $itemc->save();
             }
@@ -592,7 +592,7 @@ class StockController extends Controller
         ->where('client_id', $data['client_id'])
         ->whereNull('travel_certificate_id')
         ->whereNotNull('driver_id')
-        ->whereDate('fecha_de_recepcion', '<=', $data['fecha'])   // ← ¿recepción o entrega?
+        ->whereDate('fecha_de_recepcion', '<=', $data['fecha'])
         ->whereHas('estadoActual', function ($query) {
             $query->whereIn('estado', ['ENTREGADO', 'RECHAZADO']);
         })

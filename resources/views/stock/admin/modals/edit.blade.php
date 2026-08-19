@@ -45,9 +45,10 @@
 
                     <label for="driver{{ $carga->id }}">Chofer:</label>
                     <select id="driver{{ $carga->id }}" name="driver_id" class="form-control mb-2" required>
+                        <option value="">Seleccione una opcion</option>
                         @foreach ($drivers as $driver)
                             <option value="{{ $driver->id }}"
-                                {{ old('estado_de_envio', $carga->driver) == $driver ? 'selected' : '' }}>
+                                {{ old('driver_id', $carga->driver?->id) == $driver?->id ? 'selected' : '' }}>
                                 {{ ucfirst(strtolower($driver->name)) }}
                             </option>
                         @endforeach
