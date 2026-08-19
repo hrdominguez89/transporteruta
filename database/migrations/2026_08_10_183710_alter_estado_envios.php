@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Schema::table('estado_envios', function (Blueprint $table) {
-        //     $table->boolean('estado_actual')->default(false);
-        // });
+        Schema::table('estado_envios', function (Blueprint $table) {
+            $table->boolean('estado_actual')->default(false);
+        });
     }
 
     public function down(): void
