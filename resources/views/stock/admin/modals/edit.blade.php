@@ -43,12 +43,12 @@
                         @endforeach
                     </select>
 
-                    <label for="estado_de_envio{{ $carga->id }}">Estado de envio:</label>
-                    <select id="estado_de_envio{{ $carga->id }}" name="estado_de_envio" class="form-control mb-2" required>
-                        @foreach (['DEPOSITO',  'AVISADO','COORDINADO','TRANSITO','ENTREGADO', 'RECHAZADO'] as $estado)
-                            <option value="{{ $estado }}"
-                                {{ old('estado_de_envio', $carga->estado_de_envio) == $estado ? 'selected' : '' }}>
-                                {{ ucfirst(strtolower($estado)) }}
+                    <label for="driver{{ $carga->id }}">Chofer:</label>
+                    <select id="driver{{ $carga->id }}" name="driver_id" class="form-control mb-2" required>
+                        @foreach ($drivers as $driver)
+                            <option value="{{ $driver->id }}"
+                                {{ old('estado_de_envio', $carga->driver) == $driver ? 'selected' : '' }}>
+                                {{ ucfirst(strtolower($driver->name)) }}
                             </option>
                         @endforeach
                     </select>

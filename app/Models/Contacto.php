@@ -16,9 +16,14 @@ class Contacto extends Model
     'mail',
     'telefono',
     'comentario',
+    'cliente_tercero_id'
     ];
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id');
+    }
+    public function clienteTercero()
+    {
+        return $this->belongsTo(ClienteTercero::class, 'cliente_tercero_id');
     }
 }

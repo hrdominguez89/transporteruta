@@ -173,24 +173,28 @@ Route::group(['middleware' => 'auth'], function () {
 
         
         });
-    Route::post('/stock/cortedeoperaciones', [StockController::class, 'corteDeOperaciones'])->name('cortedeoperaciones');//crearContactoTercero
-    Route::post('/contacto-tercero/{tercero}', [StockController::class, 'crearContactoTercero'])->name('crearContactoTercero');
-    Route::post('/stock/contacto3roupd/{contacto}/{tercero}', [StockController::class, 'editarContactoTercero'])
-    ->name('editarContactoTercero');
-    Route::post('/stock/storecliente3ro', [StockController::class, 'storeClientTercero'])->name('storeClientTercero');
-    Route::post('/stock/editprice', [StockController::class, 'editpriceoncarga'])->name('editpriceoncarga');//edittypeofcarga
-    Route::post('/stock/edittype', [StockController::class, 'edittypeofcarga'])->name('edittypeofcarga');//
-    
-    Route::get('/stock', [StockController::class, 'index'])->name('stock');
-    Route::get('/stock/show/{id}', [StockController::class, 'show'])->name('showcarga');
-    Route::post('/stock/generate', [StockController::class, 'generate'])->name('generatestock');
-    Route::post('/stock/edit', [StockController::class, 'edit'])->name('editstock');
-    Route::get('/stock/delete/{id}', [StockController::class, 'delete'])->name('deletestock');
-    Route::post('/stock/update/price', [StockController::class, 'updateprice'])->name('updateprice');
-    Route::post('/stock/remitos', [StockController::class, 'storeRemito'])->name('storeRemito');
-    Route::delete('/stock/contacto3rodel/{contacto}/{tercero}', [StockController::class, 'eliminarContactoTercero'])->name('eliminarContactoTercero');
-    Route::get('/remito/{remito}/pdf', [StockController::class, 'remitoPdf'])
-    ->middleware('auth')->name('remitoPdf');
-    Route::post('/cliente-tercero/update', [StockController::class, 'updateClienteTercero'])->name('updateClientTercero');
-    Route::post('/remito/update', [StockController::class, 'updateRemito'])->name('updateRemito');
+        Route::post('/contacto-tercero/{tercero}', [StockController::class, 'crearContactoTercero'])->name('crearContactoTercero');
+        Route::post('/stock/contacto3roupd/{contacto}/{tercero}', [StockController::class, 'editarContactoTercero'])
+        ->name('editarContactoTercero');
+        Route::post('/stock/storecliente3ro', [StockController::class, 'storeClientTercero'])->name('storeClientTercero');
+        Route::post('/stock/editprice', [StockController::class, 'editpriceoncarga'])->name('editpriceoncarga');//edittypeofcarga
+        Route::post('/stock/edittype', [StockController::class, 'edittypeofcarga'])->name('edittypeofcarga');//
+        
+        Route::get('/stock', [StockController::class, 'index'])->name('stock');
+        Route::get('/stock/show/{id}', [StockController::class, 'show'])->name('showcarga');
+        Route::post('/stock/generate', [StockController::class, 'generate'])->name('generatestock');
+        Route::post('/stock/edit', [StockController::class, 'edit'])->name('editstock');
+        Route::delete('/stock/delete/{id}', [StockController::class, 'delete'])->name('deletestock');
+        Route::post('/stock/update/price', [StockController::class, 'updateprice'])->name('updateprice');
+        Route::post('/stock/remitos', [StockController::class, 'storeRemito'])->name('storeRemito');
+        Route::delete('/stock/contacto3rodel/{contacto}/{tercero}', [StockController::class, 'eliminarContactoTercero'])->name('eliminarContactoTercero');
+        Route::get('/remito/{remito}/pdf', [StockController::class, 'remitoPdf'])
+        ->middleware('auth')->name('remitoPdf');
+        Route::post('/cliente-tercero/update', [StockController::class, 'updateClienteTercero'])->name('updateClientTercero');
+        Route::post('/remito/update', [StockController::class, 'updateRemito'])->name('updateRemito');
+        Route::delete('/cliente-tercero', [StockController::class, 'deleteClienteTercero'])->name('clienteTercero.destroy');//editEstadoEnviostock
+        Route::post('/edit-estado', [StockController::class, 'editEstadoEnviostock'])->name('editEstadoEnviostock');//generartc
+        Route::post('/stock/cortedeoperaciones', [StockController::class, 'corteDeOperaciones'])->name('cortedeoperaciones');//crearContactoTercero
+        Route::post('/generar-tc', [StockController::class, 'generartc'])->name('generartc');//generatealltcoperaciones
+        Route::post('/generar-tc/all', [StockController::class, 'generartodastc'])->name('generatealltcoperaciones');
 });

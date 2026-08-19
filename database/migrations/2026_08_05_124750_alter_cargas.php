@@ -24,6 +24,7 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        DB::statement("ALTER TABLE cargas MODIFY estado_de_envio ENUM('DEPOSITO', 'TRANSITO', 'ENTREGADO', 'RECHAZADO', 'AVISADO') NOT NULL DEFAULT 'DEPOSITO'");
+        
     }
 };

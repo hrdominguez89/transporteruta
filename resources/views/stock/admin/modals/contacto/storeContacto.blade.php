@@ -1,8 +1,8 @@
-@if ($carga->cliente_tercero && ! $carga->cliente_tercero->contacto)
+@if ($carga->cliente_tercero)
 <div class="modal fade" id="storeContacto" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form action="{{ route('crearContactoTercero', $carga->cliente_tercero->id) }}" method="POST">
+      <form action="{{ route('crearContactoTercero', $carga->cliente_tercero?->id) }}" method="POST">
         @csrf
         <div class="modal-header bg-danger">
           <h5 class="modal-title">Agregar contacto</h5>
