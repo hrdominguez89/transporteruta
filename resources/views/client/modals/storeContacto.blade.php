@@ -17,7 +17,7 @@
             <label for="address">Departamento:</label>
             <select name="category" class="form-control mb-2">
               <option value="-">Seleccione un departamento</option>
-              <option value="Depto. Cobros y Pagos">Depto. Cobros y Pagos</option>
+              <option value="Cobros y Pagos">Depto. Cobros y Pagos</option>
               <option value="administracion">Administracion</option>
               <option value="proveedores">Proveedores</option>
               <option value="oficina">Oficina</option>

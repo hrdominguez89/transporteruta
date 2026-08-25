@@ -523,8 +523,8 @@ class StockController extends Controller
         $d = Driver::find($request->driver_id);
         
         $newTravelCertificate = new TravelCertificate;
-        $newTravelCertificate->date = $cargas[0]->fecha_de_recepcion;
-        $newTravelCertificate->destiny = $cargas[0]->destino;
+        $newTravelCertificate->date = $cargas[0]->fecha_de_entrega;
+        $newTravelCertificate->destiny = "";// $cargas[0]->destino;
         $newTravelCertificate->clientId = $request->client_id;
         $newTravelCertificate->driverId = $d->id;
         $newTravelCertificate->commission_type =  'porcentaje pactado';
@@ -539,37 +539,51 @@ class StockController extends Controller
         {
             if($carga->cantidad_bulto)
             {
+                $descripcion = 'Bultos :'.$carga->cantidad_bulto.' cliente :' .$carga->cliente_tercero->nombre;
                 $item = new TravelItem();
                 $item->travelCertificateId = $newTravelCertificate->id;
                 $item->type        = 'BULTO';
-                $item->description = 'Bultos';
+                $item->description = $descripcion;
                 $item->price       = $carga->cantidad_bulto *  $carga->bulto_costo;
                 $item->distance    = $carga->cantidad_bulto;
                 $item->save();
             }
             if($carga->cantidad_pallet_normal)
             {
+                $descripcion = 'Pallet estandar :' . $carga->cantidad_pallet_normal .' cliente :' . $carga->cliente_tercero->nombre;
                 $itemb = new TravelItem();
                 $itemb->travelCertificateId = $newTravelCertificate->id;
                 $itemb->type        = 'PALLET';
-                $itemb->description = 'Pallets normales';
+                $itemb->description = $descripcion;
                 $itemb->price       = $carga->cantidad_pallet_normal * $carga->pallet_costo;
                 $itemb->distance    = $carga->cantidad_pallet_normal;
                 $itemb->save();
             }
             if($carga->cantidad_pallet_grande)
             {
+                $descripcion = 'Pallet grandes :' . $carga->cantidad_pallet_grande .' cliente :' . $carga->cliente_tercero->nombre;
                 $itemc = new TravelItem();
                 $itemc->travelCertificateId = $newTravelCertificate->id;
                 $itemc->type        = 'PALLET';
-                $itemc->description = 'Pallets grandes';
+                $itemc->description = $descripcion;
                 $itemc->price       = $carga->cantidad_pallet_grande * (1.5 * $carga->pallet_costo);
                 $itemc->distance    = $carga->cantidad_pallet_grande;
                 $itemc->save();
             }
+            $itemd = new TravelItem();
+            $itemd->travelCertificateId = $newTravelCertificate->id;
+            $itemd->type          = 'REMITO';
+            $itemd->description   = 'Remito N° ' . $carga->remito?->numero;
+            $itemd->remito_number = $carga->remito?->numero;
+            $itemd->price         = 0;
+            $itemd->percent       = 0;
+            $itemd->save();
+
             $carga->travel_certificate_id = $newTravelCertificate->id;
             $carga->liquidado = true;
             $carga->save();
+
+            $newTravelCertificate->destiny .= $carga->destino;
         }
 
         $newTravelCertificate->recalcTotals();
@@ -617,8 +631,8 @@ class StockController extends Controller
 
                 $primera = $cargasDelGrupo->first();
                 $newTravelCertificate = new TravelCertificate;
-                $newTravelCertificate->date            = $primera->fecha_de_recepcion;
-                $newTravelCertificate->destiny         = $primera->destino;
+                $newTravelCertificate->date            = $primera?->fecha_de_entrega;
+                $newTravelCertificate->destiny         = '';
                 $newTravelCertificate->clientId        = $data['client_id'];
                 $newTravelCertificate->driverId        = $driverId;
                 $newTravelCertificate->commission_type = 'porcentaje pactado';
@@ -629,36 +643,49 @@ class StockController extends Controller
 
                 foreach ($cargasDelGrupo as $carga) {
                     if ($carga->cantidad_bulto) {
+                        $descripcion = 'Bultos :'.$carga->cantidad_bulto.' cliente :' .$carga->cliente_tercero->nombre;
                         $item = new TravelItem();
                         $item->travelCertificateId = $newTravelCertificate->id;
                         $item->type        = 'BULTO';
-                        $item->description = 'Bultos';
+                        $item->description = $descripcion;
                         $item->price  = $carga->cantidad_bulto * $carga->bulto_costo;
                         $item->distance    = $carga->cantidad_bulto;
                         $item->save();
                     }
                     if ($carga->cantidad_pallet_normal) {
+                        $descripcion = 'Pallet estandar :' . $carga->cantidad_pallet_normal .' cliente :' . $carga->cliente_tercero->nombre;
                         $itemb = new TravelItem();
                         $itemb->travelCertificateId = $newTravelCertificate->id;
                         $itemb->type        = 'PALLET';
-                        $itemb->description = 'Pallets normales';
+                        $itemb->description = $descripcion;
                         $itemb->price = $carga->cantidad_pallet_normal * $carga->pallet_costo;
                         $itemb->distance    = $carga->cantidad_pallet_normal;
                         $itemb->save();
                     }
                     if ($carga->cantidad_pallet_grande) {
+                        $descripcion = 'Pallet grandes :' . $carga->cantidad_pallet_grande .' cliente :' . $carga->cliente_tercero->nombre;
                         $itemc = new TravelItem();
                         $itemc->travelCertificateId = $newTravelCertificate->id;
                         $itemc->type        = 'PALLET';
-                        $itemc->description = 'Pallets grandes';
+                        $itemc->description = $descripcion;
                         $itemc->price = $carga->cantidad_pallet_grande * (1.5 * $carga->pallet_costo);
                         $itemc->distance    = $carga->cantidad_pallet_grande;
                         $itemc->save();
                     }
+                    $itemd = new TravelItem();
+                    $itemd->travelCertificateId = $newTravelCertificate->id;
+                    $itemd->type          = 'REMITO';
+                    $itemd->description   = 'Remito N° ' . $carga->remito?->numero;
+                    $itemd->remito_number = $carga->remito?->numero;
+                    $itemd->price         = 0;
+                    $itemd->percent       = 0;
+                    $itemd->save();
 
                     $carga->travel_certificate_id = $newTravelCertificate->id;
                     $carga->liquidado = true;
                     $carga->save();
+
+                    $newTravelCertificate->destiny .= $carga->destino;
                 }
 
                 $newTravelCertificate->recalcTotals();
