@@ -56,7 +56,7 @@
                 <th>Bultos</th>
                 <th>Pallets normales</th>
                 <th>Pallets grandes</th>   
-                <th>Precio</th>
+                <th>Costo por remito</th>
                 <th>Estado de envio</th>
                 <th>Acciones</th>
             </tr>
