@@ -23,12 +23,25 @@ class StockController extends Controller
     public function index(Request $request)
     {
        if (auth()->user()->isAdmin()) {
+             $flg = $request->boolean('all_cargas');
+
             $cargas = Carga::when($request->client_id, function ($query, $clientId) {
-                $query->where('client_id', $clientId);
-            })->get();
+                    $query->where('client_id', $clientId);
+                })
+                ->when($request->cliente_tercero_id, function ($query, $terceroId) {
+                    $query->where('cliente_tercero_id', $terceroId);
+                })
+                ->when(!$flg, function ($query) {
+                    $query->whereHas('estadoActual', function ($q) {
+                        $q->whereNotIn('estado', ['ENTREGADO', 'RECHAZADO']);
+                    });
+                })
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
             return view('stock.admin.index', [
                 'cargas'            => $cargas,
-                'clients'           => Client::all(),
+                'clients'           => Client::orderBy('created_at', 'DESC')->get(),
                 'clientes_terceros' => ClienteTercero::all(),
                 'prices'            => Price::all(),
                 'drivers'           => Driver::all() 

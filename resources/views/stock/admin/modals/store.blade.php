@@ -11,22 +11,25 @@
                 <form action="{{ Route('generatestock') }}" class="form-group" method="POST">
                     @csrf
                     <label for="client_id">Cliente:</label>
-                    <select name="client_id" class="form-control mb-2 @error('clientId') is-invalid @enderror" required>
+                    <select name="client_id"  id="client_id_2"  class="form-control mb-2 @error('clientId') is-invalid @enderror" required>
                         <option value="">---- Seleccione una opcion ----</option>
                         @foreach ($clients as $client)
                             <option value="{{ $client->id }}" {{ old('clientId') == $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
                         @endforeach
                     </select>
-                    <label for="cliente_tercero_id">Cliente tercero:</label>
-                    <select id="cliente_tercero_id" name="cliente_tercero_id" class="form-control mb-2">
-                        <option value="">---- Sin tercero ----</option>
-                        @foreach ($clientes_terceros as $tercero)
-                            <option value="{{ $tercero->id }}" data-client="{{ $tercero->client->id }}">
-                                {{ $tercero->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-               
+                        
+                    <div id="wrapper_tercero_2" style="display: none">
+                        <label for="cliente_tercero_id">Cliente tercero:</label>
+                        <select id="cliente_tercero_id_2" name="cliente_tercero_id" class="form-control mb-2">
+                            <option value="">---- Sin tercero ----</option>
+                            @foreach ($clientes_terceros as $tercero)
+                                <option value="{{ $tercero->id }}" data-client="{{ $tercero->client->id }}">
+                                    {{ $tercero->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                                
                     <label for="destino">Destino:</label>
                     <input id="destino" type="text" name="destino" class="form-control mb-2"
                     placeholder="Ingrese el destino..." >
@@ -48,20 +51,6 @@
                     <input id="cantidad_pallet_grande" type="number" name="cantidad_pallet_grande" class="form-control mb-2"
                     placeholder="Ingrese la cantidad de pallet..." >
                     
-                    {{-- <label for="cantidad">Cantidad:</label>
-                    <input id="cantidad" type="number" name="cantidad" class="form-control mb-2"
-                        placeholder="Ingrese la cantidad..." > --}}
-                        {{-- <label for="fecha_de_entrega">Fecha de entrega:</label>
-                        <input id="fecha_de_entrega" type="date" name="fecha_de_entrega" class="form-control mb-2"
-                            placeholder="Ingrese el telefono..." > --}}
-                    {{-- <label for="tipo">Tipo:</label> --}}
-                    {{-- <select id="tipo" name="tipo" class="form-control mb-2" required>
-                        <option value="">---- Seleccione una opcion ----</option>
-                        <option value="PALLET">Pallet</option>
-                        <option value="BULTO">Bulto</option>
-                    </select>
-                    <div id="tamaño_pallet_div" style="display: none">
-                    </div> --}}
                     <label for="driver">Chofer:<span class="text-danger"> *</span></label>
                     <select id="driver" name="driver_id" class="form-control">
                         <option>Seleccione una opcion</option>
@@ -80,40 +69,38 @@
     </div>
 </div>
 <script>
-  // --- toggle tamaño pallet (lo que ya tenías) ---
-    // document.getElementById("tipo").addEventListener("change", function () {
-    //     var type = this.value;
-    //     if (type === "PALLET") {
-    //         document.getElementById("tamaño_pallet_div").style.display = "block";
-    //         document.getElementById("tamaño_pallet").setAttribute("required", "required");
-    //     } else {
-    //         document.getElementById("tamaño_pallet_div").style.display = "none";
-    //         document.getElementById("tamaño_pallet").removeAttribute("required");
-    //     }
-    // });
-    window.addEventListener('load', function () {
-    var tercero = $('#cliente_tercero_id');
-    var htmlOriginal = tercero.html();
+window.addEventListener('load', function () {
+    const $client   = $('#client_id_2');
+    const $tercero  = $('#cliente_tercero_id_2');
+    const $wrapper  = $('#wrapper_tercero_2');
+    const htmlOrig  = $tercero.html(); 
 
-    function filtrar(clientId) {
-        var temp = $('<select>').html(htmlOriginal);
-        var nuevo = '<option value="">---- Sin tercero ----</option>';
+    $client.select2({ allowClear: true, width: '100%' });
+    $tercero.select2({ allowClear: true, width: '100%' });
 
-        temp.find('option').each(function () {
-            var op = $(this);
-            if (op.val() === '') return;
-            if (op.attr('data-client') === clientId) {
-                nuevo += '<option value="' + op.val() + '">' + op.text() + '</option>';
+    function filtrar(clienteId) {
+        if (!clienteId) {
+            $wrapper.hide();
+            return;
+        }
+
+        const $temp = $('<select>').html(htmlOrig);
+        let nuevo = '<option value="">---- Sin tercero ----</option>';
+
+        $temp.find('option[data-client]').each(function () {
+            if ($(this).data('client') == clienteId) {
+                nuevo += '<option value="' + $(this).val() + '">' + $(this).text().trim() + '</option>';
             }
         });
 
-        tercero.html(nuevo);
+        $tercero.html(nuevo).trigger('change');
+        $wrapper.show();
     }
 
-    $('select[name="client_id"]').on('change', function () {
+    $client.on('change', function () {
         filtrar($(this).val());
     });
 
-    filtrar($('select[name="client_id"]').val()); // filtrado inicial
+    filtrar($client.val());
 });
 </script>

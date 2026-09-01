@@ -22,35 +22,35 @@
                 <strong>{{ sprintf('%05d', $invoice->pointOfSale) }}</strong>
             </h3>
         </div>
-        @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
-            <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-danger col-1 mr-1" data-toggle="modal" data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
-                <button class="btn btn-sm btn-primary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
-                <form action="{{ Route('invoicePdf', $invoice->id) }}" method="GET" target="_blank">
-                    <button type="submit" class="btn btn-sm btn-info">Generar PDF</button>
-                    <label for="constancias" class="form-check-label">Constancias</label>
-                    <input type="checkbox" name="constancias" value="1">
-                </form>
-            </div>
-        @elseif($invoice->invoiced == 'NO')
-            <div class="col-12 text-right mb-2">
-                <button class="btn btn-sm btn-primary col-1" data-toggle="modal"
-                    data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
-                <button class="btn btn-sm btn-primary col-1" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}" >Editar</button>
-            </div>
-        @endif
-        @if ($invoice->paid == 'SI')
-            <div class="col-12 text-right mb-2">
-              <form action="{{ Route('invoicePdf', $invoice->id) }}" method="GET" target="_blank">
-                <button type="submit" class="btn btn-sm btn-info">Generar PDF</button>
-                <label for="constancias" class="form-check-label">Incluir constancias</label>
-                <input type="checkbox" name="constancias" value="1">
+       @if ($invoice->invoiced == 'SI' and $invoice->paid == 'NO')
+        <div class="col-12 d-flex justify-content-end align-items-center mb-2">
+            <button class="btn btn-sm btn-danger mr-2" data-toggle="modal" data-target="#cancelModal{{ $invoice->id }}">Anular Factura</button>
+            <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}">Editar</button>
+            <form action="{{ Route('invoicePdf', $invoice->id) }}" method="GET" target="_blank" class="d-inline-flex align-items-center mb-0">
+                <button type="submit" class="btn btn-sm btn-info mr-2">Generar PDF</button>
+                <label for="constancias{{ $invoice->id }}" class="form-check-label mb-0 mr-1">Constancias</label>
+                <input type="checkbox" id="constancias{{ $invoice->id }}" name="constancias" value="1">
             </form>
-            </div>
-            <div class="col-12 mb-2">
-                <h5 class="text-danger">La factura se marcó como pagada y se descontó el saldo de la cuenta corriente</h5>
-            </div>
-        @endif
+        </div>
+    @elseif($invoice->invoiced == 'NO')
+        <div class="col-12 d-flex justify-content-end align-items-center mb-2">
+            <button class="btn btn-sm btn-primary mr-2" data-toggle="modal" data-target="#invoicedModal{{ $invoice->id }}">Facturar</button>
+            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editReferenceModal{{ $invoice->id }}">Editar</button>
+        </div>
+    @endif
+
+    @if ($invoice->paid == 'SI')
+        <div class="col-12 d-flex justify-content-end align-items-center mb-2">
+            <form action="{{ Route('invoicePdf', $invoice->id) }}" method="GET" target="_blank" class="d-inline-flex align-items-center mb-0">
+                <button type="submit" class="btn btn-sm btn-info mr-2">Generar PDF</button>
+                <label for="constancias{{ $invoice->id }}" class="form-check-label mb-0 mr-1">Incluir constancias</label>
+                <input type="checkbox" id="constancias{{ $invoice->id }}" name="constancias" value="1">
+            </form>
+        </div>
+        <div class="col-12 mb-2">
+            <h5 class="text-danger">La factura se marcó como pagada y se descontó el saldo de la cuenta corriente</h5>
+        </div>
+    @endif
     </div>
     @include('invoice.modals.invoiced')
     @include('invoice.modals.cancel')
