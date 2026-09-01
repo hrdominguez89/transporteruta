@@ -7,7 +7,7 @@
     <div class="row">
         <a href="{{ Route('clients') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col-9">Cliente: <strong>{{ $client->name }}</strong></h1>
-        <button class="btn btn-sm btn-success col-2" data-toggle="modal" data-target="#updateModal{{ $client->id }}">Actualizar
+        <button class="btn btn-sm btn-success col-1" data-toggle="modal" data-target="#updateModal{{ $client->id }}">Actualizar
             Cliente</button>
         @include('client.modals.update')
     </div>

@@ -43,7 +43,7 @@
             </select>
         </div>
         @else
-            <div class="col-12 text-right mb-2">
+            <div class="col-3 text-right mb-2">
                 <a href="{{ Route('travelCertificatePdf', $travelCertificate->id) }}" class="btn btn-sm btn-info col-4">
                     Generar PDF
                 </a>

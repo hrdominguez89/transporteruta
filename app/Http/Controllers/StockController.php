@@ -596,7 +596,7 @@ class StockController extends Controller
             $carga->liquidado = true;
             $carga->save();
 
-            $newTravelCertificate->destiny .= $carga->destino;
+            $newTravelCertificate->destiny .= "-".$carga->destino;
         }
 
         $newTravelCertificate->recalcTotals();
@@ -698,7 +698,7 @@ class StockController extends Controller
                     $carga->liquidado = true;
                     $carga->save();
 
-                    $newTravelCertificate->destiny .= $carga->destino;
+                    $newTravelCertificate->destiny .= "-".$carga->destino;
                 }
 
                 $newTravelCertificate->recalcTotals();

@@ -3,10 +3,12 @@
 @section('title', 'Clientes')
 
 @section('content_header')
-    <div class="row">
-        <h1 class="col-7">Clientes</h1>
-        <a href="{{ Route('generateDebtorsPdf') }}" class="btn btn-sm btn-info col-2 mr-2">Reporte Deudores</a>
-        <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Cliente</button>
+    <div class="row align-items-center">
+        <h1 class="col mb-0">Clientes</h1>
+        <div class="col-auto d-flex">
+            <a href="{{ Route('generateDebtorsPdf') }}" class="btn btn-sm btn-info mr-2">Reporte Deudores</a>
+            <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#storeModal">Agregar Cliente</button>
+        </div>
     </div>
     @include('client.modals.store')
 @stop
