@@ -3,39 +3,58 @@
 @section('title', 'Stock')
 
 @section('content_header')
-    <div class="row">
-        <h1 class="col-5">Cargas</h1>
-        <button class="btn btn-sm btn-danger col-1" data-toggle="modal" data-target="#storeModal">Agregar carga</button>
-        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#pricemodal">Precios</button>
-        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#buscarcortedeoperaciones">Corte de op.</button>
-        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#storeClienteTercero">Agregar 3ro</button>
-        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#editClienteTercero">Editar 3ro</button>
-        <button class="btn btn-sm btn-danger col-1 ml-2" data-toggle="modal" data-target="#deleteClienteTercero">Eliminar 3ro</button>
-        <form action="{{ route('stock') }}" method="GET" class="form-inline mb-3">
-            <select name="client_id" id="client_id" class="form-control mr-2" required style="width: 2  50px;">
-                <option value="">Todos los clientes</option>
-                @foreach ($clients as $client)
-                    <option value="{{ $client->id }}"
-                        {{ request('client_id') == $client->id ? 'selected' : '' }}>
-                        {{ $client->name }}
+   <div class="row mb-2">
+    <h1 class="col-12">Cargas</h1>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12 d-flex flex-wrap" style="gap: .5rem;">
+        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#storeModal">Agregar carga</button>
+        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#storeClienteTercero">Agregar 3ro</button>
+        <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pricemodal">Editar precios</button>
+        <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editClienteTercero">Editar 3ro</button>
+        <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#buscarcortedeoperaciones">Corte de operaciones</button>
+        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteClienteTercero">Eliminar 3ro</button>
+
+        <form action="{{ route('stock') }}" method="GET" class="d-inline">
+            <input type="hidden" name="all_cargas" value="1">
+            <button type="submit" class="btn btn-sm btn-info">Ver todas las cargas</button>
+        </form>
+        <form action="{{ route('stock') }}" method="GET" class="d-inline">
+            <input type="hidden" name="all_cargas" value="0">
+            <button type="submit" class="btn btn-sm btn-info">Ver actuales cargas</button>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <form action="{{ route('stock') }}" method="GET" class="form-inline col-12">
+        <label for="client_id" class="mr-2">Clientes:</label>
+        <select name="client_id" id="client_id" class="form-control mr-2" required>
+            <option value="">Todos los clientes</option>
+            @foreach ($clients as $client)
+                <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                    {{ $client->name }}
+                </option>
+            @endforeach
+        </select>
+
+        <div id="wrapper_tercero" class="form-inline mr-2" style="display: none;">
+            <label for="filtro_tercero" class="mr-2">Cliente (3ro):</label>
+            <select id="filtro_tercero" name="cliente_tercero_id" class="form-control">
+                <option value="">---- Todos ----</option>
+                @foreach ($clientes_terceros as $tercero)
+                    <option value="{{ $tercero->id }}" data-client="{{ $tercero->client_id }}"
+                        {{ request('cliente_tercero_id') == $tercero->id ? 'selected' : '' }}>
+                        {{ $tercero->nombre }}
                     </option>
                 @endforeach
             </select>
-            <div id="wrapper_tercero" style="display: none;">
-                <select id="filtro_tercero" name="cliente_tercero_id" class="   ">
-                    <option value="">---- Todos ----</option>
-                    @foreach ($clientes_terceros as $tercero)
-                        <option value="{{ $tercero->id }}" data-client="{{ $tercero->client_id }}"
-                            {{ request('cliente_tercero_id') == $tercero->id ? 'selected' : '' }}>
-                            {{ $tercero->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+        </div>
 
-            <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
-        </form>
-    </div>
+        <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+    </form>
+</div>
     @include('stock.admin.modals.clienteTercero.editClienteTercero')   
     @include('stock.admin.modals.store')
     @include('stock.admin.modals.price.price')
@@ -169,7 +188,9 @@
     });
 
     $('#client_id').select2({
-        placeholder: 'Buscá...',
+        allowClear: true
+    });
+     $('#filtro_tercero').select2({
         allowClear: true
     });
 
@@ -198,42 +219,42 @@
         $('#cortedeoperaciones').modal('show');
     @endisset
     $('#del_cliente').on('change', function () {
-    const clienteId = $(this).val();
-    const $wrapper = $('#del_wrapper_tercero');
-    const $tercero = $('#del_tercero');
+        const clienteId = $(this).val();
+        const $wrapper = $('#del_wrapper_tercero');
+        const $tercero = $('#del_tercero');
 
-    $('#del_info_tercero').hide();
-    $('#del_cliente_tercero_id').val('');
-    $('#del_btn_eliminar').prop('disabled', true);
-    $tercero.val('');
-
-    if (!clienteId) {
-        $wrapper.hide();
-        return;
-    }
-
-    $wrapper.show();
-    $tercero.find('option[data-client]').each(function () {
-        $(this).prop('hidden', $(this).data('client') != clienteId);
-    });
-});
-
-$('#del_tercero').on('change', function () {
-    const $opt = $(this).find('option:selected');
-    const id = $(this).val();
-
-    if (!id) {
         $('#del_info_tercero').hide();
         $('#del_cliente_tercero_id').val('');
         $('#del_btn_eliminar').prop('disabled', true);
-        return;
-    }
+        $tercero.val('');
 
-    $('#del_nombre_tercero').text($opt.data('nombre'));
-    $('#del_info_tercero').show();
-    $('#del_cliente_tercero_id').val(id);
-    $('#del_btn_eliminar').prop('disabled', false);
-});
+        if (!clienteId) {
+            $wrapper.hide();
+            return;
+        }
+
+        $wrapper.show();
+        $tercero.find('option[data-client]').each(function () {
+            $(this).prop('hidden', $(this).data('client') != clienteId);
+        });
+    });
+
+    $('#del_tercero').on('change', function () {
+        const $opt = $(this).find('option:selected');
+        const id = $(this).val();
+
+        if (!id) {
+            $('#del_info_tercero').hide();
+            $('#del_cliente_tercero_id').val('');
+            $('#del_btn_eliminar').prop('disabled', true);
+            return;
+        }
+
+        $('#del_nombre_tercero').text($opt.data('nombre'));
+        $('#del_info_tercero').show();
+        $('#del_cliente_tercero_id').val(id);
+        $('#del_btn_eliminar').prop('disabled', false);
+    });
 });
 </script>
     
