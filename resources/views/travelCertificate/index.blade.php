@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-9">Constancias de Viaje</h1>
-        <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Constancia</button>
+        <button class="btn btn-sm btn-danger col-1" data-toggle="modal" data-target="#storeModal">Agregar Constancia</button>
     </div>
     @include('travelCertificate.modals.store')
 @stop

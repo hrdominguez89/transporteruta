@@ -26,7 +26,7 @@
         $porcentaje = 0;
         foreach ($cargas as $carga)
         {
-            $valor_declarado += $carga->remito->valor_declarado;
+            $valor_declarado += $carga->remito?->valor_declarado;
             $valor_viajes += $carga->precio;
         }
         $porcentaje = (100 * $valor_viajes) / $valor_declarado;

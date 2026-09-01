@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <h1 class="col-9">Choferes</h1>
-        <button class="btn btn-sm btn-danger col-2" data-toggle="modal" data-target="#storeModal">Agregar Chofer</button>
+        <button class="btn btn-sm btn-danger col-1" data-toggle="modal" data-target="#storeModal">Agregar Chofer</button>
     </div>
     @include('driver.modals.store')
     @if($errors->any())
