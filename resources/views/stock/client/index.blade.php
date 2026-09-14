@@ -89,9 +89,9 @@
                     <td>{{ $carga->cantidad_bulto }}</td>
                     <td>{{ $carga->cantidad_pallet_normal }}</td>
                     <td>{{ $carga->cantidad_pallet_grande }}</td>
+                    <td>{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} </td>
                     <td>{{ $carga->precio }}</td>
                     <td>{{ $carga->remito?->valor_declarado }}</td>
-                    <td>{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} </td>
                     <td>
                         <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
