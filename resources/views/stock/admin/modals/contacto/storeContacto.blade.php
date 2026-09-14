@@ -15,17 +15,25 @@
           <input type="text" name="name" class="form-control mb-2" placeholder="Ingrese el nombre..." required>
           <label>Apellido:</label>
           <input type="text" name="lastname" class="form-control mb-2" placeholder="Ingrese el apellido...">
-          <label>Departamento:</label>
-          <select name="category" class="form-control mb-2">
-            <option value="-">Seleccione un departamento</option>
-            <option value="Cobros y Pagos">Depto. Cobros y Pagos</option>
-            <option value="administracion">Administracion</option>
-            <option value="proveedores">Proveedores</option>
-            <option value="oficina">Oficina</option>
-            <option value="contable">Area contable</option>
-            <option value="compras">Compras</option>
-            <option value="ventas">Ventas</option>
-          </select>
+          <label class="d-block">Departamento:</label>
+          <div class="mb-2">
+              @foreach([
+                  'Cobros y Pagos' => 'Depto. Cobros y Pagos',
+                  'administracion'  => 'Administracion',
+                  'proveedores'     => 'Proveedores',
+                  'oficina'         => 'Oficina',
+                  'contable'        => 'Area contable',
+                  'compras'         => 'Compras',
+                  'ventas'          => 'Ventas',
+              ] as $value => $label)
+                  <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="category[]"
+                            value="{{ $value }}"
+                            id="store-tercero-cat-{{ Str::slug($value) }}">
+                      <label class="form-check-label" for="store-tercero-cat-{{ Str::slug($value) }}">{{ $label }}</label>
+                  </div>
+              @endforeach
+          </div>
           <label>Mail:</label>
           <input type="text" name="mail" class="form-control mb-2" placeholder="Ingrese un mail...">
           <label>Telefono:</label>

@@ -155,7 +155,12 @@
         <tbody>
             <tr>
                 <td>{{ $carga->cliente_tercero?->contacto?->nombre }}</td>
-                <td>{{ $carga->cliente_tercero?->contacto?->categoria }}</td>
+                <td><strong>
+                        @foreach($carga->cliente_tercero?->contacto?->categorias as $c)
+                            {{ $c->categoria }} /
+                        @endforeach
+                </strong>
+                </td>
                 <td>{{ $carga->cliente_tercero?->contacto?->mail }}</td>
                 <td>{{ $carga->cliente_tercero?->contacto?->telefono }}</td>
                 <td>{{ $carga->cliente_tercero?->contacto?->comentario }}</td>

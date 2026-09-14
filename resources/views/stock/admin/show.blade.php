@@ -199,7 +199,13 @@
             @forelse ($carga->cliente_tercero?->contactos ?? [] as $contacto)
                 <tr>
                     <td>{{ $contacto->nombre }}</td>
-                    <td>{{ $contacto->categoria }}</td>
+                    <td>
+                        <strong>
+                            @foreach($contacto->categorias as $c)
+                                {{ $c->categoria }} /
+                            @endforeach
+                        </strong>
+                    </td>
                     <td>{{ $contacto->mail }}</td>
                     <td>{{ $contacto->telefono }}</td>
                     <td>{{ $contacto->comentario }}</td>

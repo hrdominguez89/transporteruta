@@ -115,7 +115,7 @@ class ClientController extends Controller
         $client->save();
         return redirect(route('showClient', $client->id));
     }
-    public function generateContact(Request $request,$id)
+    public function generateContact(Request $request, $id)
     {
         $contacto = new Contacto();
         $contacto->client_id = $id;
@@ -124,11 +124,15 @@ class ClientController extends Controller
         $contacto->telefono = $request->telefono ?? "-";
         $contacto->mail = $request->mail ?? "-";
         $contacto->comentario = $request->comentarios ?? "-";
-        $contacto->categoria = $request->category ?? "-";
         $contacto->save();
+
+        foreach ($request->category ?? [] as $categoria) {
+            $contacto->categorias()->create(['categoria' => $categoria]);
+        }
+
         return redirect(route('showClient', $id));
     }
-      public function editContact(Request $request,$id_contacto,$id_cliente)
+    public function editContact(Request $request, $id_contacto, $id_cliente)
     {
         $contacto = Contacto::findOrFail($id_contacto);
         $contacto->nombre = $request->name ?? "-";
@@ -136,8 +140,13 @@ class ClientController extends Controller
         $contacto->telefono = $request->telefono ?? "-";
         $contacto->mail = $request->mail ?? "-";
         $contacto->comentario = $request->comentarios ?? "-";
-        $contacto->categoria = $request->category ?? "-";
         $contacto->save();
+
+        $contacto->categorias()->delete();
+        foreach ($request->category ?? [] as $categoria) {
+            $contacto->categorias()->create(['categoria' => $categoria]);
+        }
+
         return redirect(route('showClient', $id_cliente));
     }
     public function deleteContacto(Request $request,$id_contacto,$id_cliente)

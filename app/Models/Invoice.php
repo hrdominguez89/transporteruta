@@ -38,6 +38,7 @@ class Invoice extends Model
         'balance',
         'clientId',
         'receiptId',
+        'dpto_notificacion'
     ];
     public function debits()
     {

@@ -16,6 +16,7 @@ use App\Models\TravelItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Sabberworm\CSS\Rule\Rule;
 
 class StockController extends Controller
 {
@@ -377,7 +378,7 @@ class StockController extends Controller
     }
     public function crearContactoTercero(Request $request, $terceroId)
     {
-         if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             abort(403);
         }
 
@@ -385,39 +386,48 @@ class StockController extends Controller
         if ($tercero->contactos()->count() >= 10) {
             return redirect()->back()->withErrors(['contacto' => 'Este cliente ya alcanzó el máximo de 10 contactos.']);
         }
-       
+
+
         $data = $request->validate([
             'name'        => 'required|string|max:255',
             'lastname'    => 'nullable|string|max:255',
-            'category'    => 'nullable|string|max:255',
+            'category'    => 'nullable|array',
+            'category.*'  => 'string',
             'mail'        => 'nullable|email|max:255',
             'telefono'    => 'nullable|string|max:50',
             'comentarios' => 'nullable|string|max:500',
         ]);
 
-        Contacto::create([
-            'nombre'     => $data['name'],
-            'apellido'   => $data['lastname'] ?? null,
-            'categoria'  => $data['category'] !== '-' ? $data['category'] : null,
-            'mail'       => $data['mail'] ?? null,
-            'telefono'   => $data['telefono'] ?? null,
-            'comentario' => $data['comentarios'] ?? null,
-            'cliente_tercero_id' => $tercero->id
+        $contacto = Contacto::create([
+            'nombre'             => $data['name'],
+            'apellido'           => $data['lastname'] ?? null,
+            'mail'               => $data['mail'] ?? null,
+            'telefono'           => $data['telefono'] ?? null,
+            'comentario'         => $data['comentarios'] ?? null,
+            'cliente_tercero_id' => $tercero->id,
         ]);
+
+        foreach ($data['category'] ?? [] as $categoria) {
+            $contacto->categorias()->create(['categoria' => $categoria]);
+        }
 
         return redirect()->back()->with('success', 'Contacto creado correctamente.');
     }
     public function editarContactoTercero(Request $request, $contactoId, $terceroId)
     {
-         if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             abort(403);
         }
+
         $contacto = Contacto::findOrFail($contactoId);
+
+        
 
         $data = $request->validate([
             'name'        => 'required|string|max:255',
             'lastname'    => 'nullable|string|max:255',
-            'category'    => 'nullable|string|max:255',
+            'category'    => 'nullable|array',
+            'category.*'  => 'string',
             'mail'        => 'nullable|email|max:255',
             'telefono'    => 'nullable|string|max:50',
             'comentarios' => 'nullable|string|max:500',
@@ -426,11 +436,15 @@ class StockController extends Controller
         $contacto->update([
             'nombre'     => $data['name'],
             'apellido'   => $data['lastname'] ?? null,
-            'categoria'  => $data['category'] !== '-' ? $data['category'] : null,
             'mail'       => $data['mail'] ?? null,
             'telefono'   => $data['telefono'] ?? null,
             'comentario' => $data['comentarios'] ?? null,
         ]);
+
+        $contacto->categorias()->delete();
+        foreach ($data['category'] ?? [] as $categoria) {
+            $contacto->categorias()->create(['categoria' => $categoria]);
+        }
 
         return redirect()->back()->with('success', 'Contacto actualizado correctamente.');
     }

@@ -104,6 +104,7 @@
                 <th>Cliente 3ro</th>
                 <th>Destino</th>
                 <th>Remito</th>
+                <th>Costo por remito</th>
                 <th>Nombre</th>
                 <th>Fecha de recepcion</th>
                 <th>Bultos</th>
@@ -128,6 +129,7 @@
                     <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
                     <td>{{ $carga->destino }}</td>
                     <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
+                    <td>{{ $carga->precio }}</td>
                     <td>{{ $carga->nombre }}</td>
                     <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
                     <td>{{ $carga->cantidad_bulto }}</td>
