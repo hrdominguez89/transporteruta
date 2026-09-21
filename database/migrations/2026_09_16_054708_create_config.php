@@ -9,6 +9,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('config')) {
+            return;
+        }
         Schema::create('config', function (Blueprint $table) {
             $table->id();
             $table->boolean('automatico')->default(false);

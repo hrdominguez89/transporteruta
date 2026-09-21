@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
 
-         if (Schema::hasTable('contacto_categorias')) {
-        return;
-    }
+        if (Schema::hasTable('contacto_categorias')) {
+            return;
+        }
 
         Schema::create('contacto_categorias', function (Blueprint $table) {
             $table->id();
