@@ -24,7 +24,6 @@ class PaymentNotificationsService
             {
                 $sinNotificar[] = $invoices[0]->client->name;
             }
-            break;
         }
     }
 
