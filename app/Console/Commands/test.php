@@ -37,30 +37,48 @@ class test extends Command
                     ->subject('Facturas vencidas y en plazo')
                     ->from(env('MAIL_FROM_ADDRESS'));
         });
+        $this->testeodedireccionesdemail();
         return Command::SUCCESS;
     }
     public function testeodedireccionesdemail()
-    {
-        $facturasPorCliente = Invoice::with([
-                'client',
-                'credits',      // notas de crédito (FK invoiceId)
-                'debits',       // notas de débito  (FK invoiceId)
-                'misrecibos',   // pagos parciales: pivot->total = monto aplicado a la factura
-            ])
-            ->whereHas('client', fn($q) => $q->whereNotNull('paymentTermDays'))
-            ->where('paid', 'NO')
-            ->whereBetween(
-                DB::raw("DATE_ADD(date, INTERVAL (SELECT paymentTermDays FROM clients WHERE clients.id = invoices.clientId) DAY)"),
-                [Carbon::now()->subYears(10), Carbon::now()->addDays(6)]
-            )
-            ->get()
-            ->groupBy('clientId');
+{
+    $facturasPorCliente = Invoice::with([
+            'client',
+            'credits',      // notas de crédito (FK invoiceId)
+            'debits',       // notas de débito  (FK invoiceId)
+            'misrecibos',   // pagos parciales: pivot->total = monto aplicado a la factura
+        ])
+        ->whereHas('client', fn($q) => $q->whereNotNull('paymentTermDays'))
+        ->where('paid', 'NO')
+        ->whereBetween(
+            DB::raw("DATE_ADD(date, INTERVAL (SELECT paymentTermDays FROM clients WHERE clients.id = invoices.clientId) DAY)"),
+            [Carbon::now()->subYears(10), Carbon::now()->addDays(6)]
+        )
+        ->get()
+        ->groupBy('clientId');
 
-        foreach ($facturasPorCliente as $clienteId => $invoices) {
-            $destinatario = Contacto::where('client_id',$invoices[0]->client->id)
-                                ->where('categoria','Cobros y Pagos')->first();
-            echo( $destinatario->mail."\n");
+    foreach ($facturasPorCliente as $clienteId => $invoices) {
+        $cliente = $invoices[0]->client->name;
+
+        $destinatarios = Contacto::where('client_id', $invoices[0]->client->id)
+                            ->whereNotNull('mail')
+                            ->with('categorias')
+                            ->get();
+
+        $invoicesDpto = $invoices->groupBy('dpto_notificacion');
+
+        foreach ($invoicesDpto as $dpto => $invoicesDelDpto) {
+            $mailsDelDpto = $destinatarios->filter(
+                fn($contacto) => $contacto->categorias->contains('categoria', $dpto)
+            )->pluck('mail')->all();
+
+            $facturas = $invoicesDelDpto->pluck('id')->implode(', ');
+
+            echo "Cliente: {$cliente} | Dpto: {$dpto}\n";
+            echo "  Facturas: {$facturas}\n";
+            echo "  Mails: " . (empty($mailsDelDpto) ? '(ninguno)' : implode(', ', $mailsDelDpto)) . "\n\n";
         }
     }
+}
 
 }

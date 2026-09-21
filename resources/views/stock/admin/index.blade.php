@@ -111,6 +111,7 @@
                 <th>Pallets normales</th>
                 <th>Pallets grandes</th>
                 <th>Estado de envio</th>
+                <th>Comentarios</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -136,6 +137,7 @@
                     <td>{{ $carga->cantidad_pallet_normal }}</td>
                     <td>{{ $carga->cantidad_pallet_grande }}</td>
                     <td>{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} </td>
+                    <td>{{ $carga->comentarios ?? '-' }}</td>
                     <td>
                         <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
                         <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deletecarga{{ $carga->id }}">Eliminar</button>               

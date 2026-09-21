@@ -15,17 +15,18 @@
             <label for="lastname">Apellido:</label>
             <input type="text" name="lastname" class="form-control mb-2" placeholder="Ingrese el apellido..." value="{{ $contacto->apellido ?? "" }}" >
            @php $selected = $contacto->categorias->pluck('categoria')->toArray(); @endphp
-<label class="d-block">Departamento:</label>
-<div class="mb-2">
-    @foreach([
-        'Cobros y Pagos' => 'Depto. Cobros y Pagos',
-        'administracion'  => 'Administracion',
-        'proveedores'     => 'Proveedores',
-        'oficina'         => 'Oficina',
-        'contable'        => 'Area contable',
-        'compras'         => 'Compras',
-        'ventas'          => 'Ventas',
-    ] as $value => $label)
+          <label class="d-block">Departamento:</label>
+          <div class="mb-2">
+              @foreach([
+                  'Cobros y Pagos' => 'Depto. Cobros y Pagos',
+                  'administracion'  => 'Administracion',
+                  'proveedores'     => 'Proveedores',
+                  'oficina'         => 'Oficina',
+                  'contable'        => 'Area contable',
+                  'compras'         => 'Compras',
+                  'ventas'          => 'Ventas',
+                  'comercio exterior' => 'Comercio exterior'
+              ] as $value => $label)
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="category[]"
                    value="{{ $value }}"

@@ -17,13 +17,14 @@
             <label class="d-block">Departamento:</label>
             <div class="mb-2">
                 @foreach([
-                    'Cobros y Pagos' => 'Depto. Cobros y Pagos',
-                    'administracion'  => 'Administracion',
-                    'proveedores'     => 'Proveedores',
-                    'oficina'         => 'Oficina',
-                    'contable'        => 'Area contable',
-                    'compras'         => 'Compras',
-                    'ventas'          => 'Ventas',
+                    'Cobros y Pagos'    => 'Depto. Cobros y Pagos',
+                    'administracion'    => 'Administracion',
+                    'proveedores'       => 'Proveedores',
+                    'oficina'           => 'Oficina',
+                    'contable'          => 'Area contable',
+                    'compras'           => 'Compras',
+                    'ventas'            => 'Ventas',
+                    'comercio exterior' => 'Comercio exterior'
                 ] as $value => $label)
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="category[]"

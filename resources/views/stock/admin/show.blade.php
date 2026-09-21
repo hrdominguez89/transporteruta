@@ -58,6 +58,7 @@
                 <th>Pallets grandes</th>   
                 <th>Costo por remito</th>
                 <th>Estado de envio</th>
+                <th>Vehiculo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -72,6 +73,7 @@
                     <span class="badge badge-success p-2" style="font-size: 1rem;">{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} 
                     <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#updateEstadoEnvioModal{{ $carga->id }}">Actualizar</button>
                 </td>
+                <th>{{ $carga->vehicle->name ?? 'no asignado'  }}</th>
                 <td>
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -105,6 +107,7 @@
                 <th>Constancia</th>
                 <th>Liquidado</th>
                 <th>Motivo</th>
+                <th>Comentario</th>
             </tr>
         </thead>
         <tbody>
@@ -117,6 +120,7 @@
                 <td>{{ $carga->travel_certificate?->id ?? '---' }}</td>
                 <td>{{ $carga->liquidado ? 'Sí' : 'No' }}</td>
                 <td>{{ $carga->motivo ?? '---'}}</td>
+                <td>{{ $carga->comentarios ?? '---'}}</td>
             </tr>
         </tbody>
     </table>

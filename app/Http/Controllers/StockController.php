@@ -13,6 +13,7 @@ use App\Models\Price;
 use App\Models\Remito;
 use App\Models\TravelCertificate;
 use App\Models\TravelItem;
+use App\Models\Vehicle;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +46,8 @@ class StockController extends Controller
                 'clients'           => Client::orderBy('created_at', 'DESC')->get(),
                 'clientes_terceros' => ClienteTercero::all(),
                 'prices'            => Price::all(),
-                'drivers'           => Driver::all() 
+                'drivers'           => Driver::all(),
+                'vehicles'          => Vehicle::all()
             ]);
         }
 
@@ -92,7 +94,8 @@ class StockController extends Controller
                 'estado_envio' => $estado_envio,
                 'drivers' => Driver::all(),
                 'precio_bulto' =>Price::where('type','BULTO')->value('price'),
-                'precio_pallet' =>Price::where('type','PALLET')->value('price')
+                'precio_pallet' =>Price::where('type','PALLET')->value('price'),
+                'vehicles'          => Vehicle::all()
                 ]);
         }
         return view('stock.client.show', [
@@ -116,7 +119,9 @@ class StockController extends Controller
             'destino'            => 'nullable|string|max:255',
             'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
             'cliente_tercero_id' => ['nullable'],
-            'driver_id' =>'nullable'
+            'driver_id' =>'nullable',
+            'vehicle_id'     => 'nullable',
+            'comentarios' =>'nullable|string'
         ]);
 
         $data['client_id'] = auth()->user()->isAdmin()
@@ -165,9 +170,10 @@ class StockController extends Controller
             'motivo'                => 'nullable|string|max:255',
             'liquidado'             => 'nullable|boolean',
             'travel_certificate_id' => 'nullable',
-            'driver_id'             => 'nullable'
+            'driver_id'             => 'nullable',
+            'vehicle_id' =>'nullable',
+            'comentarios' =>'nullable|string'
         ]);
-        
         $carga->update($data);
         
         return redirect()->route('showcarga', $carga->id)
@@ -364,7 +370,7 @@ class StockController extends Controller
         $data = $request->validate([
             'client_id'     => 'required|exists:clients,id',
             'nombre'          => 'required|string',
-            'numero_cliente'  => 'nullable|string',
+            'numero_cliente'  => 'string|unique:clients,numero_cliente',
             'cuit'            => 'nullable|string',
             'condicion_venta' => 'nullable|string',
             'codigo_postal'   => 'nullable|string',

@@ -25,7 +25,7 @@
   <input type="text" name="nombre" class="form-control mb-2" placeholder="Ingrese el nombre..." required>
 
   <label for="numero_cliente">N° de cliente:</label>
-  <input type="text" name="numero_cliente" class="form-control mb-2" placeholder="Ingrese el N° de cliente...">
+  <input type="text" name="numero_cliente" class="form-control mb-2" placeholder="Ingrese el N° de cliente..." required>
 
   <label for="cuit">CUIT:</label>
   <input type="text" name="cuit" class="form-control mb-2" placeholder="Ingrese el CUIT...">

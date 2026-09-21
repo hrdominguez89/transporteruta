@@ -56,6 +56,7 @@
                             'contable'        => 'Area contable',
                             'compras'         => 'Compras',
                             'ventas'          => 'Ventas',
+                            'comercio exterior' => 'Comercio exterior'
                         ] as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach

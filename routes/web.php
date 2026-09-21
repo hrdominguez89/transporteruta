@@ -22,7 +22,7 @@ use App\Http\Controllers\UserController;
 Auth::routes(['register' => false]);
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::group(['middleware' => 'role:ADMIN'], function () {
+    Route::group(['middleware' => 'role:ADMIN,SUPER_ADMIN'], function () {
     //Dashboard
         Route::get('', [DashboardController::class, 'dashboard'])->name('dashboard');
 
@@ -35,7 +35,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('crear/cliente/contacto/{id}', [ClientController::class, 'generateContact'])->name('crearContacto');
         Route::post('editar/cliente/contacto/{id_contacto}/{id_cliente}', [ClientController::class, 'editContact'])->name('editarContacto');//editarContacto
         Route::delete('eliminar/cliente/contacto/{id_contacto}/{id_cliente}', [ClientController::class, 'deleteContacto'])->name('deleteContacto');//editarContacto
-
+        Route::post('/config/notificaciones', [ClientController::class, 'updateConfig'])->name('config.notificaciones.update');
+        Route::post('/notificar-ahora', [ClientController::class, 'notificarAhora'])->name('notificar.ahora');
+    
         // Driver
         Route::get('choferes', [DriverController::class, 'drivers'])->name('drivers');
         Route::post('guardar/chofer', [DriverController::class, 'store'])->name('storeDriver');

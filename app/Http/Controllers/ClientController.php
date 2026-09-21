@@ -10,16 +10,18 @@ use App\Models\Credit;
 use App\Models\Debit;
 use App\Models\Payments;
 use App\Models\Receipt;
+use App\Models\Config;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Artisan;
 
 class ClientController extends Controller
 {
     public function clients()
     {
         $clients = Client::all();
-        return view('client.index', ['clients' => $clients]);
+        $config = Config::first();
+        return view('client.index', ['clients' => $clients,'config'=>$config]);
     }
 
     public function store(StoreClientRequest $request)
@@ -153,5 +155,23 @@ class ClientController extends Controller
     {
         Contacto::findOrFail($id_contacto)->delete();
         return redirect(route('showClient', $id_cliente));
+    }
+    public function updateConfig(Request $request)
+    {
+       
+        $data = $request->validate([
+            'automatico' => 'nullable|boolean',
+            'dia'        => 'required|integer|between:0,6',
+            'hora'       => 'required|date_format:H:i',
+            ]);
+        $data['automatico'] = $request->boolean('automatico');
+        Config::updateOrCreate(['id' => 1], $data);
+        return redirect(route('clients'));
+    }
+    public function  notificarAhora(Request $request)
+    {
+        Artisan::call('command:notificarpagosatrasados');
+
+        return redirect(route('clients'))->with('success', 'Notificaciones enviadas.');
     }
 }

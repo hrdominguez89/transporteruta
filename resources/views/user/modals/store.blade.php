@@ -18,6 +18,7 @@
             <input type="password" name="password" class="form-control mb-2" placeholder="Ingrese la contraseña..." required>
             <label for="role">Rol:</label>
             <select name="role" id="role" class="form-control mb-2" required>
+                <option value="SUPER_ADMIN" >Administrador superior</option>
                 <option value="ADMIN" >Administrador</option>
                 <option value="CLIENT">Cliente</option>
             </select>

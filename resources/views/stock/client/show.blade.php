@@ -38,6 +38,7 @@
                 <th>Pallets grandes</th>   
                 <th>Costo por remito</th>
                 <th>Estado de envio</th>
+                <th>Comentarios</th>
             </tr>
         </thead>
         <tbody>
@@ -48,6 +49,7 @@
                 <td>{{ $carga->cantidad_pallet_grande }}</td>
                 <td>${{ $carga->precio }}</td>
                 <td>{{ $carga->estado_de_envio }}</td>
+                <td>{{ $carga->comentarios ?? '-' }}</td>
             </tr>
         </tbody>
     </table>

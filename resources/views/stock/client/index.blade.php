@@ -35,7 +35,7 @@
     <table class="table table-sm table-bordered text-center data-table" style="width: 20%">
         <thead class="bg-danger">
             <tr>
-                <th>Total de valor decladarado</th>
+                <th>Total de valor declarado</th>
                 <th>Total de viajes</th>
                 <th>Porcentaje</th>
             </tr>
@@ -71,7 +71,6 @@
         <tbody>
             @foreach ($cargas as $carga)
                 @include('stock.admin.modals.delete')
-
                 @if ($carga->estadoActual?->estado =='ENTREGADO')
                     <tr class="bg-success">
                 @elseif($carga->estadoActual?->estado =='RECHAZADO')
@@ -79,20 +78,18 @@
                 @else
                     <tr>
                 @endif   
-                    <td>{{ $carga->client->name }}</td>
-                    <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
-                    <td>{{ $carga->destino }}</td>
-                    <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
-                    <td>{{ $carga->precio }}</td>
-                    <td>{{ $carga->nombre }}</td>
-                    <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
-                    <td>{{ $carga->cantidad_bulto }}</td>
-                    <td>{{ $carga->cantidad_pallet_normal }}</td>
-                    <td>{{ $carga->cantidad_pallet_grande }}</td>
-                    <td>{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} </td>
-                    <td>
-                        <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
-                    </td>
+                        <td>{{ $carga->client->name }}</td>
+                        <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
+                        <td>{{ $carga->destino }}</td>
+                        <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
+                        <td>{{ $carga->precio }}</td>
+                        <td>{{ $carga->nombre }}</td>
+                        <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
+                        <td>{{ $carga->cantidad_bulto }}</td>
+                        <td>{{ $carga->cantidad_pallet_normal }}</td>
+                        <td>{{ $carga->cantidad_pallet_grande }}</td>
+                        <td>{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} </td>
+                        <td> <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a> </td>
                 </tr>
             @endforeach
         </tbody>
