@@ -370,7 +370,7 @@ class StockController extends Controller
         $data = $request->validate([
             'client_id'     => 'required|exists:clients,id',
             'nombre'          => 'required|string',
-            'numero_cliente'  => 'string|unique:clients,numero_cliente',
+            'numero_cliente'  => 'string|unique:cliente_terceros,numero_cliente',
             'cuit'            => 'nullable|string',
             'condicion_venta' => 'nullable|string',
             'codigo_postal'   => 'nullable|string',
