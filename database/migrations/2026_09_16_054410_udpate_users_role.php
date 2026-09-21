@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE users MODIFY role VARCHAR(25) NOT NULL");
+        DB::statement("ALTER TABLE users MODIFY role VARCHAR(255) NOT NULL");
     }
 
     public function down(): void
