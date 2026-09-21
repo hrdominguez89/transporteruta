@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -41,37 +42,68 @@ class PaymentNotificationsService
         )->count();
 
         $cliente = $invoices[0]->client->name;
-        $destinatarios = Contacto::where('client_id', $invoices[0]->client->id)
-                            ->where('categoria', 'Cobros y Pagos')
-                            ->whereNotNull('mail')
-                            ->get();
-        if ($destinatarios->isNotEmpty())
-        {
-            $TC = new TravelCertificateController();
-            Mail::send('emails.notificacion', compact('invoices', 'cantidadVencidas', 'cantidadEnPlazo'), function ($message) 
-            use ($destinatarios,$cliente,$invoices,$TC) {
-                foreach($invoices as $invoice)
-                {
-                    $tcPDFs=[];
-                    $invoiceHtml = view('invoice.pdf', ['invoice'=>$invoice])->render();
-                    foreach($invoice->travelCertificates as $travelCertificate)
-                    {
-                        $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id,true);
-                    }
-                    $allHtml = $invoiceHtml  . implode( $tcPDFs);
-                    $pdf = Pdf::loadHTML($allHtml);
-                    $message->attachData($pdf->output(), 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
-                }
 
-                    $mails = $destinatarios->pluck('mail')->all();
-                    $message->to($mails)
-                        ->cc([env('MAIL_CC_ONE'),env('MAIL_CC_TWO'),env('MAIL_CC_THREE')])
-                        ->subject('Facturas vencidas y en plazo - ' . $cliente )
-                        ->from(env('MAIL_FROM_ADDRESS'));
-            });
-            return true;
+        // destinatarios cargados UNA sola vez, con sus categorias
+        $destinatarios = Contacto::where('client_id', $invoices[0]->client->id)
+                            ->whereNotNull('mail')
+                            ->with('categorias')
+                            ->get();
+
+        if ($destinatarios->isEmpty()) {
+            return false;
         }
-        return false;
+
+        $TC = new TravelCertificateController();
+        $invoicesDpto = $invoices->groupBy('dpto_notificacion');
+
+        foreach ($invoicesDpto as $dpto => $invoicesDelDpto) {
+            $mailsDelDpto = $destinatarios->filter(
+                fn($contacto) => $contacto->categorias->contains('categoria', $dpto)
+            )->pluck('mail')->all();
+
+            if (empty($mailsDelDpto)) {
+                continue;
+            }
+            try 
+            {
+                Mail::send(
+                    'emails.notificacion',
+                    [
+                    'invoices' => $invoicesDelDpto,
+                    'cantidadVencidas' => $cantidadVencidas,
+                    'cantidadEnPlazo' => $cantidadEnPlazo,
+                    ],
+                        function ($message) use ($mailsDelDpto, $cliente, $invoicesDelDpto, $TC) {
+                            foreach ($invoicesDelDpto as $invoice) {
+                                $tcPDFs = [];
+                                $invoiceHtml = view('invoice.pdf', ['invoice' => $invoice])->render();
+                                foreach ($invoice->travelCertificates as $travelCertificate) {
+                                    $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id, true);
+                                    }
+                                    $allHtml = $invoiceHtml . implode($tcPDFs);
+                                    $pdf = Pdf::loadHTML($allHtml);
+                                    $message->attachData($pdf->output(), 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
+                                    }
+                                    $out = $pdf->output();
+                                    $message->attachData($out, 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
+                                    
+                                    $message->to($mailsDelDpto)
+                                    ->cc([env('MAIL_CC_ONE'), env('MAIL_CC_TWO'), env('MAIL_CC_THREE')])
+                                    ->subject('Facturas vencidas y en plazo - ' . $cliente)
+                                    ->from(env('MAIL_FROM_ADDRESS'));
+                                    }
+                );
+            }
+            catch(Exception $e)
+            {
+                \Illuminate\Support\Facades\Log::error(
+                    "Fallo el envío de mail -> cliente: {$cliente}/ dpto: {$dpto} - {$e->getMessage()}"
+                );
+                continue;
+            }
+        }
+
+        return true;
     }
   
     public function validarNotificacion()

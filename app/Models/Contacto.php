@@ -26,4 +26,8 @@ class Contacto extends Model
     {
         return $this->belongsTo(ClienteTercero::class, 'cliente_tercero_id');
     }
+    public function categorias()
+    {
+        return $this->hasMany(ContactoCategoria::class);
+    }
 }

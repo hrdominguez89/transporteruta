@@ -13,9 +13,11 @@ use App\Models\Price;
 use App\Models\Remito;
 use App\Models\TravelCertificate;
 use App\Models\TravelItem;
+use App\Models\Vehicle;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Sabberworm\CSS\Rule\Rule;
 
 class StockController extends Controller
 {
@@ -44,7 +46,8 @@ class StockController extends Controller
                 'clients'           => Client::orderBy('created_at', 'DESC')->get(),
                 'clientes_terceros' => ClienteTercero::all(),
                 'prices'            => Price::all(),
-                'drivers'           => Driver::all() 
+                'drivers'           => Driver::all(),
+                'vehicles'          => Vehicle::all()
             ]);
         }
 
@@ -91,7 +94,8 @@ class StockController extends Controller
                 'estado_envio' => $estado_envio,
                 'drivers' => Driver::all(),
                 'precio_bulto' =>Price::where('type','BULTO')->value('price'),
-                'precio_pallet' =>Price::where('type','PALLET')->value('price')
+                'precio_pallet' =>Price::where('type','PALLET')->value('price'),
+                'vehicles'          => Vehicle::all()
                 ]);
         }
         return view('stock.client.show', [
@@ -115,7 +119,9 @@ class StockController extends Controller
             'destino'            => 'nullable|string|max:255',
             'client_id'          => auth()->user()->isAdmin() ? 'required|exists:clients,id' : 'nullable',
             'cliente_tercero_id' => ['nullable'],
-            'driver_id' =>'nullable'
+            'driver_id' =>'nullable',
+            'vehicle_id'     => 'nullable',
+            'comentarios' =>'nullable|string'
         ]);
 
         $data['client_id'] = auth()->user()->isAdmin()
@@ -164,9 +170,10 @@ class StockController extends Controller
             'motivo'                => 'nullable|string|max:255',
             'liquidado'             => 'nullable|boolean',
             'travel_certificate_id' => 'nullable',
-            'driver_id'             => 'nullable'
+            'driver_id'             => 'nullable',
+            'vehicle_id' =>'nullable',
+            'comentarios' =>'nullable|string'
         ]);
-        
         $carga->update($data);
         
         return redirect()->route('showcarga', $carga->id)
@@ -363,7 +370,7 @@ class StockController extends Controller
         $data = $request->validate([
             'client_id'     => 'required|exists:clients,id',
             'nombre'          => 'required|string',
-            'numero_cliente'  => 'nullable|string',
+            'numero_cliente'  => 'string|unique:clients,numero_cliente',
             'cuit'            => 'nullable|string',
             'condicion_venta' => 'nullable|string',
             'codigo_postal'   => 'nullable|string',
@@ -377,7 +384,7 @@ class StockController extends Controller
     }
     public function crearContactoTercero(Request $request, $terceroId)
     {
-         if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             abort(403);
         }
 
@@ -385,39 +392,48 @@ class StockController extends Controller
         if ($tercero->contactos()->count() >= 10) {
             return redirect()->back()->withErrors(['contacto' => 'Este cliente ya alcanzó el máximo de 10 contactos.']);
         }
-       
+
+
         $data = $request->validate([
             'name'        => 'required|string|max:255',
             'lastname'    => 'nullable|string|max:255',
-            'category'    => 'nullable|string|max:255',
+            'category'    => 'nullable|array',
+            'category.*'  => 'string',
             'mail'        => 'nullable|email|max:255',
             'telefono'    => 'nullable|string|max:50',
             'comentarios' => 'nullable|string|max:500',
         ]);
 
-        Contacto::create([
-            'nombre'     => $data['name'],
-            'apellido'   => $data['lastname'] ?? null,
-            'categoria'  => $data['category'] !== '-' ? $data['category'] : null,
-            'mail'       => $data['mail'] ?? null,
-            'telefono'   => $data['telefono'] ?? null,
-            'comentario' => $data['comentarios'] ?? null,
-            'cliente_tercero_id' => $tercero->id
+        $contacto = Contacto::create([
+            'nombre'             => $data['name'],
+            'apellido'           => $data['lastname'] ?? null,
+            'mail'               => $data['mail'] ?? null,
+            'telefono'           => $data['telefono'] ?? null,
+            'comentario'         => $data['comentarios'] ?? null,
+            'cliente_tercero_id' => $tercero->id,
         ]);
+
+        foreach ($data['category'] ?? [] as $categoria) {
+            $contacto->categorias()->create(['categoria' => $categoria]);
+        }
 
         return redirect()->back()->with('success', 'Contacto creado correctamente.');
     }
     public function editarContactoTercero(Request $request, $contactoId, $terceroId)
     {
-         if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             abort(403);
         }
+
         $contacto = Contacto::findOrFail($contactoId);
+
+        
 
         $data = $request->validate([
             'name'        => 'required|string|max:255',
             'lastname'    => 'nullable|string|max:255',
-            'category'    => 'nullable|string|max:255',
+            'category'    => 'nullable|array',
+            'category.*'  => 'string',
             'mail'        => 'nullable|email|max:255',
             'telefono'    => 'nullable|string|max:50',
             'comentarios' => 'nullable|string|max:500',
@@ -426,11 +442,15 @@ class StockController extends Controller
         $contacto->update([
             'nombre'     => $data['name'],
             'apellido'   => $data['lastname'] ?? null,
-            'categoria'  => $data['category'] !== '-' ? $data['category'] : null,
             'mail'       => $data['mail'] ?? null,
             'telefono'   => $data['telefono'] ?? null,
             'comentario' => $data['comentarios'] ?? null,
         ]);
+
+        $contacto->categorias()->delete();
+        foreach ($data['category'] ?? [] as $categoria) {
+            $contacto->categorias()->create(['categoria' => $categoria]);
+        }
 
         return redirect()->back()->with('success', 'Contacto actualizado correctamente.');
     }

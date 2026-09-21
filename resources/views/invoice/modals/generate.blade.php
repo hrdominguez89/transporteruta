@@ -39,11 +39,28 @@
                     </select>
 
                     <label>Referencia:</label>
-                    <input type="text" name="reference"class="form-control mb-2">
+                    <input type="text" name="reference" class="form-control mb-2">
 
                     @error('clientId')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+
+                    <label class="form-control mb-2">Dpto. a notificar:</label>
+                    <select class="form-control mb-2" name="dpto_notificacion">
+                        <option value="">Seleccione un dpto</option>
+                        @foreach([
+                            'Cobros y Pagos'  => 'Depto. Cobros y Pagos',
+                            'administracion'  => 'Administracion',
+                            'proveedores'     => 'Proveedores',
+                            'oficina'         => 'Oficina',
+                            'contable'        => 'Area contable',
+                            'compras'         => 'Compras',
+                            'ventas'          => 'Ventas',
+                            'comercio exterior' => 'Comercio exterior'
+                        ] as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
             </div>
             <div class="modal-footer">
                 <!-- Keep both BS4 and BS5 attributes for compatibility -->

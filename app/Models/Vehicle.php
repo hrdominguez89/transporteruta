@@ -50,4 +50,8 @@ class Vehicle extends Model
         
         return $viajes->sum(fn($viaje) => $viaje->totalpeajes);
     }
+    public function cargas()
+    {
+        return $this->hasMany(Carga::class, 'vehicle_id');
+    }
 }

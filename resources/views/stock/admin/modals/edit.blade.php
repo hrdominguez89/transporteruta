@@ -53,6 +53,17 @@
                             </option>
                         @endforeach
                     </select>
+
+                    <label for="vehicle{{ $carga->id }}">Vehiculo:</label>
+                    <select id="vehicle{{ $carga->id }}" name="vehicle_id" class="form-control mb-2" required>
+                        <option value="">Seleccione una opcion</option>
+                        @foreach ($vehicles as $vehicle)
+                            <option value="{{ $vehicle->id }}"
+                                {{ old('vehicle_id', $carga->vehicle?->id) == $vehicle?->id ? 'selected' : '' }}>
+                                {{ ucfirst(strtolower($vehicle->name)) }}
+                            </option>
+                        @endforeach
+                    </select>
                                         
                     <div id="motivoDiv{{ $carga->id }}" style="display: none">
                         <label for="motivo{{ $carga->id }}">Motivo de rechazo:</label>
@@ -76,6 +87,10 @@
                             </option>
                         @endforeach
                     </select>
+
+                    <label for="comentarios" >Comentarios:</label>
+                    <input type="text" name="comentarios" class="form-control mb-2" value="{{ $carga->comentarios }}">
+                    
                 </div>
 
                 <div class="modal-footer">

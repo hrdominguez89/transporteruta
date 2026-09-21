@@ -27,6 +27,7 @@
 
           <label for="role{{ $user->id }}">Rol:</label>
           <select id="role{{ $user->id }}" name="role" class="form-control mb-2" required>
+            <option value="SUPER_ADMIN" {{ old('role', $user->role) == 'SUPER_ADMIN'  ? 'selected' : '' }} >Administrador superior</option>
             <option value="ADMIN"  {{ old('role', $user->role) == 'ADMIN'  ? 'selected' : '' }}>Administrador</option>
             <option value="CLIENT" {{ old('role', $user->role) == 'CLIENT' ? 'selected' : '' }}>Cliente</option>
           </select>

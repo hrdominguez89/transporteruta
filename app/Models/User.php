@@ -14,6 +14,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
     public const ROLE_ADMIN  = 'ADMIN';
+    public const ROLE_SUPER_ADMIN  = 'SUPER_ADMIN';
     public const ROLE_CLIENT = 'CLIENT';
     /**
      * The attributes that are mass assignable.
@@ -50,10 +51,13 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Client::class, 'client_id');
     }
-
+    public function isSuperAdmin():bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role === self::ROLE_ADMIN || $this->role === self::ROLE_SUPER_ADMIN;
     }
 
     public function isClient(): bool

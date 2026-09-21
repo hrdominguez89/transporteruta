@@ -97,6 +97,7 @@
                 <th>Balance</th>
                 <th>Facturado</th>
                 <th>Total (Con IVA)</th>
+                <th>Notificar</th>
             </tr>
         </thead>
         <tbody>
@@ -118,6 +119,8 @@
                 <td>{{ $invoice->invoiced }}</td>
 
                 <td>$&nbsp;{{ number_format($invoice->getTotalWithIvaAttribute(), 2, ',', '.')  }}</td>
+                <td>{{ $invoice->dpto_notificacion ?? '-' }} </td>
+                
             </tr>
         </tbody>
     </table>
@@ -366,6 +369,23 @@
 
                             <label for="date">Fecha:</label>
                             <input type="date" name="date" class="form-control mb-2" value = "{{ $invoice->date ? $invoice->date->format('Y-m-d') : "" }}">
+                            
+                            <label class="form-control mb-2">Dpto. a notificar:</label>
+                            <select class="form-control mb-2" name="dpto_notificacion">
+                                <option value="">Seleccione un dpto</option>
+                                @foreach([
+                                    'Cobros y Pagos'  => 'Depto. Cobros y Pagos',
+                                    'administracion'  => 'Administracion',
+                                    'proveedores'     => 'Proveedores',
+                                    'oficina'         => 'Oficina',
+                                    'contable'        => 'Area contable',
+                                    'compras'         => 'Compras',
+                                    'ventas'          => 'Ventas',
+                                    'comercio exterior' => 'Comercio exterior'
+                                ] as $value => $label)
+                                <option value="{{ $value }}" @selected(old('dpto_notificacion', $invoice->dpto_notificacion) === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
 
                         <button type="submit" class="btn btn-sm btn-primary mt-3">Editar</button>
                     </form>

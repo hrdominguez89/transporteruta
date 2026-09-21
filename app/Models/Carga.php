@@ -39,6 +39,8 @@ class Carga extends Model
         'estado_envio_id',// PROXIMAMENTE SE USARA?
         'pallet_costo',
         'bulto_costo',
+        'vehicle_id',
+        'comentarios'
     ];
 
     protected $casts = [
@@ -80,5 +82,9 @@ class Carga extends Model
     public function estadoActual()
     {
         return $this->hasOne(EstadoEnvio::class)->where('estado_actual', true);
+    }
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 }

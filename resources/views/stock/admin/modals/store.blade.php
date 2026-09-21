@@ -53,12 +53,23 @@
                     
                     <label for="driver">Chofer:<span class="text-danger"> *</span></label>
                     <select id="driver" name="driver_id" class="form-control">
-                        <option>Seleccione una opcion</option>
+                        <option value="">Seleccione una opcion</option>
                         @foreach ($drivers as $d )
                             <option value="{{ $d->id }}">{{ $d->name }}</option>
                         @endforeach
-                        
                     </select>
+
+                    <label for="vehicle">Vehiculo:</label>
+                    <select name="vehicle_id" class="form-control">
+                        <option value="">Seleccione un vehiculo</option>
+                        @foreach ($vehicles as $vehicle )
+                            <option value="{{ $vehicle->id }}">{{ $vehicle }}</option>
+                        @endforeach
+                    </select>
+
+                    <label for="comentarios" >Comentarios:</label>
+                    <input type="text" name="comentarios" class="form-control mb-2" >
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
