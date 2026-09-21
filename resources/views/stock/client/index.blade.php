@@ -80,7 +80,6 @@
                 @else
                     <tr>
                 @endif   
-<<<<<<< HEAD
                     <td>{{ $carga->client->name }}</td>
                     <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
                     <td>{{ $carga->destino }}</td>
@@ -96,20 +95,6 @@
                     <td>
                         <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a>
                     </td>
-=======
-                        <td>{{ $carga->client->name }}</td>
-                        <td>{{ $carga->cliente_tercero?->nombre ?? 'no asignado' }}</td>
-                        <td>{{ $carga->destino }}</td>
-                        <td>{{ $carga->remito?->numero ?? 'no asignado' }}</td>
-                        <td>{{ $carga->precio }}</td>
-                        <td>{{ $carga->nombre }}</td>
-                        <td>{{ $carga->fecha_de_recepcion?->format('d/m/Y') ?? '-' }}</td>
-                        <td>{{ $carga->cantidad_bulto }}</td>
-                        <td>{{ $carga->cantidad_pallet_normal }}</td>
-                        <td>{{ $carga->cantidad_pallet_grande }}</td>
-                        <td>{{ $carga->estadoActual?->estado }}</span>  {{ $carga->estadoActual?->horario }} </td>
-                        <td> <a href="{{ Route('showcarga', $carga->id) }}" class="btn btn-sm btn-info">Ver</a> </td>
->>>>>>> test
                 </tr>
             @endforeach
         </tbody>
