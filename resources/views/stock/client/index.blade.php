@@ -58,7 +58,6 @@
                 <th>Cliente 3ro</th>
                 <th>Destino</th>
                 <th>Remito</th>
-                <th>Costo por remito</th>
                 <th>Nombre</th>
                 <th>Fecha de recepcion</th>
                 <th>Bultos</th>

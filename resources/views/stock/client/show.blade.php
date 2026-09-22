@@ -158,7 +158,7 @@
             <tr>
                 <td>{{ $carga->cliente_tercero?->contacto?->nombre }}</td>
                 <td><strong>
-                        @foreach($carga->cliente_tercero?->contacto?->categorias as $c)
+                       @foreach($carga->cliente_tercero?->contacto?->categorias ?? [] as $c)
                             {{ $c->categoria }} /
                         @endforeach
                 </strong>
