@@ -35,7 +35,7 @@ class InvoiceController extends Controller
         $invoice = Invoice::find($id);
         $invoice->reference = $request->reference;
         $invoice->date = $request->date;
-        $invoice->dpto_notificacion = $request->dpto_notificacion ?: 'Cobros y pagos';
+        $invoice->dpto_notificacion = $request->dpto_notificacion ?? 'Cobros y Pagos';
         $invoice->save();
         return redirect(route('showInvoice', $invoice->id));
     }   
@@ -59,7 +59,7 @@ class InvoiceController extends Controller
 
             $invoice->receiptId    = 0;
             $invoice->reference = $request->reference;
-            $invoice->dpto_notificacion = $request->dpto_notificacion;
+            $invoice->dpto_notificacion = $request->dpto_notificacion ?? 'Cobros y Pagos';
             $invoice->save();
 
             return redirect()->route('showInvoice', $invoice->id);

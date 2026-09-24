@@ -557,12 +557,13 @@ class StockController extends Controller
         
         $newTravelCertificate = new TravelCertificate;
         $newTravelCertificate->date = $cargas[0]->fecha_de_entrega;
-        $newTravelCertificate->destiny = "";// $cargas[0]->destino;
+        $newTravelCertificate->destiny = "";
         $newTravelCertificate->clientId = $request->client_id;
         $newTravelCertificate->driverId = $d->id;
         $newTravelCertificate->commission_type =  'porcentaje pactado';
         $newTravelCertificate->percent         =  $d->percent;
-        
+        $newTravelCertificate->vehicleId = $cargas[0]->vehicle?->id;
+        // asginar el vehiculo de la primer carga a la TC 
         $newTravelCertificate->total = 0;
         $newTravelCertificate->iva = 0;
         $newTravelCertificate->save();
@@ -672,6 +673,7 @@ class StockController extends Controller
                 $newTravelCertificate->percent         = $driver?->percent;
                 $newTravelCertificate->total         = 0;
                 $newTravelCertificate->iva         = 0;
+                $newTravelCertificate->vehicleId = $cargasDelGrupo[0]->vehicle?->id;
                 $newTravelCertificate->save();
 
                 foreach ($cargasDelGrupo as $carga) {
