@@ -34,8 +34,7 @@
                     <input id="destino" type="text" name="destino" class="form-control mb-2"
                     placeholder="Ingrese el destino..." >
                     <label for="fecha_de_recepcion">Fecha de recepcion:</label>
-                    <input id="fecha_de_recepcion" type="date" name="fecha_de_recepcion" class="form-control mb-2"
-                    placeholder="Ingrese la ciudad..." >
+                    <input id="fecha_de_recepcion" type="date" name="fecha_de_recepcion" class="form-control mb-2">
                     <label for="nombre">Mercaderia:<span class="text-danger"> *</span></label>
                     <input id="nombre" type="text" name="nombre" class="form-control mb-2"
                     placeholder="Ingrese el nombre..." required>
@@ -86,8 +85,10 @@ window.addEventListener('load', function () {
     const $wrapper  = $('#wrapper_tercero_2');
     const htmlOrig  = $tercero.html(); 
 
-    $client.select2({ allowClear: true, width: '100%' });
-    $tercero.select2({ allowClear: true, width: '100%' });
+    const $modal = $('#storeModal');
+
+    $client.select2({ allowClear: true, width: '100%', dropdownParent: $modal });
+    $tercero.select2({ allowClear: true, width: '100%', dropdownParent: $modal });
 
     function filtrar(clienteId) {
         if (!clienteId) {
