@@ -158,12 +158,11 @@ class ClientController extends Controller
     }
     public function updateConfig(Request $request)
     {
-       
         $data = $request->validate([
-            'automatico' => 'nullable|boolean',
-            'dia'        => 'required|integer|between:0,6',
-            'hora'       => 'required|date_format:H:i',
-            ]);
+            'dia'  => 'required|integer|between:0,6',
+            'hora' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+        ]);
+
         $data['automatico'] = $request->boolean('automatico');
         Config::updateOrCreate(['id' => 1], $data);
         return redirect(route('clients'));

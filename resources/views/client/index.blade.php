@@ -38,20 +38,20 @@
                                 <div class="mb-3">
                                     <label for="dia" class="form-label">Día de la semana</label>
                                     <select class="form-select" id="dia" name="dia">
-                                        <option value="0" @selected($config->dia == 0)>Domingo</option>
-                                        <option value="1" @selected($config->dia == 1)>Lunes</option>
-                                        <option value="2" @selected($config->dia == 2)>Martes</option>
-                                        <option value="3" @selected($config->dia == 3)>Miércoles</option>
-                                        <option value="4" @selected($config->dia == 4)>Jueves</option>
-                                        <option value="5" @selected($config->dia == 5)>Viernes</option>
-                                        <option value="6" @selected($config->dia == 6)>Sábado</option>
+                                        <option value=0 @selected($config->dia == 0)>Domingo</option>
+                                        <option value=1 @selected($config->dia == 1)>Lunes</option>
+                                        <option value=2 @selected($config->dia == 2)>Martes</option>
+                                        <option value=3 @selected($config->dia == 3)>Miércoles</option>
+                                        <option value=4 @selected($config->dia == 4)>Jueves</option>
+                                        <option value=5 @selected($config->dia == 5)>Viernes</option>
+                                        <option value=6 @selected($config->dia == 6)>Sábado</option>
                                     </select>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="hora" class="form-label">Hora</label>
                                     <input type="time" class="form-control" id="hora" name="hora"
-                                        value="{{ $config->hora }}">
+                                        value="{{ substr($config->hora, 0, 5) }}">
                                 </div>
                             </div>
 
@@ -74,6 +74,16 @@
 @stop
 
 @section('content')
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <table class="table table-sm table-bordered text-center data-table">
         <thead class="bg-danger">
             <tr>
