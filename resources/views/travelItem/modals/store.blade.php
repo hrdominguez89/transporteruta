@@ -31,6 +31,7 @@
             <option value="ESTADIA">Estadia</option>
             <option value="NOCHE">Noche</option>
             <option value="DEMORA">Demora</option>
+            <option value="GUARDA">Guarda</option>
           </select>
 
           {{-- ENVOLVEMOS descripción para poder ocultarla cuando sea REMITO --}}
@@ -115,6 +116,23 @@
             <small id="calculoPorcentaje"></small>
           </div>
 
+          <div style="display:none" id="guarda_div">
+              <label>Dias:</label>
+              <input  class="form-control mb-2" name="dias">
+              <label>Ingrese el precio del bulto:</label>
+              <input  class="form-control mb-2" name="bul_uni_pre">
+              <label>Cantidad de bultos:</label>
+              <input  class="form-control mb-2" name="bul_uni">
+              <label>Ingrese el precio del pallet:</label>
+              <input  class="form-control mb-2" name="pall_n_uni_pre">
+              <label>Cantidad de pallets:</label>
+              <input  class="form-control mb-2" name="pall_n_uni">
+              <label>Ingrese el precio del pallet grande:</label>
+              <input  class="form-control mb-2" name="pall_g_uni_pre">
+              <label>Cantidad de pallets grandes:</label>
+              <input  class="form-control mb-2" name="pall_g_uni">
+          </div>
+
       </div>
       <div class="modal-footer">
         {{-- <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button> --}}
@@ -144,7 +162,7 @@
     hide("distance_div");     unreq("distance");
     hide("price_div");        unreq("price");
     hide("porcentaje_div");   unreq("porcentaje");
-
+    hide("guarda_div");
     // NUEVO: esconder controles de descuento por % cuando no corresponde
     hide("discount_mode_div");    unreq("discount_mode");
     hide("discount_percent_div"); unreq("discount_percent");
@@ -239,6 +257,7 @@
         show("price_div");      req("price");
         hide("distance_div");   unreq("distance");
         hide("porcentaje_div"); unreq("porcentaje");
+        hide('guarda_div');
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
@@ -252,6 +271,7 @@
         show("price_div");      req("price");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("porcentaje_div"); unreq("porcentaje");
+        hide('guarda_div');
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
@@ -263,6 +283,7 @@
         show("description_div");
         show("adicional_mode_div"); req("adicional_mode");
         updateAdicionalModeUI();
+        hide('guarda_div');
         text("calculoPorcentaje", "");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("distance_div");   unreq("distance");
@@ -279,6 +300,7 @@
         show("description_div");
         show("discount_mode_div"); req("discount_mode");
         updateDiscountModeUI();
+        hide('guarda_div');
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("distance_div");   unreq("distance");
         hide("porcentaje_div"); unreq("porcentaje"); // (este es el de ADICIONAL)
@@ -287,10 +309,11 @@
       case 'PALLET':
         show("price_div");      req("price");
         show("unidad_div");      req("unidad");
-        hide("description_div");
+        show("description_div");
         hide("distance_div");   unreq("distance");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("porcentaje_div"); unreq("porcentaje");
+        hide('guarda_div');
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
@@ -301,10 +324,11 @@
       case 'NOCHE':
         show("price_div");      req("price");
         show("unidad_div");      req("unidad");
-        hide("description_div");
+        show("description_div");
         hide("distance_div");   unreq("distance");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("porcentaje_div"); unreq("porcentaje");
+        hide('guarda_div');
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
@@ -319,6 +343,7 @@
         hide("distance_div");   unreq("distance");
         hide("totalTime_div");  unreq("totalHours"); unreq("totalMinutes");
         hide("porcentaje_div"); unreq("porcentaje");
+        hide('guarda_div');
         // Ocultar controles de descuento si venían visibles
         hide("discount_mode_div");    unreq("discount_mode");
         hide("discount_percent_div"); unreq("discount_percent");
@@ -327,6 +352,13 @@
         break;
       case "": // opción vacía
         hideAll();
+        hide('guarda_div');
+        break;
+      case "GUARDA":
+        hideAll();
+        hide('unidad_div');
+        hide('description_div');
+        show('guarda_div');
         break;
 
       default: // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc. ESTACIONAMIENTO

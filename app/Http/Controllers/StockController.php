@@ -43,8 +43,8 @@ class StockController extends Controller
 
             return view('stock.admin.index', [
                 'cargas'            => $cargas,
-                'clients'           => Client::orderBy('created_at', 'DESC')->get(),
-                'clientes_terceros' => ClienteTercero::all(),
+                'clients'           => Client::orderBy('name', 'ASC')->get(),
+                'clientes_terceros' => ClienteTercero::orderBy('nombre', 'ASC')->get(),
                 'prices'            => Price::all(),
                 'drivers'           => Driver::all(),
                 'vehicles'          => Vehicle::all()

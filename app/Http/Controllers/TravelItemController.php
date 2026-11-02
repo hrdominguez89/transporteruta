@@ -24,7 +24,7 @@ class TravelItemController extends Controller
             
         // ============== Validación (ADICIONAL + nuevo DESCUENTO %) ==============
         $rules = [
-            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA,NOCHE,DEMORA',
+            'type'          => 'required|in:HORA,KILOMETRO,PEAJE,ADICIONAL,FIJO,MULTIDESTINO,DESCARGA,DESCUENTO,ESTACIONAMIENTO,PALLET,BULTO,ESTADIA,NOCHE,DEMORA,GUARDA',
             'description'   => 'nullable|string|max:255',
             
             // ADICIONAL → aceptar percent/porcentaje, ignorarlos si NO es adicional
@@ -67,13 +67,13 @@ class TravelItemController extends Controller
                 }
             }
         });
-
         
         if ($validator->fails()) {
             Log::error('storeTravelItem VALIDATION FAILED', $validator->errors()->toArray());
             return back()->withErrors($validator)->withInput();
         }
         // =====================================================================
+        
 
         // Reglas de negocio adicionales para DESCUENTO
         if ($request->input('type') === 'DESCUENTO') {
@@ -100,7 +100,7 @@ class TravelItemController extends Controller
                     ->withInput();
             }
         }
-
+        
         $type = $request->input('type');
 
         $item = new TravelItem();
@@ -201,7 +201,7 @@ class TravelItemController extends Controller
                     $item->description = trim(($request->input('description') ?: '') . ' (' .
                         $dist . ' unidades. x $ ' . number_format($unit, 2, ',', '.') . ')');
                 break;
-                 case 'ESTADIA':
+                case 'ESTADIA':
                     $dist = (float) $request->input('unidad', 0);
                     $unit = (float) $request->input('price', 0);
 
@@ -210,6 +210,22 @@ class TravelItemController extends Controller
 
                     $item->description = trim(($request->input('description') ?: '') . ' (' .
                     $dist . ($dist > 1 ? ' dia x $ ' : 'dias x $') . number_format($unit, 2, ',', '.') . ')');
+                break;
+                case 'GUARDA':
+                    $bul_uni = (int) $request->input('bul_uni',0);
+                    $bul_uni_pre = (float) $request->input('bul_uni_pre',0);
+                    $pall_n_uni = (int) $request->input('pall_n_uni',0);
+                    $pall_n_uni_pre = (float) $request->input('pall_n_uni_pre',0);
+                    $pall_g_uni = (int) $request->input('pall_g_uni',0);
+                    $pall_g_uni_pre = (float) $request->input('pall_g_uni_pre',0);
+                    $dias =(int) $request->input('dias',0);
+                    $item->price = $dias * (($bul_uni * $bul_uni_pre) + ($pall_n_uni * $pall_n_uni_pre) + ($pall_g_uni * $pall_g_uni_pre));
+                    $item->description = 
+                    'Bultos :' . $bul_uni . 'X' . $bul_uni_pre .
+                    ' | Pallets :'. $pall_n_uni . 'X' . $pall_n_uni_pre .
+                    ' | Pallets grandes :'. $pall_g_uni . 'X' . $pall_g_uni_pre .
+                    ' |dias x ' .$dias .
+                    ' |Total :' . $item->price;
                 break;
             default:
                 // PEAJE, FIJO, MULTIDESTINO, DESCARGA, etc.
