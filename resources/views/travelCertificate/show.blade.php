@@ -23,6 +23,43 @@
             </h1>
         </div>
 
+        <div class="col-12">
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Corregí los siguientes errores:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            @endif
+
+            @if (session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{ session('warning') }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div id="successAlert" class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            @endif
+        </div>
+
         @if ($travelCertificate->invoiced == 'NO')
             <div class="col-12 text-right mb-2">
             <select class=" custom-select-lg bg-danger text-white border-danger"
@@ -213,6 +250,10 @@
         $(document).ready(function() {
             // Activar tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
+
+            setTimeout(function () {
+                $('#successAlert').alert('close');
+            }, 5000);
         });
         $(document).ready(function() {
             const agregarRemito = document.getElementById('agregar_remitos');

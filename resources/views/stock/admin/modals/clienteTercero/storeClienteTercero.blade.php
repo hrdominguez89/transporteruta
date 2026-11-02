@@ -7,46 +7,75 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-     <div class="modal-body">
- <form action="{{ route('storeClientTercero') }}" method="POST">
-  @csrf
-    <label for="corte_client_id">Cliente:</label>
-    <select id="corte_client_id" name="client_id" class="form-control mb-2" required>
-      <option value="">Seleccione un cliente...</option>
-      @foreach ($clients as $client)
-        <option value="{{ $client->id }}"
-          {{ old('client_id') == $client->id ? 'selected' : '' }}>
-          {{ $client->name }}
-        </option>
-      @endforeach
-    </select>
 
-  <label for="nombre">Nombre (de 3ro):</label>
-  <input type="text" name="nombre" class="form-control mb-2" placeholder="Ingrese el nombre..." required>
+      <form action="{{ route('storeClientTercero') }}" method="POST">
+        @csrf
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="store_client_id">Cliente:</label>
+            <select id="store_client_id" name="client_id" class="form-control" required>
+              <option value="">Seleccione un cliente...</option>
+              @foreach ($clients as $client)
+                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                  {{ $client->name }}
+                </option>
+              @endforeach
+            </select>
+          </div>
 
-  <label for="numero_cliente">N° de cliente:</label>
-  <input type="text" name="numero_cliente" class="form-control mb-2" placeholder="Ingrese el N° de cliente..." required>
+          <div class="form-group">
+            <label for="store_nombre">Nombre (de 3ro):</label>
+            <input type="text" name="nombre" id="store_nombre" class="form-control" placeholder="Ingrese el nombre..." required>
+          </div>
 
-  <label for="cuit">CUIT:</label>
-  <input type="text" name="cuit" class="form-control mb-2" placeholder="Ingrese el CUIT...">
+          <div class="form-group">
+            <label for="store_numero_cliente">N° de cliente:</label>
+            <input type="text" name="numero_cliente" id="store_numero_cliente" class="form-control" placeholder="Ingrese el N° de cliente..." required>
+          </div>
 
-  <label for="condicion_venta">Condición de venta:</label>
-  <input type="text" name="condicion_venta" class="form-control mb-2" placeholder="Ingrese la condición de venta...">
+          <div class="form-group">
+            <label for="store_cuit">CUIT:</label>
+            <input type="text" name="cuit" id="store_cuit" class="form-control" placeholder="Ingrese el CUIT...">
+          </div>
 
-  <label for="codigo_postal">Código postal:</label>
-  <input type="text" name="codigo_postal" class="form-control mb-2" placeholder="Ingrese el código postal...">
+          <div class="form-group">
+            <label for="store_condicion_venta">Condición de venta:</label>
+            <input type="text" name="condicion_venta" id="store_condicion_venta" class="form-control" placeholder="Ingrese la condición de venta...">
+          </div>
 
-  <label for="direccion">Domicilio de entrega:</label>
-  <input type="text" name="direccion" class="form-control mb-2" placeholder="Ingrese el domicilio de entrega...">
+          <div class="form-group">
+            <label for="store_codigo_postal">Código postal:</label>
+            <input type="text" name="codigo_postal" id="store_codigo_postal" class="form-control" placeholder="Ingrese el código postal...">
+          </div>
 
-  <label for="horario_entrega">Horario de entrega:</label>
-  <input type="text" name="horario_entrega" class="form-control mb-2" placeholder="Ingrese el horario de entrega...">
-  </div>
-  <div class="modal-footer">
-      <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
-      <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
-  </form>
-</div>
+          <div class="form-group">
+            <label for="store_direccion">Domicilio de entrega:</label>
+            <input type="text" name="direccion" id="store_direccion" class="form-control" placeholder="Ingrese el domicilio de entrega...">
+          </div>
+
+          <div class="form-group mb-0">
+            <label for="store_horario_entrega">Horario de entrega:</label>
+            <input type="text" name="horario_entrega" id="store_horario_entrega" class="form-control" placeholder="Ingrese el horario de entrega...">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
+<script>
+window.addEventListener('load', function () {
+    $('#store_client_id').select2({
+        theme: 'bootstrap4',
+        width: '100%',
+        allowClear: true,
+        placeholder: 'Seleccione un cliente...',
+        dropdownParent: $('#storeClienteTercero')
+    });
+});
+</script>
