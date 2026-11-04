@@ -57,11 +57,11 @@ class DebitController extends Controller
         if($debit?->invoiceId == null)
         {
             $debit->delete();
-            return redirect()->route('debitos')->with('mensaje', 'Nota de debito eliminada correctamente.');
+            return redirect()->route('debitos')->with('success', 'Nota de debito eliminada correctamente.');
         }
         else
         {
-            return redirect()->route('debitos')->with('mensaje', 'No es posible eliminar una nota de debito que esta asignada a una factura. ');
+            return redirect()->route('debitos')->with('error', 'No es posible eliminar una nota de debito que esta asignada a una factura. ');
         }
     }
     public function generatePdf(Request $request)

@@ -3,6 +3,7 @@
 @section('title', 'Stock')
 
 @section('content_header')
+    @include('partials.alerts')
     <div class="row">
         <h1 class="col-9">Cargas de {{ $client?->name }}</h1>
     </div>

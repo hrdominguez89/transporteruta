@@ -151,11 +151,13 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('guardar/vehiculo', [VehicleController::class, 'store'])->name('storeVehicle');
         Route::put('actualizar/vehiculo/{id}', [VehicleController::class, 'update'])->name('updateVehicle');
 
-        // User
-        Route::get('usuarios', [UserController::class, 'users'])->name('users');
-        Route::post('guardar/usuario', [UserController::class, 'store'])->name('storeUser');
-        Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
-        Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
+        // User (solo SUPER_ADMIN)
+        Route::group(['middleware' => 'role:SUPER_ADMIN'], function () {
+            Route::get('usuarios', [UserController::class, 'users'])->name('users');
+            Route::post('guardar/usuario', [UserController::class, 'store'])->name('storeUser');
+            Route::put('actualizar/usuario/{id}', [UserController::class, 'update'])->name('updateUser');
+            Route::delete('eliminar/usuario/{id}', [UserController::class, 'delete'])->name('deleteUser');
+        });
 
         // Debits
         Route::get('notas-de-debito',[DebitController::class , 'index'])->name('debitos');

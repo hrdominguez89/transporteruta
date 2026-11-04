@@ -3,6 +3,7 @@
 @section('title', 'Carga')
 
 @section('content_header')
+    @include('partials.alerts')
     <div class="row align-items-center">
         <a href="{{ Route('stock') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col">Cliente: <strong>{{ $carga->client->name }}</strong></h1>

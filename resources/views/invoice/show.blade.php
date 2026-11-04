@@ -3,6 +3,7 @@
 @section('title', 'Facturas')
 
 @section('content_header')
+    @include('partials.alerts')
     @if(session('flag'))
         <div class="alert alert-success">
             {{ session('message') }}

@@ -3,6 +3,7 @@
 @section('title', 'Recibos')
 
 @section('content_header')
+    @include('partials.alerts')
     <div class="row">
         <a href="{{ Route('receipts') }}" class="btn btn-sm btn-sm btn-secondary">Volver</a>
         <h1 class="col-7">Recibo N°<strong>{{ number_format($receipt->number, 0, ',', '.') }}</strong></h1>

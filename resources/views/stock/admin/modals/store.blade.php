@@ -90,6 +90,11 @@ window.addEventListener('load', function () {
     $client.select2({ allowClear: true, width: '100%', dropdownParent: $modal });
     $tercero.select2({ allowClear: true, width: '100%', dropdownParent: $modal });
 
+    // Evitar que la rueda del mouse modifique las cantidades
+    $modal.on('wheel', 'input[type="number"]', function () {
+        $(this).blur();
+    });
+
     function filtrar(clienteId) {
         if (!clienteId) {
             $wrapper.hide();
