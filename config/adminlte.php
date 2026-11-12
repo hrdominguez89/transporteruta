@@ -371,6 +371,7 @@ return [
             'text' => 'Usuarios',
             'url'  => 'usuarios',
             'icon' => 'fas fa-users',
+            'can'  => 'superAdmin',
         ],
         [
             'text' => 'Vehiculos',

@@ -3,6 +3,7 @@
 @section('title', 'Liquidaciones de Choferes')
 
 @section('content_header')
+    @include('partials.alerts')
     @if(session('flag'))
         <div class="alert alert-warning">
             {{ session('message') }}

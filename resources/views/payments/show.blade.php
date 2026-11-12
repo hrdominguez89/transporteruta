@@ -3,6 +3,7 @@
 @section('title', 'Pago')
 
 @section('content_header')
+    @include('partials.alerts')
     <div class="row">
         <a href="{{ Route('pagos') }}" class="btn btn-sm btn-secondary mr-2">Volver</a>
         <h1 class="col-9">Cliente: <strong>{{ $pago->client?->name }}</strong></h1>

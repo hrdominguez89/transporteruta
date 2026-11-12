@@ -3,12 +3,8 @@
 @section('title', 'Notas de Debito')
 
 @section('content_header')
+    @include('partials.alerts')
 <div class="row">
-    @if(session('mensaje'))
-    <div class="alert alert-success">
-        {{ session('mensaje') }}
-    </div>
-    @endif
         <h1 class="col-10">Notas de Debito</h1>
         <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Generar Nota de Debito</button>
     </div>
