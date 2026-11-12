@@ -13,6 +13,7 @@
         <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#storeClienteTercero">Agregar 3ro</button>
         <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pricemodal">Editar precios</button>
         <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editClienteTercero">Editar 3ro</button>
+        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#verClienteTercero">Ver 3ro</button>
         <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#buscarcortedeoperaciones">Corte de operaciones</button>
         <button class="btn btn-sm btn-danger"  data-toggle="modal" data-target="#deleteClienteTercero">Eliminar 3ro</button>
 
@@ -63,6 +64,7 @@
     @include('stock.admin.modals.price.price')
     @include('stock.admin.modals.clienteTercero.storeClienteTercero')
     @include('stock.admin.modals.clienteTercero.deleteClienteTercero')
+    @include('stock.admin.modals.clienteTercero.verClienteTercero')
 
     @if (session('success'))
         <div id="successAlert" class="alert alert-success alert-dismissible fade show">

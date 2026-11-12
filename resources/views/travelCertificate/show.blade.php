@@ -195,6 +195,9 @@
         </thead>
         <tbody>
             @foreach ($travelCertificate->travelItems as $travelItem)
+                @if ($travelItem->type == 'REMITO')
+                    @continue
+                @endif
                 @php
                     // REFACTORIZACIÓN: monto mostrado por ítem
                     // 1) DESCUENTO → computed_price (negativo)
@@ -232,6 +235,31 @@
                 </tr>
                 @include('travelItem.modals.delete')
             @endforeach
+        </tbody>
+    </table>
+
+    @php
+        $remitos = $travelCertificate->travelItems->where('type', 'REMITO');
+    @endphp
+    <h4>Remitos</h4>
+    <table class="table table-sm table-bordered text-center">
+        <thead class="bg-danger">
+            <tr>
+                <th>ID</th>
+                <th>Número de remito</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($remitos as $remito)
+                <tr>
+                    <td>{{ $remito->id }}</td>
+                    <td>{{ $remito->remito_number }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="2">Esta constancia no tiene remitos cargados.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 @stop

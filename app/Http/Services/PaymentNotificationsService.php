@@ -73,25 +73,24 @@ class PaymentNotificationsService
                     'cantidadVencidas' => $cantidadVencidas,
                     'cantidadEnPlazo' => $cantidadEnPlazo,
                     ],
-                        function ($message) use ($mailsDelDpto, $cliente, $invoicesDelDpto, $TC) {
-                            foreach ($invoicesDelDpto as $invoice) {
-                                $tcPDFs = [];
-                                $invoiceHtml = view('invoice.pdf', ['invoice' => $invoice])->render();
-                                foreach ($invoice->travelCertificates as $travelCertificate) {
-                                    $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id, true);
-                                    }
-                                    $allHtml = $invoiceHtml . implode($tcPDFs);
-                                    $pdf = Pdf::loadHTML($allHtml);
-                                    $message->attachData($pdf->output(), 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
-                                    }
-                                    $out = $pdf->output();
-                                    $message->attachData($out, 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
-                                    
-                                    $message->to($mailsDelDpto)
-                                    ->cc([env('MAIL_CC_ONE'), env('MAIL_CC_TWO'), env('MAIL_CC_THREE')])
-                                    ->subject('Facturas vencidas y en plazo - ' . $cliente)
-                                    ->from(env('MAIL_FROM_ADDRESS'));
-                                    }
+                    function ($message) use ($mailsDelDpto, $cliente, $invoicesDelDpto, $TC) {
+                        // Un PDF adjunto por factura (factura + sus constancias de viaje)
+                        foreach ($invoicesDelDpto as $invoice) {
+                            $tcPDFs = [];
+                            $invoiceHtml = view('invoice.pdf', ['invoice' => $invoice])->render();
+                            foreach ($invoice->travelCertificates as $travelCertificate) {
+                                $tcPDFs[] = $TC->generateTravelCertificatePdf($travelCertificate->id, true);
+                            }
+                            $allHtml = $invoiceHtml . implode($tcPDFs);
+                            $pdf = Pdf::loadHTML($allHtml);
+                            $message->attachData($pdf->output(), 'resumen_factura_' . $invoice->id . '.pdf', ['mime' => 'application/pdf']);
+                        }
+
+                        $message->to($mailsDelDpto)
+                            ->cc([env('MAIL_CC_ONE'), env('MAIL_CC_TWO'), env('MAIL_CC_THREE')])
+                            ->subject('Facturas vencidas y en plazo - ' . $cliente)
+                            ->from(env('MAIL_FROM_ADDRESS'));
+                    }
                 );
             }
             catch(Exception $e)
