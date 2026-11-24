@@ -247,6 +247,7 @@
             <tr>
                 <th>ID</th>
                 <th>Número de remito</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -254,14 +255,27 @@
                 <tr>
                     <td>{{ $remito->id }}</td>
                     <td>{{ $remito->remito_number }}</td>
+                    <td>
+                        @if ($travelCertificate->invoiced == 'NO')
+                            <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                data-target="#deleteItemModal{{ $remito->id }}">Eliminar</button>
+                        @else
+                            <strong class="text-danger">¡No se pueden realizar cambios!</strong>
+                        @endif
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="2">Esta constancia no tiene remitos cargados.</td>
+                    <td colspan="3">Esta constancia no tiene remitos cargados.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
+    @if ($travelCertificate->invoiced == 'NO')
+        @foreach ($remitos as $remito)
+            @include('travelItem.modals.delete', ['travelItem' => $remito])
+        @endforeach
+    @endif
 @stop
 
 @section('js')

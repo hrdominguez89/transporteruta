@@ -76,7 +76,9 @@
                                                     data-target="#updateContacto-{{ $contacto->id }}-{{ $client->id }}">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <form action="{{ route('deleteContacto', [$contacto->id, $client->id]) }}" method="POST">
+                                            <form action="{{ route('deleteContacto', [$contacto->id, $client->id]) }}" method="POST"
+                                                  class="form-delete-contacto"
+                                                  data-nombre="{{ trim($contacto->nombre . ' ' . $contacto->apellido) }}">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-link p-0">
@@ -197,5 +199,28 @@
             }
         });
         $('.select2').select2();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Confirmación antes de eliminar un contacto del carrusel
+        $(document).on('submit', '.form-delete-contacto', function (e) {
+            e.preventDefault();
+            const form = this;
+            const nombre = $(form).data('nombre');
+
+            Swal.fire({
+                title: '¿Eliminar contacto?',
+                text: nombre ? 'Se eliminará el contacto ' + nombre + '.' : 'Se eliminará el contacto.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
     </script>
 @stop

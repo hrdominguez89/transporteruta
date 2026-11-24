@@ -12,6 +12,7 @@ use App\Models\InvoiceReceipt;
 use App\Models\Payments;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ReceiptController extends Controller
 {
@@ -60,6 +61,37 @@ class ReceiptController extends Controller
             'invoicesToAdd' => $invoicesToAdd,
             'pagos' => $pagos
         ]);
+    }
+
+    public function updateNumber(Request $request, $id)
+    {
+        $receipt = Receipt::findOrFail($id);
+
+        if ($receipt->paid == 'SI') {
+            return redirect()->route('showReceipt', $receipt->id)
+                ->with('error', 'No se puede editar el numero de un recibo pagado.');
+        }
+
+        // El numero no puede estar usado por otro recibo
+        $data = $request->validateWithBag('editNumber', [
+            'number' => [
+                'required',
+                'integer',
+                'between:1,2147483647',
+                Rule::unique('receipts', 'number')->ignore($receipt->id),
+            ],
+        ], [
+            'number.required' => 'Debe ingresar el numero del recibo.',
+            'number.integer'  => 'El numero del recibo debe ser un numero entero.',
+            'number.between'  => 'El numero del recibo no es valido.',
+            'number.unique'   => 'El numero ingresado ya esta siendo usado por otro recibo.',
+        ]);
+
+        $receipt->number = $data['number'];
+        $receipt->save();
+
+        return redirect()->route('showReceipt', $receipt->id)
+            ->with('success', 'Numero de recibo actualizado correctamente.');
     }
 
     public function generateReceiptPdf($id)

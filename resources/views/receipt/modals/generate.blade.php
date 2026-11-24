@@ -11,14 +11,14 @@
         <form action="{{ Route('generateReceipt') }}" class="form-group" method="POST">
             @csrf
             <label for="number">Numero:</label>
-            <input type="number" name="number" class="form-control mb-2" required>
+            <input type="number" name="number" class="form-control mb-2" min="1" max="2147483647" step="1" value="{{ old('number') }}" required>
             <label for="date">Fecha:</label>
-            <input type="date" name="date" class="form-control mb-2" required>
+            <input type="date" name="date" class="form-control mb-2" value="{{ old('date') }}" required>
             <label for="clientId">Cliente:</label>
             <select name="clientId" class="form-control mb-2" required>
                 <option value="">---- Seleccione una opcion ----</option>
                 @foreach($clients as $client)
-                  <option value="{{ $client->id }}">{{ $client->name }}</option>
+                  <option value="{{ $client->id }}" @selected(old('clientId') == $client->id)>{{ $client->name }}</option>
                 @endforeach
             </select>
     </div>

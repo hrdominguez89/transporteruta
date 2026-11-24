@@ -3,6 +3,18 @@
 @section('title', 'Recibos')
 
 @section('content_header')
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
     <div class="row">
         <h1 class="col-10">Recibos</h1>
         <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#generateModal">Generar Recibo</button>
