@@ -120,6 +120,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('recibos', [ReceiptController::class, 'receipts'])->name('receipts');
         Route::post('generar/recibo', [ReceiptController::class, 'generate'])->name('generateReceipt');
         Route::get('ver/recibo/{id}', [ReceiptController::class, 'show'])->name('showReceipt');
+        Route::put('actualizar/recibo/{id}/numero', [ReceiptController::class, 'updateNumber'])->name('updateReceiptNumber');
         Route::get('imprimir/recibo/{id}', [ReceiptController::class, 'generateReceiptPdf'])->name('receiptPdf');
         Route::get('pagar/{id}', [ReceiptController::class, 'paid'])->name('paidReceipt');
         Route::get('anular/recibo/{id}', [ReceiptController::class, 'cancel'])->name('cancelReceipt');//

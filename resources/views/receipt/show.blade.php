@@ -6,7 +6,12 @@
     @include('partials.alerts')
     <div class="row">
         <a href="{{ Route('receipts') }}" class="btn btn-sm btn-sm btn-secondary">Volver</a>
-        <h1 class="col-7">Recibo N°<strong>{{ number_format($receipt->number, 0, ',', '.') }}</strong></h1>
+        <h1 class="col-7">Recibo N°<strong>{{ number_format($receipt->number, 0, ',', '.') }}</strong>
+            @if ($receipt->paid == 'NO')
+                <button class="btn btn-sm btn-primary ml-2" data-toggle="modal"
+                    data-target="#editNumberModal{{ $receipt->id }}">Editar numero</button>
+            @endif
+        </h1>
         @if ($receipt->paid == 'NO')
             <button class="btn btn-sm btn-sm btn-warning col-4" data-toggle="modal"
                 data-target="#paidModal{{ $receipt->id }}">Marcar
@@ -24,6 +29,17 @@
     @endif
     @include('receipt.modals.paid')
     @include('receipt.modals.cancel')
+    @if ($receipt->paid == 'NO')
+        @include('receipt.modals.editNumber')
+    @endif
+    @if ($errors->editNumber->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ $errors->editNumber->first() }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
     @if ($errors->has('mensaje'))
         <div class="alert alert-danger" id="errorMensaje">
             {{ $errors->first('mensaje') }}
